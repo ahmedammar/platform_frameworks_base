@@ -204,6 +204,8 @@ public class MediaRecorder
 
         /** @hide H.264/AAC data encapsulated in MPEG2/TS */
         public static final int OUTPUT_FORMAT_MPEG2TS = 8;
+        /** mp3 file format */
+        public static final int MP3 = 9;
     };
 
     /**
@@ -226,6 +228,8 @@ public class MediaRecorder
         public static final int AAC_PLUS = 4;
         /** @hide enhanced AAC plus audio codec */
         public static final int EAAC_PLUS = 5;
+        //public static final AAC = 2;  currently unsupported
+        public static final int MP3 = 6;
     }
 
     /**
@@ -335,6 +339,41 @@ public class MediaRecorder
      */
     public native void setOutputFormat(int output_format)
             throws IllegalStateException;
+    /**
+     * Sets the sample rate of the audio to be captured.  Must be called
+     * after setAudioSource(). Call this after setOutFormat() but before
+     * prepare().
+     *
+     * @param rate the number of samples per second of audio to capture
+     * @throws IllegalStateException if it is called after
+     * prepare() or before setOutputFormat().
+     *
+     */
+    public native void setAudioSampleRate(int rate) throws IllegalStateException;
+
+    /**
+     * Sets the Bit rate of the audio to be encoded.  Must be called
+     * after setAudioSource(). Call this after setOutFormat() but before
+     * prepare().
+     *
+     * @param rate the number of bit per second of audio to encoded
+     * @throws IllegalStateException if it is called after
+     * prepare() or before setOutputFormat().
+     *
+     */
+    public native void setAudioBitRate(int rate) throws IllegalStateException;
+
+    /**
+     * Sets the channel number of the audio to be encoded.  Must be called
+     * after setAudioSource(). Call this after setOutFormat() but before
+     * prepare().
+     *
+     * @param channel the number of channel audio to encoded
+     * @throws IllegalStateException if it is called after
+     * prepare() or before setOutputFormat().
+     *
+     */
+    public native void setAudioChannel(int channel) throws IllegalStateException;
 
     /**
      * Sets the width and height of the video to be captured.  Must be called

@@ -37,6 +37,9 @@ public:
     virtual     status_t        setAudioEncoder(int ae);
     virtual     status_t        setOutputFile(const char* path);
     virtual     status_t        setOutputFile(int fd, int64_t offset, int64_t length);
+    virtual     status_t        setAudioSampleRate(int samples_per_second);
+    virtual     status_t        setAudioBitRate(int bits_per_second);
+    virtual     status_t        setAudioChannel(int channel);
     virtual     status_t        setVideoSize(int width, int height);
     virtual     status_t        setVideoFrameRate(int frames_per_second);
     virtual     status_t        setParameters(const String8& params);

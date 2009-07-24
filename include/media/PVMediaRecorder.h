@@ -53,6 +53,9 @@ public:
     virtual status_t reset();
     virtual status_t getMaxAmplitude(int *max);
     virtual status_t dump(int fd, const Vector<String16>& args) const;
+    status_t setAudioSampleRate(int samples_per_second);
+    status_t setAudioBitRate(int bits_per_second);
+    status_t setAudioChannel(int channel);
 
 private:
     status_t doStop();

@@ -43,6 +43,9 @@ enum {
     SET_AUDIO_ENCODER,
     SET_OUTPUT_FILE_PATH,
     SET_OUTPUT_FILE_FD,
+    SET_AUDIO_SAMPLERATE,
+    SET_AUDIO_BITRATE,
+    SET_AUDIO_CHANNEL,
     SET_VIDEO_SIZE,
     SET_VIDEO_FRAMERATE,
     SET_PARAMETERS,
@@ -158,6 +161,37 @@ public:
         remote()->transact(SET_OUTPUT_FILE_FD, data, &reply);
         return reply.readInt32();
     }
+
+    status_t setAudioSampleRate(int samples_per_second)
+    {
+        LOGV("setAudioSampleRate(%d)", samples_per_second);
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        data.writeInt32(samples_per_second);
+        remote()->transact(SET_AUDIO_SAMPLERATE, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setAudioBitRate(int bits_per_second)
+    {
+        LOGV("setAudioBitRate(%d)", bits_per_second);
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        data.writeInt32(bits_per_second);
+        remote()->transact(SET_AUDIO_BITRATE, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setAudioChannel(int channel)
+    {
+        LOGV("setAudioChannel(%d)", channel);
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        data.writeInt32(channel);
+        remote()->transact(SET_AUDIO_CHANNEL, data, &reply);
+        return reply.readInt32();
+    }
+
 
     status_t setVideoSize(int width, int height)
     {
@@ -375,6 +409,27 @@ status_t BnMediaRecorder::onTransact(
             int64_t length = data.readInt64();
             reply->writeInt32(setOutputFile(fd, offset, length));
             ::close(fd);
+            return NO_ERROR;
+        } break;
+        case SET_AUDIO_SAMPLERATE: {
+            LOGV("SET_AUDIO_SAMPLERATE");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            int samples_per_second = data.readInt32();
+            reply->writeInt32(setAudioSampleRate(samples_per_second));
+            return NO_ERROR;
+        } break;
+        case SET_AUDIO_BITRATE: {
+            LOGV("SET_AUDIO_BITRATE");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            int bits_per_second = data.readInt32();
+            reply->writeInt32(setAudioBitRate(bits_per_second));
+            return NO_ERROR;
+        } break;
+        case SET_AUDIO_CHANNEL: {
+            LOGV("SET_AUDIO_CHANNEL");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            int channel = data.readInt32();
+            reply->writeInt32(setAudioChannel(channel));
             return NO_ERROR;
         } break;
         case SET_VIDEO_SIZE: {

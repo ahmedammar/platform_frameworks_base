@@ -164,6 +164,39 @@ status_t MediaRecorderClient::setOutputFile(int fd, int64_t offset, int64_t leng
     return mRecorder->setOutputFile(fd, offset, length);
 }
 
+status_t MediaRecorderClient::setAudioSampleRate(int samples_per_second)
+{
+    LOGV("setAudioSampleRate(%d)", samples_per_second);
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setAudioSampleRate(samples_per_second);
+}
+
+status_t MediaRecorderClient::setAudioBitRate(int bits_per_second)
+{
+    LOGV("setAudioBitRate(%d)", bits_per_second);
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setAudioBitRate(bits_per_second);
+}
+
+status_t MediaRecorderClient::setAudioChannel(int channel)
+{
+    LOGV("setAudioChannel(%d)", channel);
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setAudioChannel(channel);
+}
+
 status_t MediaRecorderClient::setVideoSize(int width, int height)
 {
     LOGV("setVideoSize(%dx%d)", width, height);

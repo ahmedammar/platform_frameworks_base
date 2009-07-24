@@ -258,6 +258,41 @@ android_media_MediaRecorder_setOutputFileFD(JNIEnv *env, jobject thiz, jobject f
     status_t opStatus = mr->setOutputFile(fd, offset, length);
     process_media_recorder_call(env, opStatus, "java/io/IOException", "setOutputFile failed.");
 }
+static void
+android_media_MediaRecorder_setAudioSampleRate(JNIEnv *env, jobject thiz, jint rate)
+{
+    LOGV("setAudioSampleRate(%d)", rate);
+    if (rate <= 0 || rate > MEDIA_RECORDER_MAX_SAMPLE_RATE) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "invalid audio samplerate");
+        return;
+    }
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    process_media_recorder_call(env, mr->setAudioSampleRate(rate), "java/lang/RuntimeException", "setAudioSampleRate failed.");
+}
+
+static void
+android_media_MediaRecorder_setAudioBitRate(JNIEnv *env, jobject thiz, jint rate)
+{
+    LOGV("setAudioBitRate(%d)", rate);
+    if (rate <= 0 || rate > MEDIA_RECORDER_MAX_BIT_RATE) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "invalid encoded bitrate");
+        return;
+    }
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    process_media_recorder_call(env, mr->setAudioBitRate(rate), "java/lang/RuntimeException", "setAudioBitRate failed.");
+}
+
+static void
+android_media_MediaRecorder_setAudioChannel(JNIEnv *env, jobject thiz, jint channel)
+{
+    LOGV("setAudioChannel(%d)", channel);
+    if (channel <= 0 || channel > MEDIA_RECORDER_MAX_CHANNEL_NUMBER) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "invalid encoded channel number");
+        return;
+    }
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    process_media_recorder_call(env, mr->setAudioChannel(channel), "java/lang/RuntimeException", "setAudioChannel failed.");
+}
 
 static void
 android_media_MediaRecorder_setVideoSize(JNIEnv *env, jobject thiz, jint width, jint height)
@@ -466,6 +501,9 @@ static JNINativeMethod gMethods[] = {
     {"setAudioEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioEncoder},
     {"setParameter",         "(Ljava/lang/String;)V",           (void *)android_media_MediaRecorder_setParameter},
     {"_setOutputFile",       "(Ljava/io/FileDescriptor;JJ)V",   (void *)android_media_MediaRecorder_setOutputFileFD},
+    {"setAudioBitRate",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioBitRate},
+    {"setAudioChannel",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioChannel},
+    {"setAudioSampleRate",   "(I)V",                            (void *)android_media_MediaRecorder_setAudioSampleRate},
     {"setVideoSize",         "(II)V",                           (void *)android_media_MediaRecorder_setVideoSize},
     {"setVideoFrameRate",    "(I)V",                            (void *)android_media_MediaRecorder_setVideoFrameRate},
     {"setMaxDuration",       "(I)V",                            (void *)android_media_MediaRecorder_setMaxDuration},

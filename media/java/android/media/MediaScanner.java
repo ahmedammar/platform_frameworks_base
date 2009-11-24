@@ -52,6 +52,8 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import android.os.SystemProperties;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -439,6 +441,7 @@ public class MediaScanner
                     mMimeType = mimeType;
                 }
             }
+
             mFileSize = fileSize;
 
             // if mimeType was not specified, compute file type based on file extension.
@@ -449,7 +452,6 @@ public class MediaScanner
                     mMimeType = mediaFileType.mimeType;
                 }
             }
-
             String key = path;
             if (mCaseInsensitivePaths) {
                 key = path.toLowerCase();
@@ -847,6 +849,7 @@ public class MediaScanner
                 }
             }
 
+            Log.v(TAG, "isVideoFileType... " + result);
             return result;
         }
 
@@ -1132,7 +1135,7 @@ public class MediaScanner
                 // instead, clear the path and lastModified fields in the row
                 MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
                 int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
-
+                
                 if (MediaFile.isPlayListFileType(fileType)) {
                     ContentValues values = new ContentValues();
                     values.put(MediaStore.Audio.Playlists.DATA, "");
@@ -1189,6 +1192,7 @@ public class MediaScanner
             prescan(null);
             long prescan = System.currentTimeMillis();
 
+            Log.i(TAG, "scanDirectories start"+directories[0]);
             for (int i = 0; i < directories.length; i++) {
                 processDirectory(directories[i], MediaFile.sFileExtensions, mClient);
             }

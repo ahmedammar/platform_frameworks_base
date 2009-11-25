@@ -68,8 +68,10 @@ public:
     virtual void drawForSreenShot() const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
+    virtual bool transformed() const;
     virtual void validateVisibility(const Transform& globalTransform);
 
+    
     status_t registerBuffers(const ISurface::BufferHeap& buffers);
     void postBuffer(ssize_t offset);
     void unregisterBuffers();

@@ -277,10 +277,10 @@ sp<OverlayRef> LayerBuffer::SurfaceLayerBuffer::createOverlay(
     return result;
 }
 
-status_t LayerBuffer::SurfaceBuffer::getDestRect(int *left,int *right,int *top,int *bottom,int *rot)
+status_t LayerBuffer::SurfaceLayerBuffer::getDestRect(int *left,int *right,int *top,int *bottom,int *rot)
 {
-    LayerBuffer* owner(getOwner());
-    if (owner)
+    sp<LayerBuffer> owner(getOwner());
+    if (owner != 0)
         return owner->getDestRect(left,right,top,bottom,rot);
     return NO_INIT;
 }

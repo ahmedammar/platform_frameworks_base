@@ -90,7 +90,7 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat forma
 
     // we have a h/w allocator and h/w buffer is requested
     status_t err; 
-    
+
     if (usage & GRALLOC_USAGE_HW_MASK) {
         err = mAllocDev->alloc(mAllocDev, w, h, format, usage, handle, stride);
     } else {

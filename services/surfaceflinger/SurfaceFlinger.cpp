@@ -89,6 +89,7 @@ SurfaceFlinger::SurfaceFlinger()
         mFreezeDisplayTime(0),
         mDebugRegion(0),
         mDebugBackground(0),
+	mDebugFps(0),
         mDebugInSwapBuffers(0),
         mLastSwapBufferTime(0),
         mDebugInTransaction(0),
@@ -110,9 +111,12 @@ void SurfaceFlinger::init()
     mDebugRegion = atoi(value);
     property_get("debug.sf.showbackground", value, "0");
     mDebugBackground = atoi(value);
+    property_get("debug.sf.showfps", value, "0");
+    mDebugFps = atoi(value);
 
     LOGI_IF(mDebugRegion,       "showupdates enabled");
     LOGI_IF(mDebugBackground,   "showbackground enabled");
+    LOGI_IF(mDebugFps,		    "showfps enabled");
 }
 
 SurfaceFlinger::~SurfaceFlinger()
@@ -425,6 +429,11 @@ bool SurfaceFlinger::handleBypassLayer()
 void SurfaceFlinger::postFramebuffer()
 {
     if (!mInvalidRegion.isEmpty()) {
+
+        if (UNLIKELY(mDebugFps)) {
+            debugShowFPS();
+        }
+
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         const nsecs_t now = systemTime();
         mDebugInSwapBuffers = now;
@@ -1011,6 +1020,7 @@ void SurfaceFlinger::debugShowFPS() const
         mLastFrameCount = mFrameCount;
     }
     // XXX: mFPS has the value we want
+    LOGI("fps - %.2f",mFps);
  }
 
 status_t SurfaceFlinger::addLayer(const sp<LayerBase>& layer)

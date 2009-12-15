@@ -135,6 +135,9 @@ void DisplayHardware::init(uint32_t dpy)
     // TODO: all the extensions below should be queried through
     // eglGetProcAddress().
 
+	// set to EGL wrapper to load SW OpenGLES only
+	eglSetImplementationAndroid(EGL_TRUE);
+
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(display, NULL, NULL);
     eglGetConfigs(display, NULL, 0, &numConfigs);

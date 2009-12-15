@@ -237,6 +237,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSetSwapRectangleANDROID (EGLDisplay dpy, EGLSur
 typedef EGLBoolean (EGLAPIENTRYP PFNEGLSETSWAPRECTANGLEANDROIDPROC) (EGLDisplay dpy, EGLSurface draw, EGLint left, EGLint top, EGLint width, EGLint height);
 #endif
 
+EGLAPI void EGLAPIENTRY eglSetImplementationAndroid(EGLBoolean impl);
+typedef void (EGLAPIENTRYP PFNEGLSETIMPLEMENTATIONANDROIDPROC) (EGLBoolean impl);
 #ifdef __cplusplus
 }
 #endif

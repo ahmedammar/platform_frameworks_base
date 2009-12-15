@@ -265,7 +265,6 @@ static egl_connection_t gEGLImpl[IMPL_NUM_IMPLEMENTATIONS];
 static egl_display_t gDisplay[NUM_DISPLAYS];
 static pthread_mutex_t gThreadLocalStorageKeyMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t gEGLThreadLocalStorageKey = -1;
-
 // ----------------------------------------------------------------------------
 
 EGLAPI gl_hooks_t gHooks[2][IMPL_NUM_IMPLEMENTATIONS];
@@ -553,6 +552,7 @@ EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image)
 //    egl_init_drivers_locked()
 //
 static pthread_mutex_t gInitDriverMutex = PTHREAD_MUTEX_INITIALIZER;
+static EGLBoolean	 gEGLImplSWOnly = EGL_FALSE;
 
 EGLBoolean egl_init_drivers_locked()
 {
@@ -571,8 +571,15 @@ EGLBoolean egl_init_drivers_locked()
     egl_connection_t* cnx;
     egl_display_t* d = &gDisplay[0];
 
+
+    char string[PROPERTY_VALUE_MAX];
+    property_get("debug.sf.enable_hgl", string, "1");
+	bool hgl_only = true;
+    if (!atoi(string) || gEGLImplSWOnly)
+		hgl_only = false;
+
     cnx = &gEGLImpl[IMPL_SOFTWARE];
-    if (cnx->dso == 0) {
+    if (cnx->dso == 0 && !hgl_only) {
         cnx->hooks[GLESv1_INDEX] = &gHooks[GLESv1_INDEX][IMPL_SOFTWARE];
         cnx->hooks[GLESv2_INDEX] = &gHooks[GLESv2_INDEX][IMPL_SOFTWARE];
         cnx->dso = loader.open(EGL_DEFAULT_DISPLAY, 0, cnx);
@@ -588,7 +595,7 @@ EGLBoolean egl_init_drivers_locked()
     }
 
     cnx = &gEGLImpl[IMPL_HARDWARE];
-    if (cnx->dso == 0) {
+    if (cnx->dso == 0 && hgl_only) {
         char value[PROPERTY_VALUE_MAX];
         property_get("debug.egl.hw", value, "1");
         if (atoi(value) != 0) {
@@ -1832,3 +1839,25 @@ EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
     }
     return setError(EGL_BAD_DISPLAY, NULL);
 }
+
+EGLClientBuffer eglGetRenderBufferANDROID(EGLDisplay dpy, EGLSurface draw)
+{
+    SurfaceRef _s(draw);
+    if (!_s.get()) return setError(EGL_BAD_SURFACE, (EGLClientBuffer*)0);
+
+    if (!validate_display_surface(dpy, draw))
+        return 0;    
+    egl_display_t const * const dp = get_display(dpy);
+    egl_surface_t const * const s = get_surface(draw);
+    if (s->cnx->egl.eglGetRenderBufferANDROID) {
+        return s->cnx->egl.eglGetRenderBufferANDROID(
+                dp->disp[s->impl].dpy, s->surface);
+    }
+    return setError(EGL_BAD_DISPLAY, (EGLClientBuffer*)0);
+}
+
+void eglSetImplementationAndroid(EGLBoolean impl)
+{
+	gEGLImplSWOnly = impl;
+}
+

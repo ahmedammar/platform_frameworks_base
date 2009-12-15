@@ -230,11 +230,12 @@ status_t BootAnimation::readyToRun() {
     EGLUtils::selectConfigForNativeWindow(display, attribs, s.get(), &config);
     surface = eglCreateWindowSurface(display, config, s.get(), NULL);
     context = eglCreateContext(display, config, NULL, NULL);
-    eglQuerySurface(display, surface, EGL_WIDTH, &w);
-    eglQuerySurface(display, surface, EGL_HEIGHT, &h);
 
     if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE)
         return NO_INIT;
+
+	eglQuerySurface(display, surface, EGL_WIDTH, &w);
+    eglQuerySurface(display, surface, EGL_HEIGHT, &h);
 
     mDisplay = display;
     mContext = context;

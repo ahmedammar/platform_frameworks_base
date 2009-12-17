@@ -574,12 +574,12 @@ EGLBoolean egl_init_drivers_locked()
 
     char string[PROPERTY_VALUE_MAX];
     property_get("debug.sf.enable_hgl", string, "1");
-	bool hgl_only = true;
+	bool hgl = true;
     if (!atoi(string) || gEGLImplSWOnly)
-		hgl_only = false;
+		hgl = false;
 
     cnx = &gEGLImpl[IMPL_SOFTWARE];
-    if (cnx->dso == 0 && !hgl_only) {
+    if (cnx->dso == 0) {
         cnx->hooks[GLESv1_INDEX] = &gHooks[GLESv1_INDEX][IMPL_SOFTWARE];
         cnx->hooks[GLESv2_INDEX] = &gHooks[GLESv2_INDEX][IMPL_SOFTWARE];
         cnx->dso = loader.open(EGL_DEFAULT_DISPLAY, 0, cnx);
@@ -595,7 +595,7 @@ EGLBoolean egl_init_drivers_locked()
     }
 
     cnx = &gEGLImpl[IMPL_HARDWARE];
-    if (cnx->dso == 0 && hgl_only) {
+    if (cnx->dso == 0 && hgl) {
         char value[PROPERTY_VALUE_MAX];
         property_get("debug.egl.hw", value, "1");
         if (atoi(value) != 0) {

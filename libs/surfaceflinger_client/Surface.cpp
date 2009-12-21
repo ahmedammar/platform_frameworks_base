@@ -990,6 +990,7 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
             other->usage  = backBuffer->usage;
             other->format = backBuffer->format;
             other->bits   = vaddr;
+			other->reserved[0] = (uint32_t)backBuffer->handle;
         }
     }
     mApiLock.unlock();

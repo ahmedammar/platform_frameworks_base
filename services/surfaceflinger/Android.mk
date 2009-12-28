@@ -28,6 +28,10 @@ ifeq ($(TARGET_BOARD_PLATFORM), s5pc110)
 endif
 
 
+ifeq ($(TARGET_BOARD_PLATFORM), imx51_BBG)
+	LOCAL_CFLAGS += -DDIM_WITH_TEXTURE
+endif
+
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)
 	ifeq ($(HOST_OS),linux)

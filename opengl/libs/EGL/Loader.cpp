@@ -182,7 +182,7 @@ void Loader::init_api(void* dso,
         char const * name = *api;
         __eglMustCastToProperFunctionPointerType f = 
             (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
-        if (f == NULL) {
+        if (f == NULL && getProcAddress) {
             // couldn't find the entry-point, use eglGetProcAddress()
             f = getProcAddress(name);
         }
@@ -257,7 +257,8 @@ void *Loader::load_driver(const char* kind, const char *tag,
                 (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
             if (f == NULL) {
                 // couldn't find the entry-point, use eglGetProcAddress()
-                f = getProcAddress(name);
+				if(mask != EGL)
+					f = getProcAddress(name);
                 if (f == NULL) {
                     f = (__eglMustCastToProperFunctionPointerType)0;
                 }
@@ -266,21 +267,21 @@ void *Loader::load_driver(const char* kind, const char *tag,
             api++;
         }
     }
-    
+
     if (mask & GLESv1_CM) {
         init_api(dso, gl_names,
             (__eglMustCastToProperFunctionPointerType*)
                 &cnx->hooks[GLESv1_INDEX]->gl,
-            getProcAddress);
+            (mask==GLESv1_CM ? NULL:getProcAddress));
     }
 
     if (mask & GLESv2) {
       init_api(dso, gl_names,
             (__eglMustCastToProperFunctionPointerType*)
                 &cnx->hooks[GLESv2_INDEX]->gl,
-            getProcAddress);
+            (mask==GLESv2 ? NULL:getProcAddress));
     }
-    
+
     return dso;
 }
 

@@ -54,8 +54,8 @@ public:
             AudioBufferProvider* provider) = 0;
 
 protected:
-    // number of bits for phase fraction - 30 bits allows nearly 2x downsampling
-    static const int kNumPhaseBits = 30;
+    // number of bits for phase fraction - 28 bits allows nearly 8x downsampling
+    static const int kNumPhaseBits = 28;
 
     // phase mask for fraction
     static const uint32_t kPhaseMask = (1LU<<kNumPhaseBits)-1;

@@ -135,9 +135,6 @@ public class MediaFile {
         addFileType("WAV", FILE_TYPE_WAV, "audio/x-wav");
         addFileType("AMR", FILE_TYPE_AMR, "audio/amr");
         addFileType("AWB", FILE_TYPE_AWB, "audio/amr-wb");
-        if (isWMAEnabled()) {
-            addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma");
-        }
         addFileType("OGG", FILE_TYPE_OGG, "application/ogg");
         addFileType("OGA", FILE_TYPE_OGG, "application/ogg");
         addFileType("AAC", FILE_TYPE_AAC, "audio/aac");
@@ -172,24 +169,26 @@ public class MediaFile {
         String value= SystemProperties.get("ro.FSL_AVI_PARSER");	
         //Check FSL_AVI_PARSER property
         if ("1".equals(value)) {
-    		addFileType("AVI", FILE_TYPE_AVI, "video/avi");
+            addFileType("AVI", FILE_TYPE_AVI, "video/avi");
             addFileType("DIVX", FILE_TYPE_AVI, "video/avi");
         }
-	//Check FSL_AAC_PARSER property
-	value = SystemProperties.get("ro.FSL_AAC_PARSER");
-	if ("1".equals(value)) {
-		addFileType("AAC", FILE_TYPE_AAC, "X-AAC-ADIF");
-		addFileType("ADTS", FILE_TYPE_AAC, "X-AAC-ADIF");
-	}
-	value = SystemProperties.get("ro.FSL_ASF_PARSER");
-	if ("1".equals(value)) {
-		addFileType("ASF", FILE_TYPE_WMV, "video/x-ms-wmv");
-	}
-	//Check FSL_FLV_PARSER property
-	value = SystemProperties.get("ro.FSL_FLV_PARSER");
-	if ("1".equals(value)) {
-		addFileType("FLV", FILE_TYPE_FLV, "video/flv");
-	}
+        //Check FSL_AAC_PARSER property
+        value = SystemProperties.get("ro.FSL_AAC_PARSER");
+        if ("1".equals(value)) {
+            addFileType("AAC", FILE_TYPE_AAC, "X-AAC-ADIF");
+            addFileType("ADTS", FILE_TYPE_AAC, "X-AAC-ADIF");
+        }
+        value = SystemProperties.get("ro.FSL_ASF_PARSER");
+        if ("1".equals(value)) {
+            addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma");
+            addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv");
+            addFileType("ASF", FILE_TYPE_WMV, "video/x-ms-wmv");
+        }
+        //Check FSL_FLV_PARSER property
+        value = SystemProperties.get("ro.FSL_FLV_PARSER");
+        if ("1".equals(value)) {
+            addFileType("FLV", FILE_TYPE_FLV, "video/flv");
+    	}
 
        //Check FSL_RMVB_PARSER property
         value = SystemProperties.get("ro.FSL_RMVB_PARSER");

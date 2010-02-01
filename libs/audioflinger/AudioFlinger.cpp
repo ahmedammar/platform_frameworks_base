@@ -3552,8 +3552,8 @@ status_t AudioFlinger::RecordThread::getNextBuffer(AudioBufferProvider::Buffer* 
 
     if (framesReady == 0) {
         mBytesRead = mInput->read(mRsmpInBuffer, mInputBytes);
-        if ( mBytesRead < mInputBytes )
-            LOGE("under run!!! bytesread = %d mInputBytes = %d", bytesRead, mInputBytes);
+//        if ( mBytesRead < mInputBytes )
+//            LOGE("under run!!! bytesread = %d mInputBytes = %d", bytesRead, mInputBytes);
         if ( mBytesRead < 0) {
             LOGE("RecordThread::getNextBuffer() Error reading audio input");
             if (mActiveTrack->mState == TrackBase::ACTIVE) {

@@ -72,9 +72,12 @@ void LayerBuffer::onFirstRef()
         }
     }
 
+    /* 
+    * since our copybit not support multi instance, comment it out 
     if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
         copybit_open(module, &mBlitEngine);
-    }
+    } 
+    */ 
 }
 
 sp<LayerBaseClient::Surface> LayerBuffer::createSurface() const

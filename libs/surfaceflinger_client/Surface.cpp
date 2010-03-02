@@ -742,6 +742,13 @@ int Surface::perform(int operation, va_list args)
     case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
         res = dispatch_set_buffers_transform( args );
         break;
+    case NATIVE_WINDOW_FORCE_SET_WIDTH:
+        mWidth = va_arg(args, int);
+        break;
+    case NATIVE_WINDOW_FORCE_SET_HEIGHT:
+        mHeight = va_arg(args, int);
+        break;
+
     default:
         res = NAME_NOT_FOUND;
         break;

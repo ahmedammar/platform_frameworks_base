@@ -514,6 +514,11 @@ void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
             pthread_mutex_unlock(&gInitMutex);
         }
 
+		// workaround for Z430, Z430 does not accepet invalid width/height
+		android_native_window_t * window=(android_native_window_t *)mWndSurface;
+		window->perform(window,NATIVE_WINDOW_FORCE_SET_WIDTH,w);
+		window->perform(window,NATIVE_WINDOW_FORCE_SET_HEIGHT,h);
+
         mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
         checkEglError("eglCreateWindowSurface");
         if (mEGL.mSurface == EGL_NO_SURFACE) {

@@ -515,9 +515,18 @@ void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
         }
 
 		// workaround for Z430, Z430 does not accepet invalid width/height
+		// also the first two dequeued buffers seem to be invalid
 		android_native_window_t * window=(android_native_window_t *)mWndSurface;
 		window->perform(window,NATIVE_WINDOW_FORCE_SET_WIDTH,w);
 		window->perform(window,NATIVE_WINDOW_FORCE_SET_HEIGHT,h);
+
+		android_native_buffer_t * frontBuffer=0;
+		window->dequeueBuffer(window, &frontBuffer);
+		window->queueBuffer(window, frontBuffer);
+		window->dequeueBuffer(window, &frontBuffer);
+		window->queueBuffer(window, frontBuffer);
+
+
 
         mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
         checkEglError("eglCreateWindowSurface");

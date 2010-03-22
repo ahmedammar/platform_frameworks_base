@@ -20,6 +20,7 @@
 #include <utils/RefBase.h>
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
+#include <binder/IMemory.h>
 
 namespace android {
 
@@ -38,6 +39,7 @@ public:
     virtual status_t        start() = 0;
     virtual status_t        stop() = 0;
     virtual status_t        pause() = 0;
+    virtual sp<IMemory>     captureCurrentFrame() = 0;
     virtual status_t        isPlaying(bool* state) = 0;
     virtual status_t        seekTo(int msec) = 0;
     virtual status_t        getCurrentPosition(int* msec) = 0;

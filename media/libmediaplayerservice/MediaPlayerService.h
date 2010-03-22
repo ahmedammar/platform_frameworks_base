@@ -29,7 +29,7 @@
 #include <media/IMediaPlayerService.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/Metadata.h>
-
+#include <binder/MemoryDealer.h>
 namespace android {
 
 class IMediaRecorder;
@@ -211,6 +211,7 @@ private:
         virtual status_t        start();
         virtual status_t        stop();
         virtual status_t        pause();
+        virtual sp<IMemory>     captureCurrentFrame();
         virtual status_t        isPlaying(bool* state);
         virtual status_t        seekTo(int msec);
         virtual status_t        getCurrentPosition(int* msec);
@@ -293,6 +294,8 @@ private:
 #if CALLBACK_ANTAGONIZER
                     Antagonizer*                mAntagonizer;
 #endif
+        sp<MemoryDealer>                       mVideoFrameDealer;
+        sp<IMemory>                            mVideoFrame;
     };
 
 // ----------------------------------------------------------------------------

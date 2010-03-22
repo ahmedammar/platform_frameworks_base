@@ -325,6 +325,17 @@ status_t MediaPlayer::pause()
     return INVALID_OPERATION;
 }
 
+sp<IMemory> MediaPlayer::captureCurrentFrame()
+{
+    LOGV("captureCurrentFrame");
+    Mutex::Autolock _l(mLock);
+    if (mPlayer != 0) {
+         return mPlayer->captureCurrentFrame();
+    }
+    LOGV("captureCurrentFrame: no active player");
+    return NULL;
+}
+
 bool MediaPlayer::isPlaying()
 {
     Mutex::Autolock _l(mLock);

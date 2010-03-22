@@ -33,6 +33,7 @@ enum {
     STOP,
     IS_PLAYING,
     PAUSE,
+    CAPTURE_CURRENT_FRAME,
     SEEK_TO,
     GET_CURRENT_POSITION,
     GET_DURATION,
@@ -113,6 +114,18 @@ public:
         data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         remote()->transact(PAUSE, data, &reply);
         return reply.readInt32();
+    }
+
+    sp<IMemory> captureCurrentFrame()
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        remote()->transact(CAPTURE_CURRENT_FRAME, data, &reply);
+        status_t ret = reply.readInt32();
+        if (ret != NO_ERROR) {
+            return NULL;
+        }
+        return interface_cast<IMemory>(reply.readStrongBinder());
     }
 
     status_t seekTo(int msec)
@@ -288,6 +301,17 @@ status_t BnMediaPlayer::onTransact(
         case PAUSE: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(pause());
+            return NO_ERROR;
+        } break;
+        case CAPTURE_CURRENT_FRAME: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            sp<IMemory> bitmap = captureCurrentFrame();
+            if (bitmap != 0) {  // Don't send NULL across the binder interface
+                reply->writeInt32(NO_ERROR);
+                reply->writeStrongBinder(bitmap->asBinder());
+            } else {
+                reply->writeInt32(UNKNOWN_ERROR);
+            }
             return NO_ERROR;
         } break;
         case SEEK_TO: {

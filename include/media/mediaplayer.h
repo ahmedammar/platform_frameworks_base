@@ -152,6 +152,7 @@ public:
             status_t        start();
             status_t        stop();
             status_t        pause();
+            sp<IMemory>     captureCurrentFrame();
             bool            isPlaying();
             status_t        getVideoWidth(int *w);
             status_t        getVideoHeight(int *h);

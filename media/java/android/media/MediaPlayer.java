@@ -848,6 +848,16 @@ public class MediaPlayer
     private native void _pause() throws IllegalStateException;
 
     /**
+    * Call this method when playback or pause. This method finds the
+    * current frame if successful and returns it as a bitmap. This is
+    * useful for generating a thumbnail for an input media source.
+    * 
+    * @return A Bitmap containing a representative video frame, which 
+    *  can be null, if such a frame cannot be retrieved.
+    */
+    public native Bitmap captureCurrentFrame();
+
+    /**
      * Set the low-level power management behavior for this MediaPlayer.  This
      * can be used when the MediaPlayer is not playing through a SurfaceHolder
      * set with {@link #setDisplay(SurfaceHolder)} and thus can use the

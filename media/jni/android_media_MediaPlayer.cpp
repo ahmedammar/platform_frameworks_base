@@ -36,6 +36,9 @@
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
 #include <surfaceflinger/Surface.h>
+#include <core/SkBitmap.h>
+#include <private/media/VideoFrame.h>
+
 
 // ----------------------------------------------------------------------------
 
@@ -50,6 +53,9 @@ struct fields_t {
     jfieldID    surface_native;
 
     jmethodID   post_event;
+
+    jclass bitmapClazz;
+    jmethodID bitmapConstructor;
 };
 static fields_t fields;
 
@@ -530,6 +536,46 @@ android_media_MediaPlayer_getFrameAt(JNIEnv *env, jobject thiz, jint msec)
     return NULL;
 }
 
+static jobject android_media_MediaPlayer_captureCurrentFrame(JNIEnv *env, jobject thiz)
+{
+    LOGV("captureCurrentFrame");
+    
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    // Call native method to retrieve a video frame
+    VideoFrame *videoFrame = NULL;
+    sp<IMemory> frameMemory = mp->captureCurrentFrame();
+    if (frameMemory != 0) {  // cast the shared structure to a VideoFrame object
+        videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+    }
+    if (videoFrame == NULL) {
+        LOGE("captureCurrentFrame: videoFrame is a NULL pointer");
+        return NULL;
+    }
+
+    // Create a SkBitmap to hold the pixels
+    SkBitmap *bitmap = new SkBitmap();
+    if (bitmap == NULL) {
+        LOGE("captureCurrentFrame: cannot instantiate a SkBitmap object.");
+        return NULL;
+    }
+    bitmap->setConfig(SkBitmap::kRGB_565_Config, videoFrame->mDisplayWidth, videoFrame->mDisplayHeight);
+    if (!bitmap->allocPixels()) {
+        delete bitmap;
+        LOGE("failed to allocate pixel buffer");
+        return NULL;
+    }
+    memcpy((uint8_t*)bitmap->getPixels(), (uint8_t*)videoFrame + sizeof(VideoFrame), videoFrame->mSize);
+
+    // Since internally SkBitmap uses reference count to manage the reference to
+    // its pixels, it is important that the pixels (along with SkBitmap) be
+    // available after creating the Bitmap is returned to Java app.
+    return env->NewObject(fields.bitmapClazz, fields.bitmapConstructor, (int) bitmap, true, NULL, -1);
+}
 
 // Sends the request and reply parcels to the media player via the
 // binder interface.
@@ -639,6 +685,18 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
     fields.surface_native = env->GetFieldID(surface, ANDROID_VIEW_SURFACE_JNI_ID, "I");
     if (fields.surface_native == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Can't find Surface.mSurface");
+        return;
+    }
+
+    fields.bitmapClazz = env->FindClass("android/graphics/Bitmap");
+    if (fields.bitmapClazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/graphics/Bitmap");
+        return;
+    }
+
+    fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(IZ[BI)V");
+    if (fields.bitmapConstructor == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find Bitmap constructor");
         return;
     }
 }
@@ -761,6 +819,7 @@ static JNINativeMethod gMethods[] = {
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer_isLooping},
     {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
     {"getFrameAt",          "(I)Landroid/graphics/Bitmap;",     (void *)android_media_MediaPlayer_getFrameAt},
+    {"captureCurrentFrame", "()Landroid/graphics/Bitmap;",      (void *)android_media_MediaPlayer_captureCurrentFrame},
     {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},

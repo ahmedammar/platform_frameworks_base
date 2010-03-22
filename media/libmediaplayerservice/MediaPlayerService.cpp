@@ -1018,6 +1018,47 @@ status_t MediaPlayerService::Client::pause()
     return p->pause();
 }
 
+sp<IMemory> MediaPlayerService::Client::captureCurrentFrame()
+{
+    LOGV("captureCurrentFrame");
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == NULL) {
+        LOGE("media player is not initialized");
+        return NULL;
+    }
+    Mutex::Autolock lock(mLock);
+    mVideoFrame.clear();
+    mVideoFrameDealer.clear();
+    
+    VideoFrame *frame = NULL;
+    p->captureCurrentFrame(&frame);
+    if (frame == NULL) {
+        LOGE("failed to capture a video frame");
+        return NULL;
+    }
+    size_t size = sizeof(VideoFrame) + frame->mSize;
+    mVideoFrameDealer = new MemoryDealer(size);
+    if (mVideoFrameDealer == NULL) {
+        LOGE("failed to create MemoryDealer");
+        return NULL;
+    }
+    mVideoFrame = mVideoFrameDealer->allocate(size);
+    if (mVideoFrame == NULL) {
+        LOGE("not enough memory for VideoFrame size=%u", size);
+        mVideoFrameDealer.clear();
+        return NULL;
+    }
+    VideoFrame *frameCopy = static_cast<VideoFrame *>(mVideoFrame->pointer());
+    frameCopy->mWidth = frame->mWidth;
+    frameCopy->mHeight = frame->mHeight;
+    frameCopy->mDisplayWidth = frame->mDisplayWidth;
+    frameCopy->mDisplayHeight = frame->mDisplayHeight;
+    frameCopy->mSize = frame->mSize;
+    frameCopy->mData = (uint8_t *)frameCopy + sizeof(VideoFrame);
+    memcpy(frameCopy->mData, frame->mData, frame->mSize);
+    return mVideoFrame;
+}
+
 status_t MediaPlayerService::Client::isPlaying(bool* state)
 {
     *state = false;

@@ -33,7 +33,7 @@ namespace android {
 
 class Parcel;
 class ISurface;
-
+class VideoFrame;
 template<typename T> class SortedVector;
 
 enum player_type {
@@ -111,6 +111,7 @@ public:
     virtual status_t    start() = 0;
     virtual status_t    stop() = 0;
     virtual status_t    pause() = 0;
+    virtual status_t    captureCurrentFrame(VideoFrame** pvframe) = 0;
     virtual bool        isPlaying() = 0;
     virtual status_t    seekTo(int msec) = 0;
     virtual status_t    getCurrentPosition(int *msec) = 0;
@@ -158,6 +159,7 @@ public:
     virtual             ~MediaPlayerInterface() { }
     virtual bool        hardwareOutput() { return false; }
     virtual void        setAudioSink(const sp<AudioSink>& audioSink) { mAudioSink = audioSink; }
+    virtual status_t    captureCurrentFrame(VideoFrame** pvframe){return 0;}
 protected:
     sp<AudioSink>       mAudioSink;
 };

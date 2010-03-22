@@ -49,6 +49,7 @@ public:
     virtual status_t    start();
     virtual status_t    stop();
     virtual status_t    pause();
+    virtual status_t    captureCurrentFrame(VideoFrame** pvframe);
     virtual bool        isPlaying();
     virtual status_t    seekTo(int msec);
     virtual status_t    getCurrentPosition(int *msec);

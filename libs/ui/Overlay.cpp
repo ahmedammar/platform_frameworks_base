@@ -95,6 +95,12 @@ void* Overlay::getBufferAddress(overlay_buffer_t buffer)
     return mOverlayData->getBufferAddress(mOverlayData, buffer);
 }
 
+unsigned int Overlay::getBufferAddressPhy(overlay_buffer_t buffer)
+{
+    if (mStatus != NO_ERROR) return NULL;
+    return mOverlayData->getBufferAddressPhy(mOverlayData, buffer);
+}
+
 void Overlay::destroy() {  
     if (mStatus != NO_ERROR) return;
 

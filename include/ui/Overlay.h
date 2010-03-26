@@ -95,6 +95,8 @@ public:
     /* returns the address of a given buffer if supported, NULL otherwise. */
     void* getBufferAddress(overlay_buffer_t buffer);
 
+    unsigned int getBufferAddressPhy(overlay_buffer_t buffer);
+
     /* get physical informations about the overlay */
     uint32_t getWidth() const;
     uint32_t getHeight() const;

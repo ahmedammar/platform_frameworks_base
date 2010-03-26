@@ -745,6 +745,8 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
                         Transform(mOrientation));
                 overlay_dev->setParameter(overlay_dev, mOverlay,
                         OVERLAY_TRANSFORM, finalTransform.getOrientation());
+                overlay_dev->setParameter(overlay_dev, mOverlay,
+                        OVERLAY_ZORDER, mLayer.currentState().z);
                 overlay_dev->commit(overlay_dev, mOverlay);
             }
         }

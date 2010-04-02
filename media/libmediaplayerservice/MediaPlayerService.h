@@ -229,6 +229,8 @@ private:
         virtual status_t        resume();
         virtual status_t        setAuxEffectSendLevel(float level);
         virtual status_t        attachAuxEffect(int effectId);
+	virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain);
+    virtual status_t    setAudioEqualizer(bool isEnable);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
 

@@ -176,6 +176,8 @@ public:
             int             getAudioSessionId();
             status_t        setAuxEffectSendLevel(float level);
             status_t        attachAuxEffect(int effectId);
+    	    status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain);
+            status_t    setAudioEqualizer(bool isEnable);
 private:
             void            clear_l();
             status_t        seekTo_l(int msec);

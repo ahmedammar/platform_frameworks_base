@@ -82,6 +82,8 @@ public:
     virtual status_t        getMetadata(bool update_only,
                                         bool apply_filter,
                                         Parcel *metadata) = 0;
+    virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain)=0;    
+    virtual status_t    setAudioEqualizer(bool isEnable)=0;
 };
 
 // ----------------------------------------------------------------------------

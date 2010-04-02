@@ -81,6 +81,8 @@ class Player: public MediaPlayerInterface
     virtual status_t    setLooping(int loop) {return OK;}
     virtual player_type playerType() {return TEST_PLAYER;}
     virtual status_t    invoke(const Parcel& request, Parcel *reply);
+    virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain){ return false; }
+    virtual status_t    setAudioEqualizer(bool isEnable){ return false; }
 
   private:
     // Take a request, copy it to the reply.

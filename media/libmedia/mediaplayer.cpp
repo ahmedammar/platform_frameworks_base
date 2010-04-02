@@ -386,6 +386,24 @@ status_t MediaPlayer::getCurrentPosition(int *msec)
     return INVALID_OPERATION;
 }
 
+status_t MediaPlayer::setAudioEffect(int BandIndex, int BandFreq, int BandGain)
+{
+    Mutex::Autolock _l(mLock);
+    if (mPlayer != 0) { 
+        return mPlayer->setAudioEffect(BandIndex, BandFreq,BandGain);
+    }
+    return INVALID_OPERATION;
+}
+
+status_t MediaPlayer::setAudioEqualizer(bool isAudioEqualizerEnable)
+{
+    Mutex::Autolock _l(mLock);
+    if (mPlayer != 0) {
+        return mPlayer->setAudioEqualizer(isAudioEqualizerEnable);
+    }
+    return INVALID_OPERATION;
+}
+
 status_t MediaPlayer::getDuration_l(int *msec)
 {
     LOGW("getDuration");

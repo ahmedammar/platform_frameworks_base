@@ -470,6 +470,31 @@ android_media_MediaPlayer_getDuration(JNIEnv *env, jobject thiz)
 }
 
 static void
+android_media_MediaPlayer_setAudioEffect(JNIEnv *env, jobject thiz, int BandIndex, int BandFreq, int BandGain)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return ;
+    }
+    process_media_player_call( env, thiz, mp->setAudioEffect( BandIndex,  BandFreq, BandGain), NULL, NULL );
+    return ;
+}
+
+static void
+android_media_MediaPlayer_setAudioEqualizer(JNIEnv *env, jobject thiz,jboolean isAudioEqualizerEnable)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    process_media_player_call( env, thiz, mp->setAudioEqualizer(isAudioEqualizerEnable), NULL, NULL );
+    LOGV("setAudioEqualizer");
+    return;
+}
+
+static void
 android_media_MediaPlayer_reset(JNIEnv *env, jobject thiz)
 {
     LOGV("reset");
@@ -831,6 +856,8 @@ static JNINativeMethod gMethods[] = {
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
     {"setAuxEffectSendLevel", "(F)V",                           (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
+    {"setAudioEffect",      "(III)V",                           (void *)android_media_MediaPlayer_setAudioEffect},
+    {"setAudioEqualizer",   "(Z)V",                             (void *)android_media_MediaPlayer_setAudioEqualizer},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

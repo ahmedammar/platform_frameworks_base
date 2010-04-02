@@ -144,6 +144,8 @@ public:
                                     Parcel *records) {
         return INVALID_OPERATION;
     };
+    virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain)=0;
+    virtual status_t    setAudioEqualizer(bool isEnable)=0;
 
     virtual void        sendEvent(int msg, int ext1=0, int ext2=0) { if (mNotify) mNotify(mCookie, msg, ext1, ext2); }
 
@@ -160,6 +162,8 @@ public:
     virtual bool        hardwareOutput() { return false; }
     virtual void        setAudioSink(const sp<AudioSink>& audioSink) { mAudioSink = audioSink; }
     virtual status_t    captureCurrentFrame(VideoFrame** pvframe){return 0;}
+    virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain){ return false; }
+    virtual status_t    setAudioEqualizer(bool isEnable){ return false; }
 protected:
     sp<AudioSink>       mAudioSink;
 };

@@ -48,6 +48,8 @@ enum {
     RESUME,
     SET_AUX_EFFECT_SEND_LEVEL,
     ATTACH_AUX_EFFECT
+    SET_AUDIO_EFFECT,
+    SET_AUDIO_EQUALIZER,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -145,7 +147,26 @@ public:
         *msec = reply.readInt32();
         return reply.readInt32();
     }
+    
+    status_t setAudioEffect(int bandIndex, int bandFreq, int bandGain)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+	data.writeInt32(bandIndex);
+	data.writeInt32(bandFreq);
+	data.writeInt32(bandGain);
+        remote()->transact(SET_AUDIO_EFFECT, data, &reply);
+        return reply.readInt32();
+    }
 
+    status_t setAudioEqualizer(bool isAudioEqualizerEnable)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+	data.writeInt32(isAudioEqualizerEnable);
+        remote()->transact(SET_AUDIO_EQUALIZER, data, &reply);
+        return reply.readInt32();
+    }
     status_t getDuration(int* msec)
     {
         Parcel data, reply;
@@ -391,6 +412,16 @@ status_t BnMediaPlayer::onTransact(
         case ATTACH_AUX_EFFECT: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(attachAuxEffect(data.readInt32()));
+        case SET_AUDIO_EFFECT: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            status_t ret = setAudioEffect(data.readInt32(),data.readInt32(),data.readInt32());
+            reply->writeInt32(ret);
+            return NO_ERROR;
+        } break;
+        case SET_AUDIO_EQUALIZER: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            status_t ret = setAudioEqualizer(data.readInt32());
+            reply->writeInt32(ret);
             return NO_ERROR;
         } break;
         default:

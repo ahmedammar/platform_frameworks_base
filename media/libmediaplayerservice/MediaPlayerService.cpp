@@ -1097,6 +1097,34 @@ status_t MediaPlayerService::Client::getDuration(int *msec)
     return ret;
 }
 
+status_t MediaPlayerService::Client::setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain)
+{
+    //LOGW("MediaPlayerService::setAudioEffect");
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    status_t ret = p->setAudioEffect(iBandIndex, iBandFreq, iBandGain);
+    if (ret == NO_ERROR) {
+        LOGV("[%d] setAudioEffect iBandIndex= %d", mConnId, iBandIndex);
+    } else {
+        LOGE("setAudioEffect returned %d", ret);
+    }
+    return ret;
+}
+
+status_t MediaPlayerService::Client::setAudioEqualizer(bool isEnable)
+{
+    //LOGW("setAudioEqualizer");
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    status_t ret = p->setAudioEqualizer(isEnable);
+    if (ret == NO_ERROR) {
+        LOGW("[%d] setAudioEqualizer = %d", mConnId, isEnable);
+    } else {
+        LOGE("setAudioEqualizer returned %d", ret);
+    }
+    return ret;
+}
+
 status_t MediaPlayerService::Client::seekTo(int msec)
 {
     LOGV("[%d] seekTo(%d)", mConnId, msec);

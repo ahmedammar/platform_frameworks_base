@@ -980,6 +980,23 @@ public class MediaPlayer
     public native int getDuration();
 
     /**
+     * Set parameters for Audio Equalizer.
+     *
+     * @param  BandIndex the index number of band which is the parameter will apply
+     * @param  BandFreq  the center frequence(in Hz) of band
+     * @param  BandGain  the gain (dB) of band
+     */
+    public native void setAudioEffect(int BandIndex, int BandFreq, int BandGain);
+
+    /**
+     * Enable or Disable Audio Equalizer.
+     *
+     * @param isEnableEqualizer is the flag which indicate if Audio Equalizer is enable or disable
+     */
+    public native void setAudioEqualizer(boolean isEnableEqualizer);
+    
+    
+    /**
      * Gets the media metadata.
      *
      * @param update_only controls whether the full set of available

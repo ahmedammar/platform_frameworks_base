@@ -326,6 +326,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 // to enable it a little bit later (i.e, give the user a chance
                 // to turn the screen back on within a certain window without
                 // having to unlock the screen)
+		/*
                 long when = SystemClock.elapsedRealtime() + KEYGUARD_DELAY_MS;
                 Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
                 intent.putExtra("seq", mDelayedShowingSequence);
@@ -335,6 +336,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         sender);
                 if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
                                  + mDelayedShowingSequence);
+		*/
+                doKeyguard();
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
                 // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {

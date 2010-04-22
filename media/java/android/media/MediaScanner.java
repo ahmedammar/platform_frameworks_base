@@ -1192,10 +1192,10 @@ public class MediaScanner
     private void initialize(String volumeName) {
         mMediaProvider = mContext.getContentResolver().acquireProvider("media");
 
-        mAudioUri = Audio.Media.getContentUri(volumeName);
-        mVideoUri = Video.Media.getContentUri(volumeName);
-        mImagesUri = Images.Media.getContentUri(volumeName);
-        mThumbsUri = Images.Thumbnails.getContentUri(volumeName);
+        mAudioUri = Audio.Media.EXTERNAL_CONTENT_URI;
+        mVideoUri = Video.Media.EXTERNAL_CONTENT_URI;
+        mImagesUri = Images.Media.EXTERNAL_CONTENT_URI;
+        mThumbsUri = Images.Thumbnails.EXTERNAL_CONTENT_URI;
 
         if (!volumeName.equals("internal")) {
             // we only support playlists on external media

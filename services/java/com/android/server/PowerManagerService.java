@@ -2605,12 +2605,8 @@ class PowerManagerService extends IPowerManager.Stub
         synchronized (mLocks) {
             mUserActivityAllowed = enabled;
             if (!enabled) {
-		// During boot, there may be a race condition that system had been suspended before user can
-		// see the keyguard screen. So when keyguard call this function to take ownership for user
-		// activity, don't transit state directly to SCREEN_OFF. Instead, transit to SCREEN_BRIGHT
-		// so that the whole SCREEN_TIMEOUT value (saved in screen timeout setting) can take effect
-		// before SCREEN_OFF
-                setTimeoutLocked(SystemClock.uptimeMillis(), SCREEN_BRIGHT);
+                // cancel timeout and clear mUserState so the keyguard can set a short timeout
+                setTimeoutLocked(SystemClock.uptimeMillis(), 0);
             }
         }
     }

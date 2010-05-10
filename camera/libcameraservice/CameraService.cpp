@@ -460,7 +460,7 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
         // buffers now.
         if (mHardware->previewEnabled()) {
             if (mUseOverlay) {
-            //    result = setOverlay();
+                result = setOverlay();
             } else if (mSurface != 0) {
                 result = registerPreviewBuffers();
             }
@@ -639,7 +639,7 @@ status_t CameraService::Client::startPreviewMode()
     if (mUseOverlay) {
         // If preview display has been set, set overlay now.
         if (mSurface != 0) {
-        //    ret = setOverlay();
+            ret = setOverlay();
         }
         if (ret != NO_ERROR) return ret;
         ret = mHardware->startPreview();

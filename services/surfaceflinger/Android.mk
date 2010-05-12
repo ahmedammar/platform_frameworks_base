@@ -28,7 +28,7 @@ ifeq ($(TARGET_BOARD_PLATFORM), s5pc110)
 endif
 
 
-ifeq ($(TARGET_BOARD_PLATFORM), imx51_BBG)
+ifeq ($(BOARD_SOC_CLASS), IMX5X)
 	LOCAL_CFLAGS += -DDIM_WITH_TEXTURE
 endif
 

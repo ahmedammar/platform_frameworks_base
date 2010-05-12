@@ -698,10 +698,10 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
         }
 #endif 
 
-#if defined(imx51)
-#warning "imx51 eglInitialize() workaround"
+#if defined(IMX5X)
+#warning "imx5x eglInitialize() workaround"
         /*
-         * same workaround should be applied to imx51 Z430 EGL as ADRENO130
+         * same workaround should be applied to imx5x Z430 EGL as ADRENO130
          */
         if (i == IMPL_HARDWARE) {
             dp->disp[i].dpy =

@@ -211,7 +211,6 @@ private:
         virtual status_t        start();
         virtual status_t        stop();
         virtual status_t        pause();
-        virtual sp<IMemory>     captureCurrentFrame();
         virtual status_t        isPlaying(bool* state);
         virtual status_t        seekTo(int msec);
         virtual status_t        getCurrentPosition(int* msec);
@@ -231,6 +230,8 @@ private:
         virtual status_t        attachAuxEffect(int effectId);
 	virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain);
     virtual status_t    setAudioEqualizer(bool isEnable);
+        virtual sp<IMemory> captureCurrentFrame();
+        virtual status_t    setVideoCrop(int iTop, int iRight, int iBottom, int iLeft);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
 

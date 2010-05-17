@@ -602,6 +602,18 @@ static jobject android_media_MediaPlayer_captureCurrentFrame(JNIEnv *env, jobjec
     return env->NewObject(fields.bitmapClazz, fields.bitmapConstructor, (int) bitmap, true, NULL, -1);
 }
 
+static void
+android_media_MediaPlayer_setVideoCrop(JNIEnv *env, jobject thiz, int Top, int Left, int Bottom,int Right)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return ;
+    }
+    process_media_player_call( env, thiz, mp->setVideoCrop( Top,  Left, Bottom,Right), NULL, NULL );
+    return ;
+}
+
 // Sends the request and reply parcels to the media player via the
 // binder interface.
 static jint
@@ -844,7 +856,6 @@ static JNINativeMethod gMethods[] = {
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer_isLooping},
     {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
     {"getFrameAt",          "(I)Landroid/graphics/Bitmap;",     (void *)android_media_MediaPlayer_getFrameAt},
-    {"captureCurrentFrame", "()Landroid/graphics/Bitmap;",      (void *)android_media_MediaPlayer_captureCurrentFrame},
     {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
@@ -858,6 +869,8 @@ static JNINativeMethod gMethods[] = {
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
     {"setAudioEffect",      "(III)V",                           (void *)android_media_MediaPlayer_setAudioEffect},
     {"setAudioEqualizer",   "(Z)V",                             (void *)android_media_MediaPlayer_setAudioEqualizer},
+    {"captureCurrentFrame", "()Landroid/graphics/Bitmap;",      (void *)android_media_MediaPlayer_captureCurrentFrame},
+    {"setVideoCrop",      "(IIII)V",                           (void *)android_media_MediaPlayer_setVideoCrop},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

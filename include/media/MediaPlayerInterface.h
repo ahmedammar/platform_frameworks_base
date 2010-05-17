@@ -111,7 +111,6 @@ public:
     virtual status_t    start() = 0;
     virtual status_t    stop() = 0;
     virtual status_t    pause() = 0;
-    virtual status_t    captureCurrentFrame(VideoFrame** pvframe) = 0;
     virtual bool        isPlaying() = 0;
     virtual status_t    seekTo(int msec) = 0;
     virtual status_t    getCurrentPosition(int *msec) = 0;
@@ -146,6 +145,8 @@ public:
     };
     virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain)=0;
     virtual status_t    setAudioEqualizer(bool isEnable)=0;
+    virtual status_t    captureCurrentFrame(VideoFrame** pvframe) = 0;
+    virtual status_t    setVideoCrop(int top,int left, int bottom, int right) = 0;
 
     virtual void        sendEvent(int msg, int ext1=0, int ext2=0) { if (mNotify) mNotify(mCookie, msg, ext1, ext2); }
 
@@ -161,9 +162,10 @@ public:
     virtual             ~MediaPlayerInterface() { }
     virtual bool        hardwareOutput() { return false; }
     virtual void        setAudioSink(const sp<AudioSink>& audioSink) { mAudioSink = audioSink; }
-    virtual status_t    captureCurrentFrame(VideoFrame** pvframe){return 0;}
     virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain){ return false; }
     virtual status_t    setAudioEqualizer(bool isEnable){ return false; }
+    virtual status_t    captureCurrentFrame(VideoFrame** pvframe){return 0;}
+    virtual status_t    setVideoCrop(int top,int left, int bottom, int right){return 0;}
 protected:
     sp<AudioSink>       mAudioSink;
 };

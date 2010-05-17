@@ -325,17 +325,6 @@ status_t MediaPlayer::pause()
     return INVALID_OPERATION;
 }
 
-sp<IMemory> MediaPlayer::captureCurrentFrame()
-{
-    LOGV("captureCurrentFrame");
-    Mutex::Autolock _l(mLock);
-    if (mPlayer != 0) {
-         return mPlayer->captureCurrentFrame();
-    }
-    LOGV("captureCurrentFrame: no active player");
-    return NULL;
-}
-
 bool MediaPlayer::isPlaying()
 {
     Mutex::Autolock _l(mLock);
@@ -400,6 +389,26 @@ status_t MediaPlayer::setAudioEqualizer(bool isAudioEqualizerEnable)
     Mutex::Autolock _l(mLock);
     if (mPlayer != 0) {
         return mPlayer->setAudioEqualizer(isAudioEqualizerEnable);
+    }
+    return INVALID_OPERATION;
+}
+
+sp<IMemory> MediaPlayer::captureCurrentFrame()
+{
+    LOGV("captureCurrentFrame");
+    Mutex::Autolock _l(mLock);
+    if (mPlayer != 0) {
+         return mPlayer->captureCurrentFrame();
+    }
+    LOGV("captureCurrentFrame: no active player");
+    return NULL;
+}
+
+status_t MediaPlayer::setVideoCrop(int top, int left, int bottom, int right)
+{
+    Mutex::Autolock _l(mLock);
+    if (mPlayer != 0) { 
+        return mPlayer->setVideoCrop(top, left, bottom, right);
     }
     return INVALID_OPERATION;
 }

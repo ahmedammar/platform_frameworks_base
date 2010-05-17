@@ -152,7 +152,6 @@ public:
             status_t        start();
             status_t        stop();
             status_t        pause();
-            sp<IMemory>     captureCurrentFrame();
             bool            isPlaying();
             status_t        getVideoWidth(int *w);
             status_t        getVideoHeight(int *h);
@@ -178,6 +177,8 @@ public:
             status_t        attachAuxEffect(int effectId);
     	    status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain);
             status_t    setAudioEqualizer(bool isEnable);
+            sp<IMemory>     captureCurrentFrame();
+            status_t    setVideoCrop(int top,int left, int bottom, int right);
 private:
             void            clear_l();
             status_t        seekTo_l(int msec);

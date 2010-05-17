@@ -49,7 +49,6 @@ public:
     virtual status_t    start();
     virtual status_t    stop();
     virtual status_t    pause();
-    virtual status_t    captureCurrentFrame(VideoFrame** pvframe);
     virtual bool        isPlaying();
     virtual status_t    seekTo(int msec);
     virtual status_t    getCurrentPosition(int *msec);
@@ -63,6 +62,8 @@ public:
         Parcel *records);
     virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain);
     virtual status_t    setAudioEqualizer(bool isEnable);
+    virtual status_t    captureCurrentFrame(VideoFrame** pvframe);
+    virtual status_t    setVideoCrop(int top,int left, int bottom, int right);
 
     // make available to PlayerDriver
     void        sendEvent(int msg, int ext1=0, int ext2=0) { MediaPlayerBase::sendEvent(msg, ext1, ext2); }

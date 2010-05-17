@@ -39,7 +39,6 @@ public:
     virtual status_t        start() = 0;
     virtual status_t        stop() = 0;
     virtual status_t        pause() = 0;
-    virtual sp<IMemory>     captureCurrentFrame() = 0;
     virtual status_t        isPlaying(bool* state) = 0;
     virtual status_t        seekTo(int msec) = 0;
     virtual status_t        getCurrentPosition(int* msec) = 0;
@@ -82,8 +81,10 @@ public:
     virtual status_t        getMetadata(bool update_only,
                                         bool apply_filter,
                                         Parcel *metadata) = 0;
-    virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain)=0;    
+    virtual status_t    setAudioEffect(int iBandIndex, int iBandFreq, int iBandGain) = 0;    
     virtual status_t    setAudioEqualizer(bool isEnable)=0;
+    virtual sp<IMemory>     captureCurrentFrame() = 0;
+    virtual status_t    setVideoCrop(int top,int left, int bottom, int right) = 0;
 };
 
 // ----------------------------------------------------------------------------

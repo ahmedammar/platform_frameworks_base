@@ -1202,8 +1202,8 @@ public class MediaScanner
             mProcessPlaylists = true;
             mProcessGenres = true;
             mGenreCache = new HashMap<String, Uri>();
-            mGenresUri = Genres.getContentUri(volumeName);
-            mPlaylistsUri = Playlists.getContentUri(volumeName);
+            mGenresUri = Genres.getContentUri("external");
+            mPlaylistsUri = Playlists.getContentUri("external");
             // assuming external storage is FAT (case insensitive), except on the simulator.
             if ( Process.supportsProcesses()) {
                 mCaseInsensitivePaths = true;

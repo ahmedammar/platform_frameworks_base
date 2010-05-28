@@ -48,8 +48,9 @@ public class MediaFile {
     public static final int FILE_TYPE_AAC     = 8;
     public static final int FILE_TYPE_RMA     = 9;
     public static final int FILE_TYPE_MKA     = 10;
+    public static final int FILE_TYPE_FLAC    = 11;
     private static final int FIRST_AUDIO_FILE_TYPE = FILE_TYPE_MP3;
-    private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_MKA;
+    private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_FLAC;
 
     // MIDI file types
     public static final int FILE_TYPE_MID     = 21;
@@ -140,6 +141,8 @@ public class MediaFile {
         addFileType("AAC", FILE_TYPE_AAC, "audio/aac");
         addFileType("MKA", FILE_TYPE_MKA, "audio/x-matroska");
  
+        addFileType("FLAC", FILE_TYPE_FLAC, "audio/flac");
+         
         addFileType("MID", FILE_TYPE_MID, "audio/midi");
         addFileType("MIDI", FILE_TYPE_MID, "audio/midi");
         addFileType("XMF", FILE_TYPE_MID, "audio/midi");
@@ -205,6 +208,12 @@ public class MediaFile {
             addFileType("MKV", FILE_TYPE_MKV, "video/matroska");
         }
 
+        //Check FSL_FLAC_PARSER property
+        value = SystemProperties.get("ro.FSL_FLAC_PARSER");
+        if ("1".equals(value)) {
+            addFileType("FLAC", FILE_TYPE_FLAC, "audio/flac");
+        }
+        
         addFileType("JPG", FILE_TYPE_JPEG, "image/jpeg");
         addFileType("JPEG", FILE_TYPE_JPEG, "image/jpeg");
         addFileType("GIF", FILE_TYPE_GIF, "image/gif");

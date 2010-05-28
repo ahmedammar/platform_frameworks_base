@@ -1368,6 +1368,10 @@ class PowerManagerService extends IPowerManager.Stub
             mBroadcastWakeLock.release();
             mBroadcastWakeLock.release();
             index = 0;
+            //The wake lock was being held twice, but we now strip the previous two broadcase(a pair) event
+	    //, so we  also need to release the previous locked wake lock twice;
+            mBroadcastWakeLock.release();
+            mBroadcastWakeLock.release();
         }
         if (index == 1 && !on) {
             mBroadcastQueue[0] = -1;

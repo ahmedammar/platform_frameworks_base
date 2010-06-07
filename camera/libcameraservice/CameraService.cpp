@@ -450,8 +450,11 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
             else
             {
                 // Force the destruction of any previous overlay
+                mHardware->stopPreview();
                 sp<Overlay> dummy;
                 mHardware->setOverlay( dummy );
+                mHardware->startPreview();
+                mSurface->unregisterBuffers();
             }
         }
         mSurface = surface;

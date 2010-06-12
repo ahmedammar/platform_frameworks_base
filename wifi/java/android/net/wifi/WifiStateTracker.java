@@ -418,6 +418,22 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     /**
+     * Ensure that a network route exists to deliver traffic to the specified
+     * host via the mobile data network.
+     * @param hostAddress the IP address of the host to which the route is desired,
+     * in network byte order.
+     * @return {@code true} on success, {@code false} on failure
+     */
+    @Override
+    public boolean requestRouteToHost(int hostAddress) {
+        if (mInterfaceName != null && hostAddress != -1) {
+            return NetworkUtils.addHostRoute(mInterfaceName, hostAddress) == 0;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Helper method: sets the supplicant state and keeps the network
      * info updated (string version).
      * @param stateName the string name of the new state

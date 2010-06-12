@@ -400,11 +400,7 @@ public abstract class NetworkStateTracker extends Handler {
      * @return {@code true} on success, {@code false} on failure
      */
     public boolean requestRouteToHost(int hostAddress) {
-      if (mInterfaceName != null && hostAddress != -1) {
-            return NetworkUtils.addHostRoute(mInterfaceName, hostAddress) == 0;
-        } else {
             return false;
-        }
     }
 
     /**

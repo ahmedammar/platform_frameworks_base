@@ -55,6 +55,7 @@ static char const * const kOldWakeFileName = "/sys/android_power/wait_for_fb_wak
 // This dir exists if the framebuffer console is present, either built into
 // the kernel or loaded as a module.
 static char const * const kFbconSysDir = "/sys/class/graphics/fbcon";
+static char const * const kConsoleSwitch = "/sys/power/console_switch";
 
 // ----------------------------------------------------------------------------
 
@@ -139,7 +140,9 @@ status_t DisplayHardwareBase::DisplayEventThread::initCheck() const
             access(kWakeFileName, R_OK) == 0) ||
             (access(kOldSleepFileName, R_OK) == 0 &&
             access(kOldWakeFileName, R_OK) == 0)) &&
-            access(kFbconSysDir, F_OK) != 0) ? NO_ERROR : NO_INIT;
+            (access(kConsoleSwitch, F_OK) != 0 ||
+            access(kFbconSysDir, F_OK) != 0)) ? NO_ERROR : NO_INIT;
+
 }
 
 // ----------------------------------------------------------------------------
@@ -352,7 +355,7 @@ bool DisplayHardwareBase::ConsoleManagerThread::threadLoop()
 
 status_t DisplayHardwareBase::ConsoleManagerThread::initCheck() const
 {
-    return consoleFd >= 0 ? NO_ERROR : NO_INIT;
+    return (access(kConsoleSwitch, F_OK) == 0 && consoleFd >= 0) ? NO_ERROR : NO_INIT;
 }
 
 // ----------------------------------------------------------------------------
@@ -365,6 +368,9 @@ DisplayHardwareBase::DisplayHardwareBase(const sp<SurfaceFlinger>& flinger,
     if (mDisplayEventThread->initCheck() != NO_ERROR) {
         // fall-back on the console
         mDisplayEventThread = new ConsoleManagerThread(flinger);
+		if (mDisplayEventThread->initCheck() != NO_ERROR) {
+			LOGE("!!!!ConsoleManagerThread initCheck failt\n");
+		}
     }
 }
 

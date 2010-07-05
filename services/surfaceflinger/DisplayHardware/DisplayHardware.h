@@ -63,8 +63,8 @@ public:
 
     // Flip the front and back buffers if the back buffer is "dirty".  Might
     // be instantaneous, might involve copying the frame buffer around.
-    void flip(const Region& dirty) const;
     status_t postBypassBuffer(const native_handle_t* handle) const;
+    void flip(const Region& dirty, int mode) const;
 
     float       getDpiX() const;
     float       getDpiY() const;

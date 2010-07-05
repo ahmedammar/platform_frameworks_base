@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 package android.view;
 
@@ -58,6 +59,7 @@ public interface ViewParent {
      * @param r The area within the child that is invalid
      */
     public void invalidateChild(View child, Rect r);
+    public void invalidateChild(View child, Rect r, int updateMode);
 
     /**
      * All or part of a child is dirty and needs to be redrawn.
@@ -80,6 +82,8 @@ public interface ViewParent {
      * @return the parent of this ViewParent or null
      */
     public ViewParent invalidateChildInParent(int[] location, Rect r);
+
+    public ViewParent invalidateChildInParent(int[] location, Rect r, int updateMode);
 
     /**
      * Returns the parent if it exists, or null.

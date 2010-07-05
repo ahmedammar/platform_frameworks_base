@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 #define LOG_TAG "ISurface"
 
@@ -85,6 +86,18 @@ public:
         sp<GraphicBuffer> buffer = new GraphicBuffer();
         reply.read(*buffer);
         return buffer;
+    }
+    virtual void setDirtyRect(int index,int left, int top, int right, int bottom, int dirtyMode)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
+        data.writeInt32(index);
+        data.writeInt32(left);
+        data.writeInt32(top);
+        data.writeInt32(right);
+        data.writeInt32(bottom);
+        data.writeInt32(dirtyMode);
+        remote()->transact(SET_DIRTYRECT, data, &reply);
     }
 
     virtual status_t setBufferCount(int bufferCount)
@@ -184,6 +197,18 @@ status_t BnSurface::onTransact(
             reply->writeInt32(err);
             return NO_ERROR;
         }
+        case SET_DIRTYRECT: {
+            CHECK_INTERFACE(ISurface, data, reply);
+            int index = data.readInt32();
+            int left = data.readInt32();
+            int top = data.readInt32();
+            int right = data.readInt32();
+            int bottom = data.readInt32();
+            int dirtyMode = data.readInt32();
+            setDirtyRect(index,left,top,right,bottom,dirtyMode);
+            return NO_ERROR;
+        }break;
+        
         case REGISTER_BUFFERS: {
             CHECK_INTERFACE(ISurface, data, reply);
             BufferHeap buffer;

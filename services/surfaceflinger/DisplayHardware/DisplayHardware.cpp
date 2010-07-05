@@ -313,7 +313,7 @@ int DisplayHardware::getCurrentBufferIndex() const {
     return mNativeWindow->getCurrentBufferIndex();
 }
 
-void DisplayHardware::flip(const Region& dirty) const
+void DisplayHardware::flip(const Region& dirty, int mode) const
 {
     checkGLErrors();
 
@@ -330,7 +330,7 @@ void DisplayHardware::flip(const Region& dirty) const
 #endif
     
     if (mFlags & PARTIAL_UPDATES) {
-        mNativeWindow->setUpdateRectangle(dirty.getBounds());
+        mNativeWindow->setUpdateRectangle(dirty.getBounds(), mode);
     }
     
     mPageFlipCount++;

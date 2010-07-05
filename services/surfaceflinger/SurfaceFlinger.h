@@ -308,7 +308,8 @@ private:
             void        unlockPageFlip(const LayerVector& currentLayers);
             void        handleRepaint();
             bool        handleBypassLayer();
-            void        postFramebuffer();
+            void        EinkOptPostFramebuffer();
+            void        postFramebuffer(Region pInvalidRegion, int mode);
             void        composeSurfaces(const Region& dirty);
 
 

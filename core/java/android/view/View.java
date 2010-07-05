@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 package android.view;
 
@@ -960,6 +961,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public static final int FOCUS_DOWN = 0x00000082;
 
+
     /**
      * The partial update mode in region
      */
@@ -1017,6 +1019,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public static final int EINK_WAIT_MODE_MASK = 0x00000F00;
 
+    /**
+     * The regional update mode
+     */
+    public static final int EINK_AUTO_MODE_REGIONAL = 0x00000000;
+
+    /**
+     * The automatic update mode 
+     */
+    public static final int EINK_AUTO_MODE_AUTOMATIC = 0x00001000;
+
+    /**
+     * The mask of the  auto mode 
+     */
+    public static final int EINK_AUTO_MODE_MASK = 0x0000F000;
+
+
+	
+    public static final int UI_DEFAULT_MODE = EINK_UPDATE_MODE_FULL | EINK_WAVEFORM_MODE_GC16 | EINK_WAIT_MODE_WAIT | EINK_AUTO_MODE_REGIONAL;
     /**
      * Base View state sets
      */
@@ -5264,7 +5284,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * WARNING: This method is destructive to dirty.
      * @param dirty the rectangle representing the bounds of the dirty region
      */
-    public void invalidate(Rect dirty) {
+    public void invalidate(Rect dirty, int updateMode) {
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
@@ -5279,7 +5299,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 final Rect r = ai.mTmpInvalRect;
                 r.set(dirty.left - scrollX, dirty.top - scrollY,
                         dirty.right - scrollX, dirty.bottom - scrollY);
-                mParent.invalidateChild(this, r);
+                mParent.invalidateChild(this, r, updateMode);
             }
         }
     }
@@ -5294,8 +5314,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param dirty the rectangle representing the bounds of the dirty region 
      * @param updateMode update mode for this draw
      */
-    public void invalidate(Rect dirty,int updateMode) {
-        invalidate(dirty);
+    public void invalidate(Rect dirty) {
+        invalidate(dirty, UI_DEFAULT_MODE);
     }
 
     /**
@@ -5309,7 +5329,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param r the right position of the dirty region
      * @param b the bottom position of the dirty region
      */
-    public void invalidate(int l, int t, int r, int b) {
+    public void invalidate(int l, int t, int r, int b,int updateMode) {
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
@@ -5323,7 +5343,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 final int scrollY = mScrollY;
                 final Rect tmpr = ai.mTmpInvalRect;
                 tmpr.set(l - scrollX, t - scrollY, r - scrollX, b - scrollY);
-                p.invalidateChild(this, tmpr);
+                p.invalidateChild(this, tmpr, updateMode);
             }
         }
     }
@@ -5339,17 +5359,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param r the right position of the dirty region
      * @param b the bottom position of the dirty region 
      * @param updateMode update mode for this draw 
-     */
-    public void invalidate(int l, int t, int r, int b,int updateMode) {
-        invalidate(l,t,r,b);
-    }
+    */
+    public void invalidate(int l, int t, int r, int b) {
+        invalidate(l,t,r,b, UI_DEFAULT_MODE );
+    } 
 
     /**
      * Invalidate the whole view. If the view is visible, {@link #onDraw} will
      * be called at some point in the future. This must be called from a
      * UI thread. To call from a non-UI thread, call {@link #postInvalidate()}.
      */
-    public void invalidate() {
+    public void invalidate(int updateMode) {
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
@@ -5363,7 +5383,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 r.set(0, 0, mRight - mLeft, mBottom - mTop);
                 // Don't call invalidate -- we don't want to internally scroll
                 // our own bounds
-                p.invalidateChild(this, r);
+                p.invalidateChild(this, r, updateMode);
             }
         }
     }
@@ -5374,8 +5394,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * UI thread. To call from a non-UI thread, call {@link #postInvalidate()}. 
      * @param updateMode update mode for this draw
      */
-    public void invalidate(int updateMode) {
-        invalidate();
+    public void invalidate() {
+        invalidate(UI_DEFAULT_MODE);
     }
 
     /**
@@ -5516,20 +5536,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #invalidate()
      */
     public void postInvalidate() {
-        postInvalidateDelayed(0);
+        postInvalidateDelayed(0, UI_DEFAULT_MODE);
     }
 
-    /**
-     * Cause an invalidate to happen on a subsequent cycle through the event loop.
-     * Use this to invalidate the View from a non-UI thread.
-     *  
-     * @param updateMode update mode for this draw 
-     * @see #invalidate()
-     */
     public void postInvalidate(int updateMode) {
-        postInvalidateDelayed(0);
+        postInvalidateDelayed(0, updateMode);
     }
-
     /**
      * Cause an invalidate of the specified area to happen on a subsequent cycle
      * through the event loop. Use this to invalidate the View from a non-UI thread.
@@ -5543,25 +5555,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #invalidate(Rect)
      */
     public void postInvalidate(int left, int top, int right, int bottom) {
-        postInvalidateDelayed(0, left, top, right, bottom);
+        postInvalidateDelayed(0, left, top, right, bottom, UI_DEFAULT_MODE);
     }
-
-    /**
-     * Cause an invalidate of the specified area to happen on a subsequent cycle
-     * through the event loop. Use this to invalidate the View from a non-UI thread.
-     *
-     * @param left The left coordinate of the rectangle to invalidate.
-     * @param top The top coordinate of the rectangle to invalidate.
-     * @param right The right coordinate of the rectangle to invalidate.
-     * @param bottom The bottom coordinate of the rectangle to invalidate. 
-     * @param updateMode update mode for this draw  
-     *
-     * @see #invalidate(int, int, int, int)
-     * @see #invalidate(Rect)
-     */
-    public void postInvalidate(int left, int top, int right, int bottom,int updateMode) {
-        postInvalidateDelayed(0, left, top, right, bottom);
+	
+    public void postInvalidate(int left, int top, int right, int bottom, int updateMode) {
+        postInvalidateDelayed(0, left, top, right, bottom, updateMode);
     }
+   
 
     /**
      * Cause an invalidate to happen on a subsequent cycle through the event
@@ -5570,27 +5570,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param delayMilliseconds the duration in milliseconds to delay the
      *         invalidation by
      */
+     
     public void postInvalidateDelayed(long delayMilliseconds) {
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
+        postInvalidateDelayed( delayMilliseconds, UI_DEFAULT_MODE);
+    }
+    public void postInvalidateDelayed(long delayMilliseconds, int updateMode) {
+        // We try only with the AttachInfo because there's no point in invalidating
+        // if we are not attached to our window
         if (mAttachInfo != null) {
+
+            final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
+            info.target = this;
+            info.updateMode = updateMode;
+
             Message msg = Message.obtain();
             msg.what = AttachInfo.INVALIDATE_MSG;
-            msg.obj = this;
+            msg.obj = info;
             mAttachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
         }
-    }
-
-    /**
-     * Cause an invalidate to happen on a subsequent cycle through the event
-     * loop. Waits for the specified amount of time.
-     *
-     * @param delayMilliseconds the duration in milliseconds to delay the
-     *         invalidation by
-     * @param updateMode update mode for this draw 
-     */
-    public void postInvalidateDelayed(long delayMilliseconds,int updateMode) {
-        postInvalidateDelayed(delayMilliseconds);
     }
 
     /**
@@ -5609,6 +5608,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
+        postInvalidateDelayed(delayMilliseconds,  left,  top,
+             right,  bottom,  UI_DEFAULT_MODE);
+    }
+
+    public void postInvalidateDelayed(long delayMilliseconds, int left, int top,
+            int right, int bottom, int updateMode) {
+
+        // We try only with the AttachInfo because there's no point in invalidating
+        // if we are not attached to our window
         if (mAttachInfo != null) {
             final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
             info.target = this;
@@ -5616,29 +5624,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             info.top = top;
             info.right = right;
             info.bottom = bottom;
+            info.updateMode = updateMode;
 
             final Message msg = Message.obtain();
             msg.what = AttachInfo.INVALIDATE_RECT_MSG;
             msg.obj = info;
             mAttachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
         }
-    }
-
-    /**
-     * Cause an invalidate of the specified area to happen on a subsequent cycle
-     * through the event loop. Waits for the specified amount of time.
-     *
-     * @param delayMilliseconds the duration in milliseconds to delay the
-     *         invalidation by
-     * @param left The left coordinate of the rectangle to invalidate.
-     * @param top The top coordinate of the rectangle to invalidate.
-     * @param right The right coordinate of the rectangle to invalidate.
-     * @param bottom The bottom coordinate of the rectangle to invalidate. 
-     * @param updateMode update mode for this draw 
-     */
-    public void postInvalidateDelayed(long delayMilliseconds, int left, int top,
-            int right, int bottom,int updateMode) {
-        postInvalidateDelayed(delayMilliseconds, left, top, right, bottom);
     }
 
     /**
@@ -7438,25 +7430,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param drawable the drawable to invalidate
      */
-    public void invalidateDrawable(Drawable drawable) {
+     public void invalidateDrawable(Drawable drawable) {
+          invalidateDrawable(drawable, UI_DEFAULT_MODE);
+    }
+
+
+    public void invalidateDrawable(Drawable drawable, int updateMode) {
         if (verifyDrawable(drawable)) {
             final Rect dirty = drawable.getBounds();
             final int scrollX = mScrollX;
             final int scrollY = mScrollY;
 
             invalidate(dirty.left + scrollX, dirty.top + scrollY,
-                    dirty.right + scrollX, dirty.bottom + scrollY);
+                    dirty.right + scrollX, dirty.bottom + scrollY, updateMode);
         }
-    }
-
-    /**
-     * Invalidates the specified Drawable.
-     *
-     * @param drawable the drawable to invalidate 
-     * @param updateMode update mode for this draw 
-     */
-    public void invalidateDrawable(Drawable drawable,int updateMode) {
-        invalidateDrawable(drawable);
     }
 
     /**
@@ -9424,6 +9411,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             int top;
             int right;
             int bottom;
+            int updateMode;
 
             public void setNextPoolable(InvalidateInfo element) {
                 mNext = element;

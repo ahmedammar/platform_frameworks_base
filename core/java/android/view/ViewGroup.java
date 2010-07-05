@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 package android.view;
 
@@ -2463,7 +2464,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Don't call or override this method. It is used for the implementation of
      * the view hierarchy.
      */
-    public final void invalidateChild(View child, final Rect dirty) {
+      public final void invalidateChild(View child, final Rect dirty) {
+         invalidateChild( child,  dirty, UI_DEFAULT_MODE);
+      }
+    public final void invalidateChild(View child, final Rect dirty, final int updateMode) {
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD);
         }
@@ -2508,7 +2512,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
                 }
 
-                parent = parent.invalidateChildInParent(location, dirty);
+                parent = parent.invalidateChildInParent(location, dirty, updateMode);
             } while (parent != null);
         }
     }
@@ -2522,6 +2526,45 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * does not intersect with this ViewGroup's bounds.
      */
     public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
+        if (ViewDebug.TRACE_HIERARCHY) {
+            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD_IN_PARENT);
+        }
+
+        if ((mPrivateFlags & DRAWN) == DRAWN) {
+            if ((mGroupFlags & (FLAG_OPTIMIZE_INVALIDATE | FLAG_ANIMATION_DONE)) !=
+                        FLAG_OPTIMIZE_INVALIDATE) {
+                dirty.offset(location[CHILD_LEFT_INDEX] - mScrollX,
+                        location[CHILD_TOP_INDEX] - mScrollY);
+
+                final int left = mLeft;
+                final int top = mTop;
+
+                if (dirty.intersect(0, 0, mRight - left, mBottom - top) ||
+                        (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
+                    mPrivateFlags &= ~DRAWING_CACHE_VALID;
+
+                    location[CHILD_LEFT_INDEX] = left;
+                    location[CHILD_TOP_INDEX] = top;
+
+                    return mParent;
+                }
+            } else {
+                mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
+
+                location[CHILD_LEFT_INDEX] = mLeft;
+                location[CHILD_TOP_INDEX] = mTop;
+
+                dirty.set(0, 0, mRight - location[CHILD_LEFT_INDEX],
+                        mBottom - location[CHILD_TOP_INDEX]);
+
+                return mParent;
+            }
+        }
+
+        return null;
+    }
+	
+    public ViewParent invalidateChildInParent(final int[] location, final Rect dirty, final int updateMode) {
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD_IN_PARENT);
         }

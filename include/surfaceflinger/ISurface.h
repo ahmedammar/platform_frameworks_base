@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 #ifndef ANDROID_SF_ISURFACE_H
 #define ANDROID_SF_ISURFACE_H
@@ -49,6 +50,7 @@ protected:
         REQUEST_BUFFER,
         SET_BUFFER_COUNT,
         GET_DESTRECT,        
+        SET_DIRTYRECT,
     };
 
 public: 
@@ -67,6 +69,8 @@ public:
      * sets the number of buffers dequeuable for this surface.
      */
     virtual status_t setBufferCount(int bufferCount) = 0;
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) = 0; 
+    virtual void setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode) = 0; 
     
     // ------------------------------------------------------------------------
     // Deprecated...

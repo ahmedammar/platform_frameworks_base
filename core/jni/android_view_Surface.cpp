@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "Surface"
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 #include <stdio.h>
 
@@ -292,7 +293,7 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format)
     }
 }
 
-static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
+static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz,  jobject dirtyRect, jintArray dirtyRectGroup)
 {
     const sp<Surface>& surface(getSurface(env, clazz));
     if (!Surface::isValid(surface))
@@ -314,7 +315,39 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
     }
 
     Surface::SurfaceInfo info;
-    status_t err = surface->lock(&info, &dirtyRegion);
+    int *pDirtyRectGroup=NULL;
+    int dirtyRectGroupSize = 0;
+    status_t err ;
+
+    //get the length of the dirty rect group
+    if (dirtyRectGroup != NULL){
+        
+        dirtyRectGroupSize = env->GetArrayLength(dirtyRectGroup);
+        if (dirtyRectGroupSize > 0)
+        {
+            pDirtyRectGroup = new int[dirtyRectGroupSize];
+            int* pTemp = env->GetIntArrayElements(dirtyRectGroup,false);
+            memcpy(pDirtyRectGroup, pTemp,dirtyRectGroupSize*sizeof(int));
+
+            
+            err = surface->lock(&info, &dirtyRegion, true, dirtyRectGroupSize, pDirtyRectGroup);
+            
+        }
+        else
+        {
+            err = surface->lock(&info, &dirtyRegion, true, 0, NULL);
+        }
+    } else{
+        
+        err = surface->lock(&info, &dirtyRegion, true, 0, NULL);
+    }
+    
+
+    if (NULL != pDirtyRectGroup)
+    {
+        delete []pDirtyRectGroup;
+    }
+        
     if (err < 0) {
         const char* const exception = (err == NO_MEMORY) ?
             OutOfResourcesException :
@@ -659,12 +692,12 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"getIdentity",         "()I",  (void*)Surface_getIdentity },
     {"destroy",             "()V",  (void*)Surface_destroy },
     {"release",             "()V",  (void*)Surface_release },
-    {"copyFrom",            "(Landroid/view/Surface;)V",  (void*)Surface_copyFrom },
-    {"isValid",             "()Z",  (void*)Surface_isValid },
-    {"lockCanvasNative",    "(Landroid/graphics/Rect;)Landroid/graphics/Canvas;",  (void*)Surface_lockCanvas },
-    {"unlockCanvasAndPost", "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvasAndPost },
-    {"unlockCanvas",        "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvas },
-    {"openTransaction",     "()V",  (void*)Surface_openTransaction },
+	{"copyFrom",            "(Landroid/view/Surface;)V",  (void*)Surface_copyFrom },
+	{"isValid",             "()Z",  (void*)Surface_isValid },
+	{"lockCanvasNative",    "(Landroid/graphics/Rect;[I)Landroid/graphics/Canvas;",  (void*)Surface_lockCanvas },
+	{"unlockCanvasAndPost", "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvasAndPost },
+	{"unlockCanvas",        "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvas },
+	{"openTransaction",     "()V",  (void*)Surface_openTransaction },
     {"closeTransaction",    "()V",  (void*)Surface_closeTransaction },
     {"setOrientation",      "(III)V", (void*)Surface_setOrientation },
     {"freezeDisplay",       "(I)V", (void*)Surface_freezeDisplay },

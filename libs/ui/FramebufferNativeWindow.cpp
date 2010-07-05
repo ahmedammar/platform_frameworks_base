@@ -152,13 +152,12 @@ FramebufferNativeWindow::~FramebufferNativeWindow()
     }
 }
 
-status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r) 
+status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r, int mode) 
 {
-    int updatemode = 0x0140;
     if (!mUpdateOnDemand) {
         return INVALID_OPERATION;
     }
-    return fbDev->setUpdateRect(fbDev, r.left, r.top, r.width(), r.height(),updatemode);
+    return fbDev->setUpdateRect(fbDev, r.left, r.top, r.width(), r.height(),mode);
 }
 
 status_t FramebufferNativeWindow::compositionComplete()

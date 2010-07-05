@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 package android.view;
 
@@ -147,6 +148,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mWidth;
     int mHeight;
     Rect mDirty; // will be a graphics.Region soon
+    private ArrayList<int []> mDirtygroup;
     boolean mIsAnimating;
 
     CompatibilityInfo.Translator mTranslator;
@@ -259,6 +261,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mWidth = -1;
         mHeight = -1;
         mDirty = new Rect();
+        mDirtygroup = new ArrayList<int []>();
         mTempRect = new Rect();
         mVisRect = new Rect();
         mWinFrame = new Rect();
@@ -639,6 +642,9 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     public void invalidateChild(View child, Rect dirty) {
+         invalidateChild (child, dirty, View.UI_DEFAULT_MODE);
+         }
+    public void invalidateChild(View child, Rect dirty, int updateMode) {
         checkThread();
         if (DEBUG_DRAW) Log.v(TAG, "Invalidate child: " + dirty);
         if (mCurScrollY != 0 || mTranslator != null) {
@@ -654,7 +660,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 dirty.inset(-1, -1);
             }
         }
+
         mDirty.union(dirty);
+
+        mDirtygroup.add(new int []{dirty.left, dirty.top, dirty.right, dirty.bottom, updateMode});
+
         if (!mWillDrawSoon) {
             scheduleTraversals();
         }
@@ -665,7 +675,12 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
-        invalidateChild(null, dirty);
+        invalidateChild(null, dirty, View.UI_DEFAULT_MODE);
+        return null;
+        }
+
+    public ViewParent invalidateChildInParent(final int[] location, final Rect dirty, final int updateMode) {
+        invalidateChild(null, dirty, updateMode);
         return null;
     }
 
@@ -1339,6 +1354,19 @@ public final class ViewRoot extends Handler implements ViewParent,
         return measureSpec;
     }
 
+    private void ArrayLitToIntArray(ArrayList<int []> dirtyArrayList, int []dirtyArray){
+        int i, j;
+        int [] temp;
+        for (i = 0; i < dirtyArrayList.size();i++)
+        {
+            temp = dirtyArrayList.get(i);
+            for ( j = 0; j< 5; j++)
+            {
+                dirtyArray[i*5+j] = temp[j] ;
+            }
+        }
+        return ;
+    }
     private void draw(boolean fullRedrawNeeded) {
         Surface surface = mSurface;
         if (surface == null || !surface.isValid()) {
@@ -1435,6 +1463,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (fullRedrawNeeded) {
             mAttachInfo.mIgnoreDirtyState = true;
             dirty.union(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
+            mDirtygroup.add(new int []{dirty.left,dirty.top,dirty.right,dirty.bottom,View.UI_DEFAULT_MODE});
         }
 
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
@@ -1453,12 +1482,24 @@ public final class ViewRoot extends Handler implements ViewParent,
                 int top = dirty.top;
                 int right = dirty.right;
                 int bottom = dirty.bottom;
-                canvas = surface.lockCanvas(dirty);
+                int[]dirtyGroup ;
+
+                if (mDirtygroup.size() > 0){
+
+                    dirtyGroup = new int[mDirtygroup.size()*5];
+                    ArrayLitToIntArray(mDirtygroup,dirtyGroup);
+                }
+                else{
+                    dirtyGroup = new int[]{0,0,0,0,View.UI_DEFAULT_MODE};
+                }
+
+                canvas = surface.lockCanvas(dirty, dirtyGroup);
 
                 if (left != dirty.left || top != dirty.top || right != dirty.right ||
                         bottom != dirty.bottom) {
                     mAttachInfo.mIgnoreDirtyState = true;
                 }
+
 
                 // TODO: Do this in native
                 canvas.setDensity(mDensity);
@@ -1499,8 +1540,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                     if (!canvas.isOpaque() || yoff != 0) {
                         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                     }
-
+                   
                     dirty.setEmpty();
+                    mDirtygroup.clear();
                     mIsAnimating = false;
                     mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
                     mView.mPrivateFlags |= View.DRAWN;
@@ -1844,11 +1886,13 @@ public final class ViewRoot extends Handler implements ViewParent,
     public void handleMessage(Message msg) {
         switch (msg.what) {
         case View.AttachInfo.INVALIDATE_MSG:
-            ((View) msg.obj).invalidate();
+            View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
+            info.target.invalidate(info.updateMode);
+            info.release();
             break;
         case View.AttachInfo.INVALIDATE_RECT_MSG:
-            final View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
-            info.target.invalidate(info.left, info.top, info.right, info.bottom);
+            info = (View.AttachInfo.InvalidateInfo) msg.obj;
+            info.target.invalidate(info.left, info.top, info.right, info.bottom, info.updateMode);
             info.release();
             break;
         case DO_TRAVERSAL:

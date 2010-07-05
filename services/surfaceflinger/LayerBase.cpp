@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -271,6 +272,12 @@ void LayerBase::unlockPageFlip(
     if ((android_atomic_and(~1, &mInvalidate)&1) == 1) {
         outDirtyRegion.orSelf(visibleRegionScreen);
     }
+}
+void LayerBase::getCurrentDirtyRegList(DirtyRegList * & CurrentDirtyRegList)
+{
+}
+void LayerBase::finishPageFlip()
+{
 }
 
 void LayerBase::invalidate()
@@ -636,6 +643,9 @@ sp<GraphicBuffer> LayerBaseClient::Surface::requestBuffer(int bufferIdx,
 status_t LayerBaseClient::Surface::setBufferCount(int bufferCount)
 {
     return INVALID_OPERATION;
+}
+void LayerBaseClient::Surface::setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode) 
+{
 }
 
 status_t LayerBaseClient::Surface::registerBuffers(

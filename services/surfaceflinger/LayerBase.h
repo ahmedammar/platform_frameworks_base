@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 #ifndef ANDROID_LAYER_BASE_H
 #define ANDROID_LAYER_BASE_H
@@ -39,9 +40,7 @@
 #include "Transform.h"
 
 namespace android {
-
 // ---------------------------------------------------------------------------
-
 class DisplayHardware;
 class Client;
 class GraphicBuffer;
@@ -51,6 +50,112 @@ class SurfaceFlinger;
 class Texture;
 
 // ---------------------------------------------------------------------------
+class DirtyRegionNode{
+public:
+        DirtyRegionNode()
+        {
+            pNextDirtyRegNode = NULL;
+            pPrevDirtyRegNode = NULL;
+            bRegionTransform = false;
+            mDirtyRegionMode = 0;
+        }
+        
+        DirtyRegionNode(Rect bounds, int dirtyRegionMode)
+        {
+            mDirtyRegion.set(bounds);
+            pNextDirtyRegNode = NULL;
+            pPrevDirtyRegNode = NULL;
+            bRegionTransform = false;
+            mDirtyRegionMode = dirtyRegionMode;
+        }
+        Region mDirtyRegion;
+        int    mDirtyRegionMode;
+        DirtyRegionNode * pNextDirtyRegNode;
+        DirtyRegionNode * pPrevDirtyRegNode;
+        bool           bRegionTransform;
+    };
+// ---------------------------------------------------------------------------
+
+class DirtyRegList{
+        
+    public:
+        
+        DirtyRegList()
+        {
+          pDirtyRegListHeader = NULL;
+          mDirtyRegListLength = 0;
+        }
+
+        ~DirtyRegList()
+        {
+           ClearDirtyRegionList();
+        }
+
+        //add the DirtyGrp node to the end
+        void  AddDirtyRegionNodeToEnd(Rect dirtyBounds, int dirtyMode)
+        {
+            
+            DirtyRegionNode * dirtyregnode = new DirtyRegionNode(dirtyBounds, dirtyMode);
+            DirtyRegionNode * pDirtyRegNodeIndex = pDirtyRegListHeader;
+
+            if (pDirtyRegListHeader != NULL)
+            {
+                while ( pDirtyRegNodeIndex->pNextDirtyRegNode!= NULL )
+                {
+                    pDirtyRegNodeIndex = pDirtyRegNodeIndex->pNextDirtyRegNode;
+                }
+                pDirtyRegNodeIndex->pNextDirtyRegNode = dirtyregnode;
+                dirtyregnode->pPrevDirtyRegNode = pDirtyRegNodeIndex;
+            }
+            else
+            {
+                pDirtyRegListHeader = dirtyregnode;
+            }
+            
+            mDirtyRegListLength++;
+            
+        }
+
+        int GetDiryRegionNode(int index, DirtyRegionNode *&pDirtyRegNode)
+        {
+            if (index <0 || index >= mDirtyRegListLength )
+                return -1; 
+            if (pDirtyRegListHeader == NULL)
+                return -1;
+            pDirtyRegNode = pDirtyRegListHeader;
+            for (int i = 0; i< index ; i ++)
+            {
+                pDirtyRegNode = pDirtyRegNode->pNextDirtyRegNode;
+            }
+            return 1;
+        }
+
+        void ClearDirtyRegionList()
+        {
+            if (mDirtyRegListLength > 0 || pDirtyRegListHeader != NULL)
+            {
+                DirtyRegionNode * tmpNode;
+                 
+                while (pDirtyRegListHeader != NULL)
+                {
+                    tmpNode = pDirtyRegListHeader;
+                    pDirtyRegListHeader = tmpNode->pNextDirtyRegNode;
+                    delete tmpNode;
+                    mDirtyRegListLength --;
+                }
+                 
+            }
+        }
+
+
+        DirtyRegionNode * pDirtyRegListHeader;
+        int mDirtyRegListLength;
+        
+        
+    };
+
+// ---------------------------------------------------------------------------
+
 
 class LayerBase : public RefBase
 {
@@ -164,7 +269,8 @@ public:
      * to figure out if the content or size of a surface has changed.
      */
     virtual void lockPageFlip(bool& recomputeVisibleRegions);
-    
+
+    virtual void getCurrentDirtyRegList(DirtyRegList *& CurrentDirtyRegList);
     /**
      * unlockPageFlip - called each time the screen is redrawn. updates the
      * final dirty region wrt the planeTransform.
@@ -310,6 +416,8 @@ public:
                 uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
         virtual status_t setBufferCount(int bufferCount);
 
+        virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
+        virtual void setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode);
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();

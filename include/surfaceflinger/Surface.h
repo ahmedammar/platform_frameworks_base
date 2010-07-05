@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 #ifndef ANDROID_SF_SURFACE_H
 #define ANDROID_SF_SURFACE_H
@@ -160,7 +161,7 @@ public:
 
     // the lock/unlock APIs must be used from the same thread
     status_t    lock(SurfaceInfo* info, bool blocking = true);
-    status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
+    status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true, int dirtyGroupSize = 0, int * dirtyRectGroup=NULL);
     status_t    unlockAndPost();
 
     // setSwapRectangle() is intended to be used by GL ES clients
@@ -220,6 +221,7 @@ private:
     int  dispatch_set_buffers_geometry(va_list args);
     int  dispatch_set_buffers_transform(va_list args);
     
+    void setDirtyRectGroup(int *DirtyRectGroup, int DirtyRectNum);
     void setUsage(uint32_t reqUsage);
     int  connect(int api);
     int  disconnect(int api);
@@ -288,6 +290,7 @@ private:
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
     mutable Region              mDirtyRegion;
+    int32_t                     mLockedBufferIdx;
 
     // must be used from the lock/unlock thread
     sp<GraphicBuffer>           mLockedBuffer;

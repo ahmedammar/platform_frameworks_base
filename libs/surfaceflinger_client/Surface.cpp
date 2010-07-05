@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 #define LOG_TAG "Surface"
 
@@ -570,6 +571,31 @@ bool Surface::needNewBuffer(int bufIdx,
     return newNeewBuffer;
 }
 
+// ----------------------------------------------------------------------------
+void Surface::setDirtyRectGroup(int *DirtyRectGroup, int DirtyRectNum)
+{
+    if (DirtyRectGroup == NULL || DirtyRectNum <= 0)
+        return ;
+
+    sp<ISurface> s(mSurface);
+    if (s == 0) return ;
+    
+    for (int i = 0; i < DirtyRectNum; i +=5,DirtyRectGroup += 5)
+    {
+        if (DirtyRectGroup[0] == DirtyRectGroup[2] || DirtyRectGroup[1] == DirtyRectGroup[3])
+        {
+            continue;
+        }
+        else
+        {
+            s->setDirtyRect(mLockedBufferIdx,DirtyRectGroup[0],DirtyRectGroup[1],
+                           DirtyRectGroup[2],DirtyRectGroup[3],DirtyRectGroup[4]);
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 {
     status_t err = validate();
@@ -587,6 +613,7 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
         LOGE("error dequeuing a buffer (%s)", strerror(bufIdx));
         return bufIdx;
     }
+    mLockedBufferIdx = bufIdx;
 
     // grow the buffer array if needed
     const size_t size = mBuffers.size();
@@ -906,10 +933,10 @@ int Surface::getConnectedApi() const
 // ----------------------------------------------------------------------------
 
 status_t Surface::lock(SurfaceInfo* info, bool blocking) {
-    return Surface::lock(info, NULL, blocking);
+    return Surface::lock(info, NULL, blocking, 0, NULL);
 }
 
-status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking) 
+status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking, int dirtyGroupSize, int * dirtyRectGroup) 
 {
     if (getConnectedApi()) {
         LOGE("Surface::lock(%p) failed. Already connected to another API",
@@ -989,6 +1016,8 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
             
             LOGW_IF(res, "failed locking buffer (handle = %p)", 
                     backBuffer->handle);
+
+            setDirtyRectGroup(dirtyRectGroup, dirtyGroupSize);
 
             mLockedBuffer = backBuffer;
             other->w      = backBuffer->width;

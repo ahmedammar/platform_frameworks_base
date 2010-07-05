@@ -67,6 +67,8 @@
 
 #define DISPLAY_COUNT       1
 
+#define UI_DEFAULT_MODE 0x241
+
 namespace android {
 // ---------------------------------------------------------------------------
 
@@ -400,10 +402,11 @@ bool SurfaceFlinger::threadLoop()
         logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
         hw.compositionComplete();
 
-        logger.log(GraphicLog::SF_SWAP_BUFFERS, index);
-        postFramebuffer();
+        EinkOptPostFramebuffer();
 
-        logger.log(GraphicLog::SF_REPAINT_DONE, index);
+        // release the clients before we flip ('cause flip might block)
+        
+        unlockClients();
     } else {
         // pretend we did the post
         hw.compositionComplete();
@@ -426,21 +429,80 @@ bool SurfaceFlinger::handleBypassLayer()
     return false;
 }
 
-void SurfaceFlinger::postFramebuffer()
+void SurfaceFlinger::EinkOptPostFramebuffer()
 {
-    if (!mInvalidRegion.isEmpty()) {
+            bool bNeedPartialupdate = false;
+            DirtyRegList * pDirtyRegList = NULL;
+            Region pInvalidRegion = mInvalidRegion;
+            LayerVector& currentLayers = const_cast<LayerVector&>(mDrawingState.layersSortedByZ);
+            size_t count = currentLayers.size();
+            sp<LayerBase> const* layers = currentLayers.array();
+            
+            const nsecs_t now = systemTime();
+            mDebugInSwapBuffers = now;
+            
+            for (size_t i=0 ; i<count ; i++) {
+                const sp<LayerBase>& layer = layers[i];
+              
+                layer->getCurrentDirtyRegList(pDirtyRegList);
+                if (pDirtyRegList == NULL)
+                    continue;
+                    for (int j = 0; j < pDirtyRegList->mDirtyRegListLength; j ++){
+                        DirtyRegionNode *pDirtyRegNode = NULL;
+                        pDirtyRegList->GetDiryRegionNode(j,pDirtyRegNode);
+                        if (pDirtyRegNode != NULL)
+                           if(pDirtyRegNode->mDirtyRegionMode != UI_DEFAULT_MODE)
+                               {
+                                    bNeedPartialupdate = true;
+                                    break;
+                                }
+                    }
+                if (bNeedPartialupdate == true) break;
+            }
+            
+            if (bNeedPartialupdate == true){
+                for (size_t i=0 ; i<count ; i++) {
+                    const sp<LayerBase>& layer = layers[i];
+                  
+                    layer->getCurrentDirtyRegList(pDirtyRegList);
+                    if (pDirtyRegList == NULL)
+                        continue;
+                    for (int j = 0; j < pDirtyRegList->mDirtyRegListLength; j ++){
+                        Rect dirtyRect; 
+                        DirtyRegionNode *pDirtyRegNode = NULL;
+                        int mode;
+                        pDirtyRegList->GetDiryRegionNode(j,pDirtyRegNode);
 
+                        if (pDirtyRegNode != NULL)
+                              pInvalidRegion = mInvalidRegion.intersect(pDirtyRegNode->mDirtyRegion);
+                          
+                          mode = pDirtyRegNode->mDirtyRegionMode;
+                          
+                          postFramebuffer(pInvalidRegion, mode);
+                    }
+                    
+                }
+            }else{
+
+                postFramebuffer(mInvalidRegion, UI_DEFAULT_MODE);
+            }
+            
+            mLastSwapBufferTime = systemTime() - now;
+            mDebugInSwapBuffers = 0;
+            mInvalidRegion.clear();
+            
+}
+
+
+void SurfaceFlinger::postFramebuffer(Region pInvalidRegion, int mode)
+{
+    if (!pInvalidRegion.isEmpty()) {
         if (UNLIKELY(mDebugFps)) {
             debugShowFPS();
         }
-
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
-        const nsecs_t now = systemTime();
-        mDebugInSwapBuffers = now;
-        hw.flip(mInvalidRegion);
-        mLastSwapBufferTime = systemTime() - now;
-        mDebugInSwapBuffers = 0;
-        mInvalidRegion.clear();
+
+        hw.flip(pInvalidRegion, mode);
     }
 }
 
@@ -943,7 +1005,7 @@ void SurfaceFlinger::debugFlashRegions()
         mDirtyRegion.dump("mDirtyRegion");
         mInvalidRegion.dump("mInvalidRegion");
     }
-    hw.flip(mInvalidRegion);
+    hw.flip(mInvalidRegion, UI_DEFAULT_MODE);
 
     if (mDebugRegion > 1)
         usleep(mDebugRegion * 1000);

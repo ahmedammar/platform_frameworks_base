@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 package android.view;
 
@@ -307,14 +308,19 @@ public class Surface implements Parcelable {
     /** draw into a surface */
     public Canvas lockCanvas(Rect dirty) throws OutOfResourcesException, IllegalArgumentException
     {
+        return lockCanvasNative(dirty, new int []{dirty.left, dirty.top, dirty.right, dirty.bottom, View.UI_DEFAULT_MODE});
+    }
+
+    public Canvas lockCanvas(Rect dirty, int []dirtyGroup) throws OutOfResourcesException, IllegalArgumentException
+    {
         /* the dirty rectangle may be expanded to the surface's size, if
          * for instance it has been resized or if the bits were lost, since
          * the last call.
          */
-        return lockCanvasNative(dirty);
+        return lockCanvasNative(dirty, dirtyGroup);
     }
 
-    private native Canvas lockCanvasNative(Rect dirty);
+    private native Canvas lockCanvasNative(Rect dirty, int [] dirtyGroup);
 
     /** unlock the surface and asks a page flip */
     public native   void unlockCanvasAndPost(Canvas canvas);

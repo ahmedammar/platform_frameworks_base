@@ -308,6 +308,8 @@ private:
             void        unlockPageFlip(const LayerVector& currentLayers);
             void        handleRepaint();
             bool        handleBypassLayer();
+            void        getDirtyGroup();
+            void        releaseDirtyGroup();
             void        EinkOptPostFramebuffer();
             void        postFramebuffer(Region pInvalidRegion, int mode);
             void        composeSurfaces(const Region& dirty);
@@ -414,6 +416,8 @@ private:
                 volatile nsecs_t            mDebugInTransaction;
                 nsecs_t                     mLastTransactionTime;
                 bool                        mBootFinished;
+
+                DirtyRegList                *mLayersDirtyReglist;
 
                 // these are thread safe
     mutable     Barrier                     mReadyToRunBarrier;

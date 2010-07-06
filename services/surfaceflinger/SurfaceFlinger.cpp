@@ -67,7 +67,7 @@
 
 #define DISPLAY_COUNT       1
 
-#define UI_DEFAULT_MODE 0x241
+#define UI_DEFAULT_MODE 0x240
 
 namespace android {
 // ---------------------------------------------------------------------------
@@ -402,11 +402,16 @@ bool SurfaceFlinger::threadLoop()
         logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
         hw.compositionComplete();
 
-        EinkOptPostFramebuffer();
-
-        // release the clients before we flip ('cause flip might block)
+        getDirtyGroup();
         
         unlockClients();
+
+        EinkOptPostFramebuffer();
+
+        releaseDirtyGroup();
+        // release the clients before we flip ('cause flip might block)
+        
+        
     } else {
         // pretend we did the post
         hw.compositionComplete();
@@ -429,10 +434,41 @@ bool SurfaceFlinger::handleBypassLayer()
     return false;
 }
 
+void SurfaceFlinger::getDirtyGroup()
+{
+    
+    LayerVector& currentLayers = const_cast<LayerVector&>(mDrawingState.layersSortedByZ);
+    size_t count = currentLayers.size();
+    sp<LayerBase> const* layers = currentLayers.array();
+
+    mLayersDirtyReglist = new DirtyRegList[count];
+
+    
+    for (size_t i=0 ; i<count ; i++) {
+        DirtyRegList * pDirtyRegList;
+        const sp<LayerBase>& layer = layers[i];
+      
+        layer->getCurrentDirtyRegList(pDirtyRegList);
+        if (pDirtyRegList == NULL)
+            continue;
+        for (int j = 0; j < pDirtyRegList->mDirtyRegListLength; j ++){
+            DirtyRegionNode *pDirtyRegNode = NULL;
+            pDirtyRegList->GetDiryRegionNode(j,pDirtyRegNode);
+            if (pDirtyRegNode != NULL){
+               mLayersDirtyReglist[i].AddDirtyRegionNodeToEnd(pDirtyRegNode->mDirtyRegion.getBounds(), pDirtyRegNode->mDirtyRegionMode);
+            }
+        }
+    }
+}
+
+void SurfaceFlinger::releaseDirtyGroup()
+{
+    delete []mLayersDirtyReglist;
+}
+
 void SurfaceFlinger::EinkOptPostFramebuffer()
 {
             bool bNeedPartialupdate = false;
-            DirtyRegList * pDirtyRegList = NULL;
             Region pInvalidRegion = mInvalidRegion;
             LayerVector& currentLayers = const_cast<LayerVector&>(mDrawingState.layersSortedByZ);
             size_t count = currentLayers.size();
@@ -444,12 +480,9 @@ void SurfaceFlinger::EinkOptPostFramebuffer()
             for (size_t i=0 ; i<count ; i++) {
                 const sp<LayerBase>& layer = layers[i];
               
-                layer->getCurrentDirtyRegList(pDirtyRegList);
-                if (pDirtyRegList == NULL)
-                    continue;
-                    for (int j = 0; j < pDirtyRegList->mDirtyRegListLength; j ++){
+                    for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++){
                         DirtyRegionNode *pDirtyRegNode = NULL;
-                        pDirtyRegList->GetDiryRegionNode(j,pDirtyRegNode);
+                        mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
                         if (pDirtyRegNode != NULL)
                            if(pDirtyRegNode->mDirtyRegionMode != UI_DEFAULT_MODE)
                                {
@@ -464,14 +497,11 @@ void SurfaceFlinger::EinkOptPostFramebuffer()
                 for (size_t i=0 ; i<count ; i++) {
                     const sp<LayerBase>& layer = layers[i];
                   
-                    layer->getCurrentDirtyRegList(pDirtyRegList);
-                    if (pDirtyRegList == NULL)
-                        continue;
-                    for (int j = 0; j < pDirtyRegList->mDirtyRegListLength; j ++){
+                    for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++){
                         Rect dirtyRect; 
                         DirtyRegionNode *pDirtyRegNode = NULL;
                         int mode;
-                        pDirtyRegList->GetDiryRegionNode(j,pDirtyRegNode);
+                        mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
 
                         if (pDirtyRegNode != NULL)
                               pInvalidRegion = mInvalidRegion.intersect(pDirtyRegNode->mDirtyRegion);

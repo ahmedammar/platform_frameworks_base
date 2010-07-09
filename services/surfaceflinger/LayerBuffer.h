@@ -75,7 +75,8 @@ public:
     void unregisterBuffers();
     sp<OverlayRef> createOverlay(uint32_t w, uint32_t h, int32_t format,
             int32_t orientation);
-    
+   status_t getDestRect(int *left,int *right,int *top,int *bottom,int *rot);
+
     sp<Source> getSource() const;
     sp<Source> clearSource();
     void setNeedsBlending(bool blending);
@@ -203,6 +204,8 @@ private:
         
         virtual sp<OverlayRef> createOverlay(
                 uint32_t w, uint32_t h, int32_t format, int32_t orientation);
+        virtual status_t getDestRect(int *left,int *right,int *top,int *bottom,int *rot);
+         
     private:
         sp<LayerBuffer> getOwner() const {
             return static_cast<LayerBuffer*>(Surface::getOwner().get());

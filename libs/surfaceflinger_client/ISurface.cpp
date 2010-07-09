@@ -141,6 +141,20 @@ public:
         remote()->transact(CREATE_OVERLAY, data, &reply);
         return OverlayRef::readFromParcel(reply);
     }
+
+    virtual status_t getDestRect(int *left,int *right,int *top,int *bottom,int *rot)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
+        remote()->transact(GET_DESTRECT, data, &reply);
+        *left = reply.readInt32();
+        *right = reply.readInt32();
+        *top = reply.readInt32();
+        *bottom = reply.readInt32();
+        *rot = reply.readInt32();
+        status_t result = reply.readInt32();  
+        return result;
+    } 
 };
 
 IMPLEMENT_META_INTERFACE(Surface, "android.ui.ISurface");
@@ -204,6 +218,18 @@ status_t BnSurface::onTransact(
             int orientation = data.readInt32();
             sp<OverlayRef> o = createOverlay(w, h, f, orientation);
             return OverlayRef::writeToParcel(reply, o);
+        } break;
+       case GET_DESTRECT: {
+            CHECK_INTERFACE(ISurface, data, reply);
+            int left,right,top,bottom,rot;            
+            status_t err = getDestRect(&left,&right,&top,&bottom,&rot);
+            reply->writeInt32(left);
+            reply->writeInt32(right);
+            reply->writeInt32(top);
+            reply->writeInt32(bottom);
+            reply->writeInt32(rot);
+            reply->writeInt32(err);
+            return NO_ERROR;
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);

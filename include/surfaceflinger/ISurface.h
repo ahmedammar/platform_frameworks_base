@@ -48,6 +48,7 @@ protected:
         CREATE_OVERLAY,
         REQUEST_BUFFER,
         SET_BUFFER_COUNT,
+        GET_DESTRECT,        
     };
 
 public: 
@@ -109,6 +110,8 @@ public:
     
     virtual sp<OverlayRef> createOverlay(
             uint32_t w, uint32_t h, int32_t format, int32_t orientation) = 0;
+    
+    virtual status_t getDestRect(int *left,int *right,int *top,int *bottom,int *rot) = 0;
 };
 
 // ----------------------------------------------------------------------------

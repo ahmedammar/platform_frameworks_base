@@ -295,7 +295,8 @@ public:
     class Surface : public BnSurface  {
     public:
         int32_t getIdentity() const { return mIdentity; }
-        
+        virtual status_t getDestRect(int *left,int *right,int *top,int *bottom,int *rot)
+                { return INVALID_OPERATION; }
     protected:
         Surface(const sp<SurfaceFlinger>& flinger, int identity,
                 const sp<LayerBaseClient>& owner);

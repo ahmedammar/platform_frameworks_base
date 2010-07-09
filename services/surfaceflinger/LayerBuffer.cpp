@@ -200,6 +200,23 @@ sp<OverlayRef> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t f,
     return result;
 }
 
+/**
+* This get a destination info for this surface
+*/
+status_t LayerBuffer::getDestRect(int *left,int *right,int *top,int *bottom,int *rot)
+{
+    Mutex::Autolock _l(mLock);
+    const Rect& transformedBounds = getTransformedBounds();
+  
+    *left = transformedBounds.left;
+    *right = transformedBounds.right;
+    *top = transformedBounds.top;
+    *bottom = transformedBounds.bottom;
+    *rot = getOrientation();
+    return NO_ERROR;
+}    
+
+
 sp<LayerBuffer::Source> LayerBuffer::getSource() const {
     Mutex::Autolock _l(mLock);
     return mSource;
@@ -259,6 +276,15 @@ sp<OverlayRef> LayerBuffer::SurfaceLayerBuffer::createOverlay(
         result = owner->createOverlay(w, h, format, orientation);
     return result;
 }
+
+status_t LayerBuffer::SurfaceBuffer::getDestRect(int *left,int *right,int *top,int *bottom,int *rot)
+{
+    LayerBuffer* owner(getOwner());
+    if (owner)
+        return owner->getDestRect(left,right,top,bottom,rot);
+    return NO_INIT;
+}
+
 
 // ============================================================================
 // LayerBuffer::Buffer

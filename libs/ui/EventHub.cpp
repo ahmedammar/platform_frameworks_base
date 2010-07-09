@@ -567,15 +567,24 @@ int EventHub::openDevice(const char *deviceName) {
     char location[80];
     char idstr[80];
     struct input_id id;
+    int retry;
 
     LOGV("Opening device: %s", deviceName);
 
     AutoMutex _l(mLock);
 
-    fd = open(deviceName, O_RDWR);
-    if(fd < 0) {
-        LOGE("could not open %s, %s\n", deviceName, strerror(errno));
-        return -1;
+
+    retry = 10;
+    while(retry) {
+        fd = open(deviceName, O_RDWR);
+        if(fd < 0) {
+          sleep(1);
+          if((retry--) == 0) {
+            LOGE("could not open %s, %s\n", deviceName, strerror(errno));
+            return -1;
+          }
+       } else
+          break;
     }
 
     if(ioctl(fd, EVIOCGVERSION, &version)) {

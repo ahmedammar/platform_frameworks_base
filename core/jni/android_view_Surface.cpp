@@ -326,8 +326,9 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz,  jobject dirtyRect
         if (dirtyRectGroupSize > 0)
         {
             pDirtyRectGroup = new int[dirtyRectGroupSize];
-            int* pTemp = env->GetIntArrayElements(dirtyRectGroup,false);
+            int* pTemp = env->GetIntArrayElements(dirtyRectGroup, NULL);
             memcpy(pDirtyRectGroup, pTemp,dirtyRectGroupSize*sizeof(int));
+            env->ReleaseIntArrayElements(dirtyRectGroup, pTemp, 0);
 
             
             err = surface->lock(&info, &dirtyRegion, true, dirtyRectGroupSize, pDirtyRectGroup);

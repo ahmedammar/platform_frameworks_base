@@ -92,8 +92,6 @@ enum audio_encoder {
     AUDIO_ENCODER_AAC = 3,
     AUDIO_ENCODER_AAC_PLUS = 4,
     AUDIO_ENCODER_EAAC_PLUS = 5,
-    AUDIO_ENCODER_MP3 = 6,
-    AUDIO_ENCODER_PCM16 = 7,
     AUDIO_ENCODER_LIST_END // must be the last - used to validate the audio encoder type
 };
 
@@ -105,18 +103,6 @@ enum video_encoder {
 
     VIDEO_ENCODER_LIST_END // must be the last - used to validate the video encoder type
 };
-
-// Maximum frames per second is 24
-#define MEDIA_RECORDER_MAX_FRAME_RATE          24
-
-// Maximum samples per second is 48000
-#define MEDIA_RECORDER_MAX_SAMPLE_RATE         48000
-
-// Maximum encoded bits per second is 48000
-#define MEDIA_RECORDER_MAX_BIT_RATE            320000
-
-// Maximum encoded bits per second is 48000
-#define MEDIA_RECORDER_MAX_CHANNEL_NUMBER       2
 
 /*
  * The state machine of the media_recorder uses a set of different state names.
@@ -189,9 +175,6 @@ public:
     status_t    setAudioEncoder(int ae);
     status_t    setOutputFile(const char* path);
     status_t    setOutputFile(int fd, int64_t offset, int64_t length);
-    status_t    setAudioSampleRate(int bits_per_second);
-    status_t    setAudioBitRate(int samples_per_second);
-    status_t    setAudioChannel(int channel);
     status_t    setVideoSize(int width, int height);
     status_t    setVideoFrameRate(int frames_per_second);
     status_t    setParameters(const String8& params);

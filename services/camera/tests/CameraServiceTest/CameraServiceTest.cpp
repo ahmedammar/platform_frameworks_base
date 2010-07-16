@@ -299,6 +299,10 @@ public:
             uint32_t w, uint32_t h, int32_t format, int32_t orientation);
     virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage);
     virtual status_t setBufferCount(int bufferCount);
+    virtual status_t getDestRect(int *left,int *right,int *top,int *bottom,int *rot) {
+       return NO_ERROR;
+    };
+
 
     // new functions
     void clearStat();

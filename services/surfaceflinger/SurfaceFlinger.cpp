@@ -67,7 +67,7 @@
 
 #define DISPLAY_COUNT       1
 
-#define UI_DEFAULT_MODE 0x240
+#define UI_DEFAULT_MODE 0x280
 
 namespace android {
 // ---------------------------------------------------------------------------

@@ -230,6 +230,10 @@ public class MediaRecorder
         public static final int AAC_PLUS = 4;
         /** @hide enhanced AAC plus audio codec */
         public static final int EAAC_PLUS = 5;
+		/** @hide enhanced MP3 audio codec */
+        public static final int MP3 = 6;
+		/** @hide enhanced MP3 audio codec */
+        public static final int PCM16 = 7; 
     }
 
     /**

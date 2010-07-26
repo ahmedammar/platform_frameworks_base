@@ -60,6 +60,8 @@
 #include "TestPlayerStub.h"
 #include "StagefrightPlayer.h"
 
+#include <media/OMXPlayer.h>
+
 #include <OMX.h>
 
 /* desktop Linux needs a little help with gettid() */
@@ -201,6 +203,20 @@ extmap FILE_EXTS [] =  {
         {".wmv", PV_PLAYER},
         {".asf", PV_PLAYER},
 #endif
+};
+
+extmap OMX_PLAYER_FILE_EXTS [] =  {
+        {".avi", OMX_PLAYER},
+        {".mkv", OMX_PLAYER},
+        {".mp4", OMX_PLAYER},
+        {".3gp", OMX_PLAYER},
+        {".mov", OMX_PLAYER},
+        {".rmvb", OMX_PLAYER},
+        {".rm", OMX_PLAYER},
+        {".mp3", OMX_PLAYER},
+        {".aac", OMX_PLAYER},
+        {".ra", OMX_PLAYER},
+        {".wav", OMX_PLAYER},
 };
 
 // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
@@ -716,6 +732,15 @@ player_type getPlayerType(int fd, int64_t offset, int64_t length)
         EAS_Shutdown(easdata);
     }
 
+    char url[128];
+    bool ret = false;
+    OMXPlayerType *pType = new OMXPlayerType();
+    sprintf(url, "sharedfd://%d:%lld:%lld",  fd, offset, length);
+    ret = pType->IsSupportedContent(url);
+    delete pType;
+    if(ret == true)
+        return OMX_PLAYER;
+
     return getDefaultPlayerType();
 }
 
@@ -747,6 +772,21 @@ player_type getPlayerType(const char* url)
         }
     }
 
+    // Use PV_PLAYER for rtsp for now
+    if (!strncasecmp(url, "rtsp://", 7)) {
+        return PV_PLAYER;
+    }
+
+        for (int i = 0; i < NELEM(OMX_PLAYER_FILE_EXTS); ++i) {
+            int len = strlen(OMX_PLAYER_FILE_EXTS[i].extension);
+            int start = lenURL - len;
+            if (start > 0) {
+                if (!strncasecmp(url + start, OMX_PLAYER_FILE_EXTS[i].extension, len)) {
+                    return OMX_PLAYER_FILE_EXTS[i].playertype;
+                }
+            }
+        }
+
     return getDefaultPlayerType();
 }
 
@@ -768,6 +808,10 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
         case STAGEFRIGHT_PLAYER:
             LOGV(" create StagefrightPlayer");
             p = new StagefrightPlayer;
+            break;
+        case OMX_PLAYER:
+            LOGV(" Create OMXPlayer.\n");
+            p = new OMXPlayer();
             break;
         case TEST_PLAYER:
             LOGV("Create Test Player stub");
@@ -1139,6 +1183,42 @@ status_t MediaPlayerService::Client::setVideoCrop(int iTop, int iLeft, int iBott
              iTop,iLeft,iBottom,iRight,ret);
     }
     return ret;
+}
+
+status_t MediaPlayerService::Client::getTrackCount(int *count)
+{
+    *count = 0;
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    *count= p->getTrackCount();
+    LOGV("getTrackCount: %d\n", *count);
+    return NO_ERROR;
+}
+
+status_t MediaPlayerService::Client::getDefaultTrack(int *number)
+{
+    *number = 0;
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    *number= p->getDefaultTrack();
+    LOGV("getDefaultTrack: %d\n", *number);
+    return NO_ERROR;
+}
+
+char* MediaPlayerService::Client::getTrackName(int index)
+{
+    LOGV("getTrackName of track %d\n", index);
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return NULL;
+    return p->getTrackName(index);
+}
+
+status_t MediaPlayerService::Client::selectTrack(int index)
+{
+    LOGV("selectTrack of track %d\n", index);
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    return p->selectTrack(index);
 }
 
 status_t MediaPlayerService::Client::seekTo(int msec)

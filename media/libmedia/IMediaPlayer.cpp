@@ -51,6 +51,10 @@ enum {
     SET_AUDIO_EQUALIZER,
     CAPTURE_CURRENT_FRAME,
     SET_VIDEO_CROP,
+    GET_TRACK_COUNT,
+    GET_TRACK_NAME,
+    GET_DEFAULT_TRACK,
+    SELECT_TRACK,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -178,6 +182,42 @@ public:
     	data.writeInt32(bottom);
         data.writeInt32(right);
         remote()->transact(SET_VIDEO_CROP, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t getTrackCount(int *count)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        remote()->transact(GET_TRACK_COUNT, data, &reply);
+        *count = reply.readInt32();
+        return reply.readInt32();
+    }
+
+    status_t getDefaultTrack(int *number)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        remote()->transact(GET_DEFAULT_TRACK, data, &reply);
+        *number = reply.readInt32();
+        return reply.readInt32();
+    }
+
+    char * getTrackName(int index)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+    	data.writeInt32(index);
+        remote()->transact(GET_TRACK_NAME, data, &reply);
+        return (char*)reply.readCString();
+    }
+
+    status_t selectTrack(int index)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeInt32(index);
+        remote()->transact(SELECT_TRACK, data, &reply);
         return reply.readInt32();
     }
 
@@ -441,6 +481,34 @@ status_t BnMediaPlayer::onTransact(
         case SET_VIDEO_CROP: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             status_t ret = setVideoCrop(data.readInt32(),data.readInt32(),data.readInt32(),data.readInt32());
+            reply->writeInt32(ret);
+            return NO_ERROR;
+        } break;
+        case GET_TRACK_COUNT: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            int count = 0;
+            status_t ret = getTrackCount(&count);
+            reply->writeInt32(count);
+            reply->writeInt32(ret);
+            return NO_ERROR;
+        } break;
+        case GET_DEFAULT_TRACK: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            int number = 0;
+            status_t ret = getDefaultTrack(&number);
+            reply->writeInt32(number);
+            reply->writeInt32(ret);
+            return NO_ERROR;
+        } break;
+        case GET_TRACK_NAME: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            char* ret = getTrackName(data.readInt32());
+            reply->writeCString(ret);
+            return NO_ERROR;
+        } break;
+        case SELECT_TRACK: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            status_t ret = selectTrack(data.readInt32());
             reply->writeInt32(ret);
             return NO_ERROR;
         } break;

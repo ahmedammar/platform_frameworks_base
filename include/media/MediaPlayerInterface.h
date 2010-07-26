@@ -44,6 +44,7 @@ enum player_type {
     // The shared library with the test player is passed passed as an
     // argument to the 'test:' url in the setDataSource call.
     TEST_PLAYER = 5,
+    OMX_PLAYER = 6,
 };
 
 
@@ -147,6 +148,10 @@ public:
     virtual status_t    setAudioEqualizer(bool isEnable)=0;
     virtual status_t    captureCurrentFrame(VideoFrame** pvframe) = 0;
     virtual status_t    setVideoCrop(int top,int left, int bottom, int right) = 0;
+    virtual int         getTrackCount() = 0;
+    virtual char*       getTrackName(int index) = 0;
+    virtual int         getDefaultTrack() = 0;
+    virtual status_t    selectTrack(int index) = 0;
 
     virtual void        sendEvent(int msg, int ext1=0, int ext2=0) { if (mNotify) mNotify(mCookie, msg, ext1, ext2); }
 
@@ -166,6 +171,10 @@ public:
     virtual status_t    setAudioEqualizer(bool isEnable){ return false; }
     virtual status_t    captureCurrentFrame(VideoFrame** pvframe){return 0;}
     virtual status_t    setVideoCrop(int top,int left, int bottom, int right){return 0;}
+    virtual int         getTrackCount() {return 0;}
+    virtual char*       getTrackName(int index) {return NULL;}
+    virtual int         getDefaultTrack() {return 0;}
+    virtual status_t    selectTrack(int index) {return INVALID_OPERATION;}
 protected:
     sp<AudioSink>       mAudioSink;
 };

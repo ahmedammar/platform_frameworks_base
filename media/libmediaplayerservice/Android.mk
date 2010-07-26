@@ -34,6 +34,7 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libstagefright_color_conversion         \
 	libstagefright_foundation               \
 	libsurfaceflinger_client
+	lib_omx_player_arm11_elinux
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_rtsp

@@ -36,6 +36,7 @@
 #include <media/MediaMetadataRetrieverInterface.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/PVMetadataRetriever.h>
+#include <media/OMXMetadataRetriever.h>
 #include <private/media/VideoFrame.h>
 #include "MidiMetadataRetriever.h"
 #include "MetadataRetrieverClient.h"
@@ -114,6 +115,10 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
         case SONIVOX_PLAYER:
             LOGV("create midi metadata retriever");
             p = new MidiMetadataRetriever();
+            break;
+        case OMX_PLAYER:
+            LOGV("Create OMXMetadataRetriever.\n");
+            p = new OMXMetadataRetriever();
             break;
         default:
             // TODO:

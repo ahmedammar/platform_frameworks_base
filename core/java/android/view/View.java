@@ -1668,6 +1668,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getParent()
      */
     protected ViewParent mParent;
+	protected ViewParentEink mParentEink;
 
     /**
      * {@hide}
@@ -5291,7 +5292,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
-            final ViewParent p = mParent;
+            final ViewParentEink p = mParentEink;
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null) {
                 final int scrollX = mScrollX;
@@ -5299,7 +5300,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 final Rect r = ai.mTmpInvalRect;
                 r.set(dirty.left - scrollX, dirty.top - scrollY,
                         dirty.right - scrollX, dirty.bottom - scrollY);
-                mParent.invalidateChild(this, r, updateMode);
+                p.invalidateChild(this, r, updateMode);
             }
         }
     }
@@ -5336,7 +5337,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
-            final ViewParent p = mParent;
+            final ViewParentEink p = mParentEink;
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null && l < r && t < b) {
                 final int scrollX = mScrollX;
@@ -5376,7 +5377,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
             mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
-            final ViewParent p = mParent;
+            final ViewParentEink p = mParentEink;
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null) {
                 final Rect r = ai.mTmpInvalRect;
@@ -6192,9 +6193,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Caller is responsible for calling requestLayout if necessary.
      * (This allows addViewInLayout to not request a new layout.)
      */
-    void assignParent(ViewParent parent) {
+    void assignParent(ViewParentEink parent) {
         if (mParent == null) {
-            mParent = parent;
+            mParent = (ViewParent)parent;
+			mParentEink = parent;
         } else if (parent == null) {
             mParent = null;
         } else {

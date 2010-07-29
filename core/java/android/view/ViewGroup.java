@@ -65,7 +65,7 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ViewGroup_addStatesFromChildren
  * @attr ref android.R.styleable#ViewGroup_descendantFocusability
  */
-public abstract class ViewGroup extends View implements ViewParent, ViewManager {
+public abstract class ViewGroup extends View implements ViewParentEink, ViewParent, ViewManager {
     private static final boolean DBG = false;
 
     /**
@@ -2472,7 +2472,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD);
         }
 
-        ViewParent parent = this;
+        ViewParentEink parent = this;
 
         final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
@@ -2546,7 +2546,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     location[CHILD_LEFT_INDEX] = left;
                     location[CHILD_TOP_INDEX] = top;
 
-                    return mParent;
+                    return mParentEink;
                 }
             } else {
                 mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
@@ -2557,14 +2557,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 dirty.set(0, 0, mRight - location[CHILD_LEFT_INDEX],
                         mBottom - location[CHILD_TOP_INDEX]);
 
-                return mParent;
+                return mParentEink;
             }
         }
 
         return null;
     }
 	
-    public ViewParent invalidateChildInParent(final int[] location, final Rect dirty, final int updateMode) {
+    public ViewParentEink invalidateChildInParent(final int[] location, final Rect dirty, final int updateMode) {
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD_IN_PARENT);
         }

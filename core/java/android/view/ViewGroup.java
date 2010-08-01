@@ -2529,7 +2529,6 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD_IN_PARENT);
         }
-
         if ((mPrivateFlags & DRAWN) == DRAWN) {
             if ((mGroupFlags & (FLAG_OPTIMIZE_INVALIDATE | FLAG_ANIMATION_DONE)) !=
                         FLAG_OPTIMIZE_INVALIDATE) {
@@ -2546,7 +2545,7 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
                     location[CHILD_LEFT_INDEX] = left;
                     location[CHILD_TOP_INDEX] = top;
 
-                    return mParentEink;
+                    return (ViewParentEink)mParent;
                 }
             } else {
                 mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
@@ -2557,7 +2556,7 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
                 dirty.set(0, 0, mRight - location[CHILD_LEFT_INDEX],
                         mBottom - location[CHILD_TOP_INDEX]);
 
-                return mParentEink;
+                return (ViewParentEink)mParent;
             }
         }
 
@@ -2568,7 +2567,6 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD_IN_PARENT);
         }
-
         if ((mPrivateFlags & DRAWN) == DRAWN) {
             if ((mGroupFlags & (FLAG_OPTIMIZE_INVALIDATE | FLAG_ANIMATION_DONE)) !=
                         FLAG_OPTIMIZE_INVALIDATE) {

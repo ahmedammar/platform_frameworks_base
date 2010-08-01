@@ -69,7 +69,7 @@ import static javax.microedition.khronos.opengles.GL10.*;
  * {@hide}
  */
 @SuppressWarnings({"EmptyCatchBlock"})
-public final class ViewRoot extends Handler implements ViewParent, ViewParentEink, 
+public final class ViewRoot extends Handler implements ViewParentEink, ViewParent,
         View.AttachInfo.Callbacks {
     private static final String TAG = "ViewRoot";
     private static final boolean DBG = false;

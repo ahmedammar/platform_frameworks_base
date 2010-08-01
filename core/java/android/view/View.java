@@ -1668,7 +1668,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getParent()
      */
     protected ViewParent mParent;
-	protected ViewParentEink mParentEink;
 
     /**
      * {@hide}
@@ -5292,7 +5291,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
-            final ViewParentEink p = mParentEink;
+            final ViewParentEink p = (ViewParentEink)mParent;
+			Log.d("@@@@", " invalidate(Rect dirty b) p is "+p);
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null) {
                 final int scrollX = mScrollX;
@@ -5334,10 +5334,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
-
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
-            final ViewParentEink p = mParentEink;
+            final ViewParentEink p =(ViewParentEink) mParent;
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null && l < r && t < b) {
                 final int scrollX = mScrollX;
@@ -5374,10 +5373,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
-
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
             mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
-            final ViewParentEink p = mParentEink;
+            final ViewParentEink p = (ViewParentEink)mParent;
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null) {
                 final Rect r = ai.mTmpInvalRect;
@@ -6196,7 +6194,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     void assignParent(ViewParentEink parent) {
         if (mParent == null) {
             mParent = (ViewParent)parent;
-			mParentEink = parent;
         } else if (parent == null) {
             mParent = null;
         } else {

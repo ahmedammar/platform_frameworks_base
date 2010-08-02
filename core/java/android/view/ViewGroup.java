@@ -2545,7 +2545,7 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
                     location[CHILD_LEFT_INDEX] = left;
                     location[CHILD_TOP_INDEX] = top;
 
-                    return (ViewParentEink)mParent;
+                    return mParent;
                 }
             } else {
                 mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
@@ -2556,7 +2556,7 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
                 dirty.set(0, 0, mRight - location[CHILD_LEFT_INDEX],
                         mBottom - location[CHILD_TOP_INDEX]);
 
-                return (ViewParentEink)mParent;
+                return mParent;
             }
         }
 
@@ -2583,7 +2583,7 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
                     location[CHILD_LEFT_INDEX] = left;
                     location[CHILD_TOP_INDEX] = top;
 
-                    return mParent;
+                    return (ViewParentEink)mParent;
                 }
             } else {
                 mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
@@ -2594,7 +2594,7 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
                 dirty.set(0, 0, mRight - location[CHILD_LEFT_INDEX],
                         mBottom - location[CHILD_TOP_INDEX]);
 
-                return mParent;
+                return (ViewParentEink)mParent;
             }
         }
 

@@ -302,7 +302,9 @@ public:
     virtual status_t getDestRect(int *left,int *right,int *top,int *bottom,int *rot) {
        return NO_ERROR;
     };
-
+    virtual void setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode) 
+    {
+    };
 
     // new functions
     void clearStat();

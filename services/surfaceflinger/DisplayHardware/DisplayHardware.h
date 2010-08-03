@@ -64,8 +64,12 @@ public:
     // Flip the front and back buffers if the back buffer is "dirty".  Might
     // be instantaneous, might involve copying the frame buffer around.
     status_t postBypassBuffer(const native_handle_t* handle) const;
+#ifdef FSL_EPDC_FB
     void flip(const Region& dirty, int mode) const;
-
+#else
+    void flip(const Region& dirty) const;
+#endif    
+    
     float       getDpiX() const;
     float       getDpiY() const;
     float       getRefreshRate() const;

@@ -584,6 +584,7 @@ void Layer::unlockPageFlip(
         const Transform tr(planeTransform * s.transform);
         dirtyRegion = tr.transform(dirtyRegion);
 
+#ifdef FSL_EPDC_FB
         //do coordinate transform for the  dirty group
        
         DirtyRegionNode* tmpNode;
@@ -601,6 +602,7 @@ void Layer::unlockPageFlip(
         }
     
         //add the current dirty group to the list
+#endif        
         // At this point, the dirty region is in screen space.
         // Make sure it's constrained by the visible region (which
         // is in screen space as well).
@@ -621,7 +623,9 @@ void Layer::getCurrentDirtyRegList(DirtyRegList * & CurrentDirtyRegList)
 
 void Layer::finishPageFlip()
 {
+#ifdef FSL_EPDC_FB
     mDirtyRegList[mFrontBufferIndex].ClearDirtyRegionList();
+#endif
     status_t err = lcblk->unlock( mFrontBufferIndex );
     LOGE_IF(err!=NO_ERROR, 
             "layer %p, buffer=%d wasn't locked!",

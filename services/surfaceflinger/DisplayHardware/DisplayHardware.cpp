@@ -313,6 +313,7 @@ int DisplayHardware::getCurrentBufferIndex() const {
     return mNativeWindow->getCurrentBufferIndex();
 }
 
+#ifdef FSL_EPDC_FB
 void DisplayHardware::flip(const Region& dirty, int mode) const
 {
     checkGLErrors();
@@ -341,6 +342,37 @@ void DisplayHardware::flip(const Region& dirty, int mode) const
     //glClearColor(1,0,0,0);
     //glClear(GL_COLOR_BUFFER_BIT);
 }
+#else
+void DisplayHardware::flip(const Region& dirty) const
+{
+    checkGLErrors();
+
+    EGLDisplay dpy = mDisplay;
+    EGLSurface surface = mSurface;
+
+#ifdef EGL_ANDROID_swap_rectangle    
+    if (mFlags & SWAP_RECTANGLE) {
+        const Region newDirty(dirty.intersect(bounds()));
+        const Rect b(newDirty.getBounds());
+        eglSetSwapRectangleANDROID(dpy, surface,
+                b.left, b.top, b.width(), b.height());
+    } 
+#endif
+    
+    if (mFlags & PARTIAL_UPDATES) {
+        mNativeWindow->setUpdateRectangle(dirty.getBounds());
+    }
+    
+    mPageFlipCount++;
+    eglSwapBuffers(dpy, surface);
+    checkEGLErrors("eglSwapBuffers");
+
+    // for debugging
+    //glClearColor(1,0,0,0);
+    //glClear(GL_COLOR_BUFFER_BIT);
+}
+#endif
+
 
 status_t DisplayHardware::postBypassBuffer(const native_handle_t* handle) const
 {

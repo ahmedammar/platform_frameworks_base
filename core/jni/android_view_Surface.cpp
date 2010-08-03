@@ -315,6 +315,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz,  jobject dirtyRect
     }
 
     Surface::SurfaceInfo info;
+#ifdef FSL_EPDC_FB
     int *pDirtyRectGroup=NULL;
     int dirtyRectGroupSize = 0;
     status_t err ;
@@ -348,6 +349,9 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz,  jobject dirtyRect
     {
         delete []pDirtyRectGroup;
     }
+#else
+    status_t err = surface->lock(&info, &dirtyRegion);    
+#endif
         
     if (err < 0) {
         const char* const exception = (err == NO_MEMORY) ?

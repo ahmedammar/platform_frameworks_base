@@ -402,6 +402,7 @@ bool SurfaceFlinger::threadLoop()
         logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
         hw.compositionComplete();
 
+#ifdef FSL_EPDC_FB
         getDirtyGroup();
         
         unlockClients();
@@ -410,7 +411,13 @@ bool SurfaceFlinger::threadLoop()
 
         releaseDirtyGroup();
         // release the clients before we flip ('cause flip might block)
-        
+#else        
+        // release the clients before we flip ('cause flip might block)
+        unlockClients();
+
+        postFramebuffer();
+#endif
+
         
     } else {
         // pretend we did the post
@@ -434,6 +441,7 @@ bool SurfaceFlinger::handleBypassLayer()
     return false;
 }
 
+#ifdef FSL_EPDC_FB
 void SurfaceFlinger::getDirtyGroup()
 {
     
@@ -535,6 +543,25 @@ void SurfaceFlinger::postFramebuffer(Region pInvalidRegion, int mode)
         hw.flip(pInvalidRegion, mode);
     }
 }
+#else
+void SurfaceFlinger::postFramebuffer()
+{
+    if (!mInvalidRegion.isEmpty()) {
+
+        if (UNLIKELY(mDebugFps)) {
+            debugShowFPS();
+        }
+
+        const DisplayHardware& hw(graphicPlane(0).displayHardware());
+        const nsecs_t now = systemTime();
+        mDebugInSwapBuffers = now;
+        hw.flip(mInvalidRegion);
+        mLastSwapBufferTime = systemTime() - now;
+        mDebugInSwapBuffers = 0;
+        mInvalidRegion.clear();
+    }
+}
+#endif
 
 void SurfaceFlinger::handleConsoleEvents()
 {
@@ -1035,8 +1062,11 @@ void SurfaceFlinger::debugFlashRegions()
         mDirtyRegion.dump("mDirtyRegion");
         mInvalidRegion.dump("mInvalidRegion");
     }
+#ifdef FSL_EPDC_FB
     hw.flip(mInvalidRegion, UI_DEFAULT_MODE);
-
+#else
+    hw.flip(mInvalidRegion);
+#endif
     if (mDebugRegion > 1)
         usleep(mDebugRegion * 1000);
 

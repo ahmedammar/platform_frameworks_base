@@ -152,6 +152,7 @@ FramebufferNativeWindow::~FramebufferNativeWindow()
     }
 }
 
+#ifdef FSL_EPDC_FB
 status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r, int mode) 
 {
     if (!mUpdateOnDemand) {
@@ -159,6 +160,15 @@ status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r, int mode)
     }
     return fbDev->setUpdateRect(fbDev, r.left, r.top, r.width(), r.height(),mode);
 }
+#else
+status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r) 
+{
+    if (!mUpdateOnDemand) {
+        return INVALID_OPERATION;
+    }
+    return fbDev->setUpdateRect(fbDev, r.left, r.top, r.width(), r.height());
+}
+#endif
 
 status_t FramebufferNativeWindow::compositionComplete()
 {

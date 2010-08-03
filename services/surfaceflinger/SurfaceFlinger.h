@@ -308,10 +308,14 @@ private:
             void        unlockPageFlip(const LayerVector& currentLayers);
             void        handleRepaint();
             bool        handleBypassLayer();
+#ifdef FSL_EPDC_FB
             void        getDirtyGroup();
             void        releaseDirtyGroup();
             void        EinkOptPostFramebuffer();
             void        postFramebuffer(Region pInvalidRegion, int mode);
+#else
+            void        postFramebuffer();
+#endif            
             void        composeSurfaces(const Region& dirty);
 
 

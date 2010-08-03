@@ -53,7 +53,11 @@ public:
     framebuffer_device_t const * getDevice() const { return fbDev; } 
 
     bool isUpdateOnDemand() const { return mUpdateOnDemand; }
+#ifdef FSL_EPDC_FB    
     status_t setUpdateRectangle(const Rect& updateRect, int mode);
+#else
+    status_t setUpdateRectangle(const Rect& updateRect);
+#endif
     status_t compositionComplete();
     
     // for debugging only

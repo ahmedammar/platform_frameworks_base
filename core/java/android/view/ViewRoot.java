@@ -645,6 +645,7 @@ public final class ViewRoot extends Handler implements ViewParentEink, ViewParen
          invalidateChild (child, dirty, View.UI_DEFAULT_MODE);
          }
     public void invalidateChild(View child, Rect dirty, int updateMode) {
+    Log.i(TAG,"viewroot,invalidateChild");
         checkThread();
         if (DEBUG_DRAW) Log.v(TAG, "Invalidate child: " + dirty);
         if (mCurScrollY != 0 || mTranslator != null) {

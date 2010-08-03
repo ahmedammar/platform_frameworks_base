@@ -2468,7 +2468,7 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
          invalidateChild( child,  dirty, UI_DEFAULT_MODE);
       }
     public final void invalidateChild(View child, final Rect dirty, final int updateMode) {
-        Log.i(VIEW_LOG_TAG,"viewgroup,invalidateChild");
+
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD);
         }

@@ -38,6 +38,11 @@ ifeq ($(TARGET_SIMULATOR),true)
     LOCAL_LDLIBS += -lpthread
 endif
 
+ifeq ($(HAVE_FSL_EPDC_FB),true)
+LOCAL_CFLAGS += -DFSL_EPDC_FB
+endif
+
+
 include $(BUILD_SHARED_LIBRARY)
 
 

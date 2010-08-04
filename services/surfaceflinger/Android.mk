@@ -32,6 +32,10 @@ ifeq ($(BOARD_SOC_CLASS), IMX5X)
 	LOCAL_CFLAGS += -DDIM_WITH_TEXTURE
 endif
 
+ifeq ($(HAVE_FSL_EPDC_FB),true)
+LOCAL_CFLAGS += -DFSL_EPDC_FB
+endif
+
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)
 	ifeq ($(HOST_OS),linux)

@@ -213,8 +213,11 @@ extmap OMX_PLAYER_FILE_EXTS [] =  {
         {".mov", OMX_PLAYER},
         {".rmvb", OMX_PLAYER},
         {".rm", OMX_PLAYER},
+        {".wmv", OMX_PLAYER},
+        {".asf", OMX_PLAYER},
         {".mp3", OMX_PLAYER},
         {".aac", OMX_PLAYER},
+        {".wma", OMX_PLAYER},
         {".ra", OMX_PLAYER},
         {".wav", OMX_PLAYER},
 };
@@ -701,6 +704,18 @@ player_type getPlayerType(int fd, int64_t offset, int64_t length)
     read(fd, buf, sizeof(buf));
     lseek(fd, offset, SEEK_SET);
 
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.omxgm.enable-player", value, NULL) && (!strcmp(value, "1"))) {
+        char url[128];
+        bool ret = false;
+        OMXPlayerType *pType = new OMXPlayerType();
+        sprintf(url, "sharedfd://%d:%lld:%lld",  fd, offset, length);
+        ret = pType->IsSupportedContent(url);
+        delete pType;
+        if(ret == true)
+            return OMX_PLAYER;
+    }
+
     long ident = *((long*)buf);
 
     // Ogg vorbis?
@@ -732,18 +747,6 @@ player_type getPlayerType(int fd, int64_t offset, int64_t length)
         EAS_Shutdown(easdata);
     }
 
-    char value[PROPERTY_VALUE_MAX];
-    if (property_get("media.omxgm.enable-player", value, NULL) && (!strcmp(value, "1"))) {
-        char url[128];
-        bool ret = false;
-        OMXPlayerType *pType = new OMXPlayerType();
-        sprintf(url, "sharedfd://%d:%lld:%lld",  fd, offset, length);
-        ret = pType->IsSupportedContent(url);
-        delete pType;
-        if(ret == true)
-            return OMX_PLAYER;
-    }
-
     return getDefaultPlayerType();
 }
 
@@ -753,8 +756,29 @@ player_type getPlayerType(const char* url)
         return TEST_PLAYER;
     }
 
-    // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.omxgm.enable-player", value, NULL) && (!strcmp(value, "1"))) {
+        if (strncasecmp(url, "http://", 7) && strncasecmp(url, "rtsp://", 7)) {
+            for (int i = 0; i < NELEM(OMX_PLAYER_FILE_EXTS); ++i) {
+                int len = strlen(OMX_PLAYER_FILE_EXTS[i].extension);
+                int start = lenURL - len;
+                if (start > 0) {
+                    if (!strncasecmp(url + start, OMX_PLAYER_FILE_EXTS[i].extension, len)) {
+                        return OMX_PLAYER_FILE_EXTS[i].playertype;
+                    }
+                }
+            }
+        }
+    }
+
+    bool useStagefrightForHTTP = false;
+    if (property_get("media.stagefright.enable-http", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        useStagefrightForHTTP = true;
+    }
+
+    // use MidiFile for MIDI extensions
     for (int i = 0; i < NELEM(FILE_EXTS); ++i) {
         int len = strlen(FILE_EXTS[i].extension);
         int start = lenURL - len;
@@ -778,18 +802,6 @@ player_type getPlayerType(const char* url)
     // Use PV_PLAYER for rtsp for now
     if (!strncasecmp(url, "rtsp://", 7)) {
         return PV_PLAYER;
-    }
-
-    if (property_get("media.omxgm.enable-player", value, NULL) && (!strcmp(value, "1"))) {
-        for (int i = 0; i < NELEM(OMX_PLAYER_FILE_EXTS); ++i) {
-            int len = strlen(OMX_PLAYER_FILE_EXTS[i].extension);
-            int start = lenURL - len;
-            if (start > 0) {
-                if (!strncasecmp(url + start, OMX_PLAYER_FILE_EXTS[i].extension, len)) {
-                    return OMX_PLAYER_FILE_EXTS[i].playertype;
-                }
-            }
-        }
     }
 
     return getDefaultPlayerType();

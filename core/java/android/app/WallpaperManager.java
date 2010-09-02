@@ -303,7 +303,8 @@ public class WallpaperManager {
                         return generateBitmap(context, bm, width, height);
                     } catch (OutOfMemoryError e) {
                         Log.w(TAG, "Can't generate default bitmap", e);
-                        return bm;
+                        bm.recycle();
+                        return null;
                     }
                 }
             } catch (RemoteException e) {

@@ -470,7 +470,6 @@ bool drawTriangleFanWithCopybit_impl(ogles_context_t* c, GLint first, GLsizei co
     clipRectRegion it(c);
     if ((it.r.r - it.r.l)*(it.r.b - it.r.t) < 2096)
     {
-        c->textures.tmu[0].texture->try_copybit = false;
         return false;
     }
 
@@ -614,7 +613,6 @@ bool drawTexiOESWithCopybit_impl(GLint x, GLint y, GLint z,
     clipRectRegion it(c);
     if ((it.r.r - it.r.l)*(it.r.b - it.r.t) < 2096)
     {
-        c->textures.tmu[0].texture->try_copybit = false;
         return false;
     } 
     

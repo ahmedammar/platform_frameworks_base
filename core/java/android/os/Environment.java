@@ -20,7 +20,6 @@ import java.io.File;
 
 import android.content.res.Resources;
 import android.os.storage.IMountService;
-
 /**
  * Provides access to environment variables.
  */
@@ -91,14 +90,30 @@ public class Environment {
 
     private static final File EXTERNAL_STORAGE_DIRECTORY
             = getDirectory("EXTERNAL_STORAGE", "/sdcard");
+    private static final File EXTERNAL_STORAGE_DIRECTORY_SD
+            = getDirectory("EXTERNAL_STORAGE_SD", "/sdcard");
 
-    private static final File EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY
-            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/sdcard"),
+    private static final File EXTERNAL_STORAGE_DIRECTORY_EXTSD
+             = getDirectory("EXTERNAL_STORAGE_EXTSD", "/extsd");
+
+    private static final File EXTERNAL_STORAGE_DIRECTORY_UDISK
+             = getDirectory("EXTERNAL_STORAGE_UDISK", "/udisk");
+
+    private static final File EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_SD
+            = new File (new File(getDirectory("EXTERNAL_STORAGE_SD", "/sdcard"),
                     "Android"), "data");
 
-    private static final File EXTERNAL_STORAGE_ANDROID_MEDIA_DIRECTORY
-            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/sdcard"),
+    private static final File EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_EXTSD
+              = new File (new File(getDirectory("EXTERNAL_STORAGE_EXTSD", "/extsd"),
+                      "Android"), "data");
+
+    private static final File EXTERNAL_STORAGE_ANDROID_MEDIA_DIRECTORY_SD
+            = new File (new File(getDirectory("EXTERNAL_STORAGE_SD", "/sdcard"),
                     "Android"), "media");
+
+    private static final File EXTERNAL_STORAGE_ANDROID_MEDIA_DIRECTORY_EXTSD
+              = new File (new File(getDirectory("EXTERNAL_STORAGE_EXTSD", "/extsd"),
+                      "Android"), "media");
 
     private static final File DOWNLOAD_CACHE_DIRECTORY
             = getDirectory("DOWNLOAD_CACHE", "/cache");
@@ -149,8 +164,48 @@ public class Environment {
      * @see #isExternalStorageRemovable()
      */
     public static File getExternalStorageDirectory() {
-        return EXTERNAL_STORAGE_DIRECTORY;
+        // Try to be smarter
+        // Return EXTERNAL_STORAGE_DIRECTORY_SD if SD card is ready
+        // Return EXTERNAL_STORAGE_DIRECTORY_UDISK if SD card is absent but udisk is ready
+        // Return EXTERNAL_STORAGE_DIRECTORY_SD if both sd card and udisk are not ready
+       String propSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_SD.getPath());
+       String propUDISK = getMediaState(EXTERNAL_STORAGE_DIRECTORY_UDISK.getPath());
+       String propEXTSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_EXTSD.getPath());
+       if (propSD.equals(MEDIA_MOUNTED) || propSD.equals(MEDIA_MOUNTED_READ_ONLY)) {
+           return EXTERNAL_STORAGE_DIRECTORY_SD;
+       } else if (propUDISK.equals(MEDIA_MOUNTED) || propUDISK.equals(MEDIA_MOUNTED_READ_ONLY)) {
+           return EXTERNAL_STORAGE_DIRECTORY_UDISK;
+       } else if (propEXTSD.equals(MEDIA_MOUNTED) || propEXTSD.equals(MEDIA_MOUNTED_READ_ONLY)) {
+           return EXTERNAL_STORAGE_DIRECTORY_EXTSD;
+       } else {
+          return EXTERNAL_STORAGE_DIRECTORY_SD;
+       }
     }
+
+    /**
+     * Gets the Android external SD card storage directory.
+     * {@hide}
+     */
+    public static File getExternalSDStorageDirectory() {
+        return EXTERNAL_STORAGE_DIRECTORY_SD;
+    }
+
+    /**
+     * Gets the Android external storage (Extension SD) directory.
+     * {@hide}
+     */
+    public static File getExternalExtSDStorageDirectory() {
+        return EXTERNAL_STORAGE_DIRECTORY_EXTSD;
+    }
+
+    /**
+     * Gets the Android external U disk  storage directory.
+     * {@hide}
+     */
+    public static File getExternalUDiskStorageDirectory() {
+        return EXTERNAL_STORAGE_DIRECTORY_UDISK;
+    }
+
 
     /**
      * Standard directory in which to place any audio files that should be
@@ -273,19 +328,43 @@ public class Environment {
     }
 
     /**
-     * Returns the path for android-specific data on the SD card.
+     * Returns the extern sd public directory path.
+     * @hide
+     */
+    public static File getExternalExtSDStoragePublicDirectory(String type) {
+         return new File(getExternalExtSDStorageDirectory(), type);
+    }
+
+    /**
+     * Returns the path for android-specific data on the first SD card.
      * @hide
      */
     public static File getExternalStorageAndroidDataDir() {
-        return EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY;
+        return EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_SD;
     }
-    
+
+     /**
+     * Returns the path for android-specific data on the second SD card.
+     * @hide
+     */
+    public static File getExternalExtSDStorageAndroidDataDir() {
+        return EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_EXTSD;
+    }
+
     /**
      * Generates the raw path to an application's data
      * @hide
      */
     public static File getExternalStorageAppDataDirectory(String packageName) {
-        return new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY, packageName);
+        return new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_SD, packageName);
+    }
+
+    /**
+     * Generates the raw path to an application's data
+     * @hide
+     */
+    public static File getExternalExtSDStorageAppDataDirectory(String packageName) {
+        return new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_EXTSD, packageName);
     }
     
     /**
@@ -293,27 +372,53 @@ public class Environment {
      * @hide
      */
     public static File getExternalStorageAppMediaDirectory(String packageName) {
-        return new File(EXTERNAL_STORAGE_ANDROID_MEDIA_DIRECTORY, packageName);
+        return new File(EXTERNAL_STORAGE_ANDROID_MEDIA_DIRECTORY_SD, packageName);
     }
-    
+
+    /**
+     * Generates the raw path to an application's media
+     * @hide
+     */
+    public static File getExternalExtSDStorageAppMediaDirectory(String packageName) {
+        return new File(EXTERNAL_STORAGE_ANDROID_MEDIA_DIRECTORY_EXTSD, packageName);
+    }
+
     /**
      * Generates the path to an application's files.
      * @hide
      */
     public static File getExternalStorageAppFilesDirectory(String packageName) {
-        return new File(new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY,
+        return new File(new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_SD,
                 packageName), "files");
     }
-    
+
+    /**
+     * Generates the path to an application's files.
+     * @hide
+     */
+    public static File getExternalExtSDStorageAppFilesDirectory(String packageName) {
+        return new File(new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_EXTSD,
+                packageName), "files");
+    }
+
     /**
      * Generates the path to an application's cache.
      * @hide
      */
     public static File getExternalStorageAppCacheDirectory(String packageName) {
-        return new File(new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY,
+        return new File(new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_SD,
                 packageName), "cache");
     }
-    
+
+    /**
+     * Generates the path to an application's cache.
+     * @hide
+     */
+    public static File getExternalExtSDStorageAppCacheDirectory(String packageName) {
+        return new File(new File(EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_EXTSD,
+                packageName), "cache");
+    }
+
     /**
      * Gets the Android Download/Cache content directory.
      */
@@ -381,15 +486,38 @@ public class Environment {
      * <p>See {@link #getExternalStorageDirectory()} for more information.
      */
     public static String getExternalStorageState() {
-        try {
-            if (mMntSvc == null) {
-                mMntSvc = IMountService.Stub.asInterface(ServiceManager
-                                                         .getService("mount"));
-            }
-            return mMntSvc.getVolumeState(getExternalStorageDirectory().toString());
-        } catch (Exception rex) {
-            return Environment.MEDIA_REMOVED;
-        }
+       // Try to be smarter
+       // Return MEDIA_MOUNTED or MEDIA_MOUNTED_READ_ONLY if SD card is ready
+       // Return MEDIA_MOUNTED or MEDIA_MOUNTED_READ_ONLY if SD card is absent but udisk is ready
+       // Return state of SD if both sd card and udisk are not ready
+        String propSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_SD.getPath());
+        String propUDISK = getMediaState(EXTERNAL_STORAGE_DIRECTORY_UDISK.getPath());
+        String propEXTSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_EXTSD.getPath());
+       if (propSD.equals(MEDIA_MOUNTED) || propSD.equals(MEDIA_MOUNTED_READ_ONLY)) {
+           return propSD;
+       } else if (propUDISK.equals(MEDIA_MOUNTED) || propUDISK.equals(MEDIA_MOUNTED_READ_ONLY)) {
+           return propUDISK;
+       } else if (propEXTSD.equals(MEDIA_MOUNTED) || propEXTSD.equals(MEDIA_MOUNTED_READ_ONLY)) {
+           return propEXTSD;
+        } else {
+           return propSD;
+       }
+    }
+
+    /**
+    * Returns the state of the first SD card.
+    * @hide
+    */
+    public static String getExternalSDStorageState() {
+        return getMediaState(EXTERNAL_STORAGE_DIRECTORY_SD.getPath());
+     }
+
+    /**
+    * Returns the state of the second SD card.
+    * @hide
+    */
+    public static String getExternalExtSDStorageState() {
+        return getMediaState(EXTERNAL_STORAGE_DIRECTORY_EXTSD.getPath());
     }
 
     /**
@@ -405,8 +533,50 @@ public class Environment {
                 com.android.internal.R.bool.config_externalStorageRemovable);
     }
 
+    * Returns the state of the U disk.
+    * @hide
+    */
+    public static String getExternalUDiskStorageState() {
+        return getMediaState(EXTERNAL_STORAGE_DIRECTORY_UDISK.getPath());
+    }
+
+    /**
+    * Returns the path.
+    * @hide
+    */
     static File getDirectory(String variableName, String defaultPath) {
         String path = System.getenv(variableName);
         return path == null ? new File(defaultPath) : new File(path);
+    }
+
+    /**
+    * Returns the mount service.
+    * @hide
+    */
+    static IMountService getMs() {
+        IBinder service = ServiceManager.getService("mount");
+        if (service != null) {
+            return IMountService.Stub.asInterface(service);
+        }
+        return null;
+    }
+
+    /**
+    * Returns the state of the Media.
+    * @hide
+    */
+    static String getMediaState(String path) {
+        try {
+            mMntSvc = getMs();
+            if (mMntSvc == null)
+                return MEDIA_REMOVED;
+            else
+            {
+                String state = getMs().getVolumeState(path);
+                return state;
+            }
+        } catch (RemoteException e) {
+            return MEDIA_REMOVED;
+        }
     }
 }

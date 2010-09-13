@@ -96,6 +96,15 @@ public class ExternalMediaFormatActivity extends AlertActivity implements Dialog
             Intent intent = new Intent(ExternalStorageFormatter.FORMAT_ONLY);
             intent.setComponent(ExternalStorageFormatter.COMPONENT_NAME);
             startService(intent);
+            IMountService mountService = IMountService.Stub.asInterface(ServiceManager
+                .getService("mount"));
+            if (mountService != null) {
+                try {
+                    mountService.formatVolume(Environment.getExternalSDStorageDirectory().toString());
+                    mountService.formatVolume(Environment.getExternalExtSDStorageDirectory().toString());
+                } catch (RemoteException e) {
+                }
+            }
         }
 
         // No matter what, finish the activity

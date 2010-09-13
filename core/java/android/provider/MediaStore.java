@@ -684,6 +684,27 @@ public final class MediaStore {
                     getContentUri("external");
 
             /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+           public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                   getContentUri("external_udisk");
+
+           /**
+            * The content:// style URI for the "EXT SDCARD" external storage
+            * volume.
+            */
+           public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                   getContentUri("external_extsd");
+ 
+            /**
              * The MIME type of of this directory of
              * images.  Note that each entry in this directory will have a standard
              * image MIME type as appropriate -- for example, image/jpeg.
@@ -804,6 +825,28 @@ public final class MediaStore {
              */
             public static final Uri EXTERNAL_CONTENT_URI =
                     getContentUri("external");
+
+            /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                    getContentUri("external_udisk");
+
+            /**
+             * The content:// style URI for the "EXT SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                    getContentUri("external_extsd");
+
 
             /**
              * The default sort order for this table
@@ -1070,9 +1113,21 @@ public final class MediaStore {
                         "/audio/media");
             }
 
+            /**
+             * Get the content:// style URI for the given path.
+             *
+             * @param path the path of the volume
+             * @return the URI for the given path
+             */
             public static Uri getContentUriForPath(String path) {
-                return (path.startsWith(Environment.getExternalStorageDirectory().getPath()) ?
-                        EXTERNAL_CONTENT_URI : INTERNAL_CONTENT_URI);
+                if(path.startsWith(Environment.getExternalStorageDirectory().getPath()))
+                    return EXTERNAL_CONTENT_URI;
+                if(path.startsWith(Environment.getExternalSDStorageDirectory().getPath()))
+                    return EXTERNAL_SD_CONTENT_URI;
+                if(path.startsWith(Environment.getExternalExtSDStorageDirectory().getPath()))
+                    return EXTERNAL_EXTSD_CONTENT_URI;
+                 else
+                    return INTERNAL_CONTENT_URI;
             }
 
             /**
@@ -1087,6 +1142,28 @@ public final class MediaStore {
              */
             public static final Uri EXTERNAL_CONTENT_URI =
                     getContentUri("external");
+
+
+            /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                    getContentUri("external_udisk");
+
+            /**
+             * The content:// style URI for the "EXT SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                    getContentUri("external_extsd");
 
             /**
              * The MIME type for this table.
@@ -1158,6 +1235,27 @@ public final class MediaStore {
              */
             public static final Uri EXTERNAL_CONTENT_URI =
                     getContentUri("external");
+
+            /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                    getContentUri("external_udisk");
+
+            /**
+             * The content:// style URI for the "EXT SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                    getContentUri("external_extsd");
 
             /**
              * The MIME type for this table.
@@ -1270,6 +1368,27 @@ public final class MediaStore {
              */
             public static final Uri EXTERNAL_CONTENT_URI =
                     getContentUri("external");
+
+            /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                    getContentUri("external_udisk");
+
+            /**
+             * The content:// style URI for the "EXT SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                    getContentUri("external_extsd");
 
             /**
              * The MIME type for this table.
@@ -1411,6 +1530,27 @@ public final class MediaStore {
                     getContentUri("external");
 
             /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                    getContentUri("external_udisk");
+
+            /**
+             * The content:// style URI for the "EXT SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                    getContentUri("external_extsd");
+
+            /**
              * The MIME type for this table.
              */
             public static final String CONTENT_TYPE = "vnd.android.cursor.dir/artists";
@@ -1535,6 +1675,27 @@ public final class MediaStore {
              */
             public static final Uri EXTERNAL_CONTENT_URI =
                     getContentUri("external");
+
+            /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                    getContentUri("external_udisk");
+
+            /**
+             * The content:// style URI for the "EXT SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                    getContentUri("external_extsd");
 
             /**
              * The MIME type for this table.
@@ -1696,6 +1857,27 @@ public final class MediaStore {
                     getContentUri("external");
 
             /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                    getContentUri("external_udisk");
+
+            /**
+             * The content:// style URI for the "EXT SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                    getContentUri("external_extsd");
+
+            /**
              * The MIME type for this table.
              */
             public static final String CONTENT_TYPE = "vnd.android.cursor.dir/video";
@@ -1799,6 +1981,27 @@ public final class MediaStore {
              */
             public static final Uri EXTERNAL_CONTENT_URI =
                     getContentUri("external");
+
+            /**
+             * The content:// style URI for the "SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_SD_CONTENT_URI =
+                    getContentUri("external_sd");
+
+            /**
+             * The content:// style URI for the "UDISK" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_UDISK_CONTENT_URI =
+                    getContentUri("external_udisk");
+
+            /**
+             * The content:// style URI for the "EXT SDCARD" external storage
+             * volume.
+             */
+            public static final Uri EXTERNAL_EXTSD_CONTENT_URI =
+                    getContentUri("external_extsd");
 
             /**
              * The default sort order for this table

@@ -61,16 +61,17 @@ public class MediaFile {
    
     // Video file types
     public static final int FILE_TYPE_MP4     = 31;
-    public static final int FILE_TYPE_M4V     = 32;
-    public static final int FILE_TYPE_3GPP    = 33;
-    public static final int FILE_TYPE_3GPP2   = 34;
-    public static final int FILE_TYPE_WMV     = 35;
-    public static final int FILE_TYPE_ASF     = 36;
-    public static final int FILE_TYPE_MP2TS   = 37;
-    public static final int FILE_TYPE_AVI     = 38;
-    public static final int FILE_TYPE_FLV     = 39;
-    public static final int FILE_TYPE_RMV     = 40;
-    public static final int FILE_TYPE_MKV     = 41;
+    public static final int FILE_TYPE_MOV     = 32;
+    public static final int FILE_TYPE_M4V     = 33;
+    public static final int FILE_TYPE_3GPP    = 34;
+    public static final int FILE_TYPE_3GPP2   = 35;
+    public static final int FILE_TYPE_WMV     = 36;
+    public static final int FILE_TYPE_ASF     = 37;
+    public static final int FILE_TYPE_MP2TS   = 38;
+    public static final int FILE_TYPE_AVI     = 39;
+    public static final int FILE_TYPE_FLV     = 40;
+    public static final int FILE_TYPE_RMV     = 41;
+    public static final int FILE_TYPE_MKV     = 42;
     private static final int FIRST_VIDEO_FILE_TYPE = FILE_TYPE_MP4;
     private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_MKV;
     
@@ -154,6 +155,7 @@ public class MediaFile {
         
         addFileType("MPEG", FILE_TYPE_MP4, "video/mpeg");
         addFileType("MP4", FILE_TYPE_MP4, "video/mp4");
+        addFileType("MOV", FILE_TYPE_MP4, "video/mp4");
         addFileType("M4V", FILE_TYPE_M4V, "video/mp4");
         addFileType("3GP", FILE_TYPE_3GPP, "video/3gpp");
         addFileType("3GPP", FILE_TYPE_3GPP, "video/3gpp");

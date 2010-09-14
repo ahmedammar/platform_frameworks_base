@@ -75,11 +75,11 @@ import javax.crypto.spec.PBEKeySpec;
  */
 class MountService extends IMountService.Stub
         implements INativeDaemonConnectorCallbacks {
-    private static final boolean LOCAL_LOGD = true;
-    private static final boolean DEBUG_UNMOUNT = true;
-    private static final boolean DEBUG_EVENTS = true;
+    private static final boolean LOCAL_LOGD = false;
+    private static final boolean DEBUG_UNMOUNT = false;
+    private static final boolean DEBUG_EVENTS = false;
     private static final boolean DEBUG_OBB = true; 
-
+    
     private static final String TAG = "MountService";
 
     private static final String VOLD_TAG = "VoldConnector";
@@ -449,7 +449,7 @@ class MountService extends IMountService.Stub
                             {
                                 String state = getVolumeState(path[i]);
 
-                                Slog.i(TAG, "After bootint the state is " +  state);
+                                if (LOCAL_LOGD) Slog.d(TAG, "After bootint the state is " +  state);
                                 if (state.equals(Environment.MEDIA_UNMOUNTED)) {
                                     int rc = doMountVolume(path[i]);
                                     if (rc != StorageResultCode.OperationSucceeded) {
@@ -602,7 +602,7 @@ class MountService extends IMountService.Stub
 
                 int index = 0;
                 try {
-                    if (LOCAL_LOGD)  Slog.w(TAG,"do list.");
+                    if (LOCAL_LOGD)  Slog.d(TAG,"do list.");
                     String[] vols = mConnector.doListCommand(
                         "volume list", VoldResponseCode.VolumeListResult);
                     for (String volstr : vols) {
@@ -615,7 +615,7 @@ class MountService extends IMountService.Stub
                             continue;
                         }
 
-                        if (LOCAL_LOGD)  Slog.w(TAG,String.format("%s...", tok[1]));
+                        if (LOCAL_LOGD)  Slog.d(TAG,String.format("%s...", tok[1]));
 
                         if (tok[1].equals(path[0]))
                             index = 0;
@@ -649,7 +649,7 @@ class MountService extends IMountService.Stub
                     updatePublicVolumeState(path[index], Environment.MEDIA_REMOVED);
                 }
 
-                if (LOCAL_LOGD)  Slog.w(TAG,"Finished list.");
+                if (LOCAL_LOGD)  Slog.d(TAG,"Finished list.");
                 try {
                     boolean avail = doGetShareMethodAvailable("ums");
                     notifyShareAvailabilityChange("ums", avail);
@@ -874,7 +874,6 @@ class MountService extends IMountService.Stub
     private int doMountVolume(String path) {
         int rc = StorageResultCode.OperationSucceeded;
 
-        Slog.w(TAG, "doMountVolume: Mouting " + path);
         if (DEBUG_EVENTS) Slog.i(TAG, "doMountVolume: Mouting " + path);
         try {
             mConnector.doCommand(String.format("volume mount %s", path));
@@ -891,7 +890,6 @@ class MountService extends IMountService.Stub
                 rc = StorageResultCode.OperationFailedNoMedia;
             } else if (code == VoldResponseCode.OpFailedMediaBlank) {
                 if (DEBUG_EVENTS) Slog.i(TAG, " updating volume state :: media nofs");
-                Slog.w(TAG, " updating volume state :: media nofs");
                 /*
                  * Media is blank or does not contain a supported filesystem
                  */
@@ -900,7 +898,6 @@ class MountService extends IMountService.Stub
                 rc = StorageResultCode.OperationFailedMediaBlank;
             } else if (code == VoldResponseCode.OpFailedMediaCorrupt) {
                 if (DEBUG_EVENTS) Slog.i(TAG, "updating volume state media corrupt");
-                Slog.w(TAG, "updating volume state media corrupt");
                 /*
                  * Volume consistency check failed
                  */
@@ -1185,7 +1182,7 @@ class MountService extends IMountService.Stub
     public void shutdown(final IMountShutdownObserver observer) {
         validatePermission(android.Manifest.permission.SHUTDOWN);
 
-        Slog.i(TAG, "Shutting down");
+        if (LOCAL_LOGD) Slog.d(TAG, "Shutting down");
 
         String path = Environment.getExternalStorageDirectory().getPath();
         String state = getVolumeState(path);
@@ -1343,7 +1340,7 @@ class MountService extends IMountService.Stub
          * XXX: Until we have multiple volume discovery, just hardwire
          * this to /sdcard
          */
-        Slog.i(TAG, "getVolumeState  " + mountPoint );
+        if (LOCAL_LOGD) Slog.d(TAG, "getVolumeState  " + mountPoint );
         int index = 0;
         if (!mountPoint.equals(Environment.getExternalSDStorageDirectory().getPath())
             && !mountPoint.equals(Environment.getExternalExtSDStorageDirectory().getPath())
@@ -1366,7 +1363,7 @@ class MountService extends IMountService.Stub
             index = 2;
         }
 
-        Slog.i(TAG, "The state is " + mLegacyState[index]);
+        if (LOCAL_LOGD) Slog.d(TAG, "The state is " + mLegacyState[index]);
         return mLegacyState[index];
     }
 

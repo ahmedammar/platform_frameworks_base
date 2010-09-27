@@ -1292,6 +1292,10 @@ class MountService extends IMountService.Stub
          * If we disabled UMS then mount the volume
          */
         if (!enable) {
+
+            //Change the state
+            setUmsEnabling(false);
+
             doShareUnshareVolume(pathSD, method, enable);
             if (doMountVolume(pathSD) != StorageResultCode.OperationSucceeded) {
                 Slog.e(TAG, "Failed to remount " + pathSD +

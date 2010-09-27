@@ -101,7 +101,7 @@ public class ExternalMediaFormatActivity extends AlertActivity implements Dialog
             if (mountService != null) {
                 try {
                     mountService.formatVolume(Environment.getExternalSDStorageDirectory().toString());
-                    mountService.formatVolume(Environment.getExternalExtSDStorageDirectory().toString());
+                    //mountService.formatVolume(Environment.getExternalExtSDStorageDirectory().toString());
                 } catch (RemoteException e) {
                 }
             }

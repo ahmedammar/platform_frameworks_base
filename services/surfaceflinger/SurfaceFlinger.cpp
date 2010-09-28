@@ -453,7 +453,7 @@ void SurfaceFlinger::getDirtyGroup()
 
     
     for (size_t i=0 ; i<count ; i++) {
-        DirtyRegList * pDirtyRegList;
+        DirtyRegList * pDirtyRegList = NULL;
         const sp<LayerBase>& layer = layers[i];
       
         layer->getCurrentDirtyRegList(pDirtyRegList);

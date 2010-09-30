@@ -962,6 +962,53 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public static final int FOCUS_DOWN = 0x00000082;
 
 
+
+    /**
+     * The waveform mode of init
+     */
+    public static final int EINK_WAVEFORM_MODE_INIT = 0x00000000;
+
+    /**
+     * The waveform mode of 2 gray levels(Grey->White/Grey->Black)
+     */
+    public static final int EINK_WAVEFORM_MODE_DU = 0x00000001;
+
+    /**
+     * The waveform mode of 16 gray levels
+     */
+    public static final int EINK_WAVEFORM_MODE_GC16 = 0x00000002;
+
+    /**
+     * The waveform mode of 4 gray levels
+     */
+    public static final int EINK_WAVEFORM_MODE_GC4 = 0x00000003;
+
+    /**
+     * The waveform mode of auto selected gray levels by painted
+     * data
+     */
+    public static final int EINK_WAVEFORM_MODE_AUTO = 0x00000004;
+
+    /**
+     * The Mask of waveform mode
+     */
+    public static final int EINK_WAVEFORM_MODE_MASK = 0x0000000F;
+
+    /**
+     * The regional update mode
+     */
+    public static final int EINK_AUTO_MODE_REGIONAL = 0x00000000;
+
+    /**
+     * The automatic update mode
+     */
+    public static final int EINK_AUTO_MODE_AUTOMATIC = 0x00000010;
+
+    /**
+     * The mask of the  auto mode
+     */
+    public static final int EINK_AUTO_MODE_MASK = 0x00000010;
+
     /**
      * The partial update mode in region
      */
@@ -970,73 +1017,93 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * The full update mode in region
      */
-    public static final int EINK_UPDATE_MODE_FULL = 0x00000001;
+    public static final int EINK_UPDATE_MODE_FULL = 0x00000020;
 
     /**
      * The Mask of update mode
      */
-    public static final int EINK_UPDATE_MODE_MASK = 0x0000000F;
+    public static final int EINK_UPDATE_MODE_MASK = 0x00000020;
 
     /**
-     * The waveform mode of 2 gray levels(Grey->White/Grey->Black)
+     * The waveform mode of no wait update
      */
-    public static final int EINK_WAVEFORM_MODE_DU = 0x00000010;
+    public static final int EINK_WAIT_MODE_NOWAIT = 0x00000000;
 
     /**
-     * The waveform mode of 4 gray levels
+     * The waveform mode of wait update
      */
-    public static final int EINK_WAVEFORM_MODE_GC4 = 0x00000020;
-
-    /**
-     * The waveform mode of 16 gray levels
-     */
-    public static final int EINK_WAVEFORM_MODE_GC16 = 0x00000040;
-
-    /**
-     * The waveform mode of auto selected gray levels by painted 
-     * data 
-     */
-    public static final int EINK_WAVEFORM_MODE_AUTO = 0x00000080;
+    public static final int EINK_WAIT_MODE_WAIT = 0x00000040;
 
     /**
      * The Mask of waveform mode
      */
-    public static final int EINK_WAVEFORM_MODE_MASK = 0x000000F0;
+    public static final int EINK_WAIT_MODE_MASK = 0x00000040;
 
     /**
-     * The waveform mode of auto selected gray levels by painted 
-     * data 
+     * The waveform mode of nocombination
      */
-    public static final int EINK_WAIT_MODE_NOWAIT = 0x00000100;
+    public static final int EINK_COMBINE_MODE_NOCOMBINE = 0x00000000;
 
     /**
-     * The waveform mode of wait update 
+     * The waveform mode of combine
      */
-    public static final int EINK_WAIT_MODE_WAIT = 0x00000200;
+    public static final int EINK_COMBINE_MODE_COMBINE = 0x00000080;
 
     /**
-     * The Mask of waveform mode
+     * The Mask of combination mode
      */
-    public static final int EINK_WAIT_MODE_MASK = 0x00000F00;
+    public static final int EINK_COMBINE_MODE_MASK = 0x00000080;
 
     /**
-     * The regional update mode
+     * The waveform mode of no dithering
      */
-    public static final int EINK_AUTO_MODE_REGIONAL = 0x00000000;
+    public static final int EINK_DITHER_MODE_NODITHER = 0x00000000;
 
     /**
-     * The automatic update mode 
+     * The waveform mode of dithering
      */
-    public static final int EINK_AUTO_MODE_AUTOMATIC = 0x00001000;
+    public static final int EINK_DITHER_MODE_DITHER = 0x00000100;
 
     /**
-     * The mask of the  auto mode 
+     * The Mask of dithering mode
      */
-    public static final int EINK_AUTO_MODE_MASK = 0x0000F000;
+    public static final int EINK_DITHER_MODE_MASK = 0x00000100;
+
+    /**
+     * The waveform mode of no invert
+     */
+    public static final int EINK_INVERT_MODE_NOINVERT = 0x00000000;
+
+    /**
+     * The waveform mode of invert
+     */
+    public static final int EINK_INVERT_MODE_INVERT = 0x00000200;
+
+    /**
+     * The Mask of invert mode
+     */
+    public static final int EINK_INVERT_MODE_MASK = 0x00000200;
+
+    /**
+     * The waveform mode of no converting
+     */
+    public static final int EINK_CONVERT_MODE_NOCONVERT = 0x00000000;
+
+    /**
+     * The waveform mode of convert
+     */
+    public static final int EINK_CONVERT_MODE_CONVERT = 0x00000400;
+
+    /**
+     * The Mask of converting mode
+     */
+    public static final int EINK_CONVERT_MODE_MASK = 0x00000400;
 
 
-	
-    public static final int UI_DEFAULT_MODE = EINK_UPDATE_MODE_PARTIAL | EINK_WAVEFORM_MODE_AUTO | EINK_WAIT_MODE_WAIT | EINK_AUTO_MODE_REGIONAL;
+
+    public static final int UI_DEFAULT_MODE = EINK_CONVERT_MODE_NOCONVERT|EINK_INVERT_MODE_NOINVERT|EINK_DITHER_MODE_NODITHER|EINK_COMBINE_MODE_NOCOMBINE|
+                                              EINK_WAIT_MODE_WAIT|EINK_UPDATE_MODE_PARTIAL|EINK_AUTO_MODE_REGIONAL|EINK_WAVEFORM_MODE_AUTO;
+
     /**
      * Base View state sets
      */

@@ -147,7 +147,48 @@ class DirtyRegList{
             }
         }
 
+        bool DeleteDirtyRegionNode(Rect dirtyBounds)
+        {
+            bool retval = false;
+            DirtyRegionNode *pDirtyRegNodeIndex = pDirtyRegListHeader;
+            while (pDirtyRegNodeIndex != NULL) {
+                if (pDirtyRegNodeIndex->mDirtyRegion.bounds() == dirtyBounds) {
+                    if (pDirtyRegNodeIndex->pNextDirtyRegNode != NULL && pDirtyRegNodeIndex->pPrevDirtyRegNode != NULL) {
+                        DirtyRegionNode *tmpNode = pDirtyRegNodeIndex;
+                        pDirtyRegNodeIndex->pNextDirtyRegNode->pPrevDirtyRegNode = pDirtyRegNodeIndex->pPrevDirtyRegNode;
+                        pDirtyRegNodeIndex->pPrevDirtyRegNode->pNextDirtyRegNode = pDirtyRegNodeIndex->pNextDirtyRegNode;
+                        delete tmpNode;
+                        mDirtyRegListLength--;
+                        retval = true;
+                    } else if (pDirtyRegNodeIndex->pNextDirtyRegNode == NULL && pDirtyRegNodeIndex->pPrevDirtyRegNode != NULL) {
 
+                        DirtyRegionNode *tmpNode = pDirtyRegNodeIndex;
+                        pDirtyRegNodeIndex->pPrevDirtyRegNode->pNextDirtyRegNode = NULL;
+                        delete tmpNode;
+                        mDirtyRegListLength--;
+                        retval = true;
+                    } else if (pDirtyRegNodeIndex->pNextDirtyRegNode != NULL && pDirtyRegNodeIndex->pPrevDirtyRegNode == NULL) {
+
+                        pDirtyRegListHeader = pDirtyRegNodeIndex->pNextDirtyRegNode ;
+                        DirtyRegionNode *tmpNode = pDirtyRegNodeIndex;
+                        pDirtyRegNodeIndex->pNextDirtyRegNode->pPrevDirtyRegNode = NULL;
+                        delete tmpNode;
+                        mDirtyRegListLength--;
+                        retval = true;
+                    } else if (pDirtyRegNodeIndex->pNextDirtyRegNode == NULL && pDirtyRegNodeIndex->pPrevDirtyRegNode == NULL) {
+
+                        pDirtyRegListHeader = NULL;
+                        DirtyRegionNode *tmpNode = pDirtyRegNodeIndex;
+                        delete tmpNode;
+                        mDirtyRegListLength--;
+                        retval = true;
+                    }
+                    break;
+                }
+                pDirtyRegNodeIndex = pDirtyRegNodeIndex->pNextDirtyRegNode;
+            }
+            return retval;
+        }
         DirtyRegionNode * pDirtyRegListHeader;
         int mDirtyRegListLength;
         

@@ -65,7 +65,7 @@ public:
     // be instantaneous, might involve copying the frame buffer around.
     status_t postBypassBuffer(const native_handle_t* handle) const;
 #ifdef FSL_EPDC_FB
-    void flip(const Region& dirty, int mode) const;
+    void flip(const Region & dirty, Vector < Rect > &rectList, Vector < int > &modelist, int count) const;
 #else
     void flip(const Region& dirty) const;
 #endif    

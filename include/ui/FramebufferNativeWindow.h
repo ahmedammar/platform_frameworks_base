@@ -21,7 +21,7 @@
 #include <sys/types.h>
 
 #include <EGL/egl.h>
-
+#include <utils/Vector.h>
 #include <utils/threads.h>
 #include <ui/Rect.h>
 
@@ -54,7 +54,7 @@ public:
 
     bool isUpdateOnDemand() const { return mUpdateOnDemand; }
 #ifdef FSL_EPDC_FB    
-    status_t setUpdateRectangle(const Rect& updateRect, int mode);
+    status_t setUpdateRectangle(Vector < Rect > &rectList, Vector < int > &modelist, int count);
 #else
     status_t setUpdateRectangle(const Rect& updateRect);
 #endif
@@ -86,6 +86,11 @@ private:
     int32_t mBufferHead;
     int32_t mCurrentBufferIndex;
     bool mUpdateOnDemand;
+    int left[20];
+    int top[20];
+    int width[20];
+    int height[20];
+    int updatemode[20];
 };
     
 // ---------------------------------------------------------------------------

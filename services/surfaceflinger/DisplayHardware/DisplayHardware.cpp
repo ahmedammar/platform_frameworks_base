@@ -314,7 +314,7 @@ int DisplayHardware::getCurrentBufferIndex() const {
 }
 
 #ifdef FSL_EPDC_FB
-void DisplayHardware::flip(const Region& dirty, int mode) const
+void DisplayHardware::flip(const Region& dirty, Vector<Rect>& rectList, Vector<int>& modelist, int count) const
 {
     checkGLErrors();
 
@@ -331,7 +331,7 @@ void DisplayHardware::flip(const Region& dirty, int mode) const
 #endif
     
     if (mFlags & PARTIAL_UPDATES) {
-        mNativeWindow->setUpdateRectangle(dirty.getBounds(), mode);
+        mNativeWindow->setUpdateRectangle(rectList, modelist, count);
     }
     
     mPageFlipCount++;

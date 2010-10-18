@@ -153,12 +153,28 @@ FramebufferNativeWindow::~FramebufferNativeWindow()
 }
 
 #ifdef FSL_EPDC_FB
-status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r, int mode) 
+status_t FramebufferNativeWindow::setUpdateRectangle(Vector < Rect > &rectList, Vector < int > &modelist, int count)
 {
     if (!mUpdateOnDemand) {
         return INVALID_OPERATION;
     }
-    return fbDev->setUpdateRect(fbDev, r.left, r.top, r.width(), r.height(),mode);
+    if(count > 20)
+    {
+        LOGE("FramebufferNativeWindow::setUpdateRectangle count > 10\n");
+        return INVALID_OPERATION;
+    }
+    int actualcount=0;
+    for(int i=0; i< count; i++)
+    {
+        if (((rectList[i].width()|rectList[i].height()) <= 0) || ((rectList[i].left|rectList[i].top)<0)) continue;
+        left[actualcount]        = rectList[i].left;
+        top[actualcount]         = rectList[i].top;
+        width[actualcount]       = rectList[i].width();
+        height[actualcount]      = rectList[i].height();
+        updatemode[actualcount]  = modelist[i];
+        actualcount ++;
+    }
+    return fbDev->setUpdateRect(fbDev, left,top,width, height,updatemode, actualcount);
 }
 #else
 status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r) 

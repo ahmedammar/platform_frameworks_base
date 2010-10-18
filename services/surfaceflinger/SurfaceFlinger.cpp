@@ -66,10 +66,11 @@
 #endif
 
 #define DISPLAY_COUNT       1
-
+#define MAX_LAYER           10
 //EINK_CONVERT_MODE_NOCONVERT|EINK_INVERT_MODE_NOINVERT|EINK_DITHER_MODE_NODITHER|EINK_COMBINE_MODE_NOCOMBINE|
 //EINK_WAIT_MODE_WAIT|EINK_UPDATE_MODE_PARTIAL|EINK_AUTO_MODE_REGIONAL|EINK_WAVEFORM_MODE_AUTO;
 #define UI_DEFAULT_MODE 0x0044
+#define SPECIAL_MODE_MASK 0x0700
 
 namespace android {
 // ---------------------------------------------------------------------------
@@ -102,6 +103,9 @@ SurfaceFlinger::SurfaceFlinger()
         mConsoleSignals(0),
         mSecureFrameBuffer(0)
 {
+    //fix the maximum layer is 10;
+    mRegionsDirtyReglist = new DirtyRegList[MAX_LAYER];
+    mNeedspecialupdate   = 0;
     init();
 }
 
@@ -126,6 +130,8 @@ void SurfaceFlinger::init()
 SurfaceFlinger::~SurfaceFlinger()
 {
     glDeleteTextures(1, &mWormholeTexName);
+    mNeedspecialupdate   = 0;
+    delete []mRegionsDirtyReglist;
 }
 
 overlay_control_device_t* SurfaceFlinger::getOverlayEngine() const
@@ -385,6 +391,9 @@ bool SurfaceFlinger::threadLoop()
 
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     if (LIKELY(hw.canDraw() && !isFrozen())) {
+        // repaint the framebuffer (if needed)
+#ifdef FSL_EPDC_FB
+        getDirtyGroup();
 
 #ifdef USE_COMPOSITION_BYPASS
         if (handleBypassLayer()) {
@@ -404,8 +413,6 @@ bool SurfaceFlinger::threadLoop()
         logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
         hw.compositionComplete();
 
-#ifdef FSL_EPDC_FB
-        getDirtyGroup();
         
         unlockClients();
 
@@ -413,7 +420,26 @@ bool SurfaceFlinger::threadLoop()
 
         releaseDirtyGroup();
         // release the clients before we flip ('cause flip might block)
-#else        
+#else    
+
+#ifdef USE_COMPOSITION_BYPASS
+        if (handleBypassLayer()) {
+            unlockClients();
+            return true;
+        }
+#endif
+    
+        const int index = hw.getCurrentBufferIndex();
+        GraphicLog& logger(GraphicLog::getInstance());
+
+        logger.log(GraphicLog::SF_REPAINT, index);
+
+        // repaint the framebuffer (if needed)
+        handleRepaint();
+        logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
+
+        // inform the h/w that we're done compositing
+        hw.compositionComplete();
         // release the clients before we flip ('cause flip might block)
         unlockClients();
 
@@ -451,7 +477,8 @@ void SurfaceFlinger::getDirtyGroup()
     size_t count = currentLayers.size();
     sp<LayerBase> const* layers = currentLayers.array();
 
-    mLayersDirtyReglist = new DirtyRegList[count];
+    mLayersDirtyReglist   =  new DirtyRegList[count];
+    mReupdateDirtyReglist =  new DirtyRegList[count];
 
     
     for (size_t i=0 ; i<count ; i++) {
@@ -465,84 +492,262 @@ void SurfaceFlinger::getDirtyGroup()
             DirtyRegionNode *pDirtyRegNode = NULL;
             pDirtyRegList->GetDiryRegionNode(j,pDirtyRegNode);
             if (pDirtyRegNode != NULL){
-               mLayersDirtyReglist[i].AddDirtyRegionNodeToEnd(pDirtyRegNode->mDirtyRegion.getBounds(), pDirtyRegNode->mDirtyRegionMode);
+                if((pDirtyRegNode->mDirtyRegionMode & SPECIAL_MODE_MASK) != 0)
+                {
+                    mRegionsDirtyReglist[i].AddDirtyRegionNodeToEnd(pDirtyRegNode->mDirtyRegion.getBounds(),pDirtyRegNode->mDirtyRegionMode);
+                    mNeedspecialupdate ++;
+                    //LOGI("add special region layer=%d, mRegionsDirtyReglist=%d \n",i,mRegionsDirtyReglist[i].mDirtyRegListLength);
+                }else
+                {
+                    mLayersDirtyReglist[i].AddDirtyRegionNodeToEnd(pDirtyRegNode->mDirtyRegion.getBounds(), pDirtyRegNode->mDirtyRegionMode);
+                    //LOGI("getDirtyGroup layer=%d, left=%d, top=%d, right=%d, bottom=%d \n",i, pDirtyRegNode->mDirtyRegion.getBounds().left, pDirtyRegNode->mDirtyRegion.getBounds().top,
+                    //    pDirtyRegNode->mDirtyRegion.getBounds().right,pDirtyRegNode->mDirtyRegion.getBounds().bottom);
+                }
             }
         }
     }
+
+    if(count > MAX_LAYER ) LOGI("Layer is larger than 10 \n");
+    for (size_t i=0 ; i<count ; i++) {
+        int length = mRegionsDirtyReglist[i].mDirtyRegListLength;
+        //LOGI("layer=%d, mRegionsDirtyReglist=%d \n",i,length);
+        //LOGI("layer=%d, mLayersDirtyReglist=%d \n",i,mLayersDirtyReglist[i].mDirtyRegListLength);
+        for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++){
+            DirtyRegionNode *pDirtyRegNode = NULL;
+            mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+
+            if (pDirtyRegNode != NULL){
+               //LOGI("mDirtyRegionMode=%d ",pDirtyRegNode->mDirtyRegionMode);
+               if((pDirtyRegNode->mDirtyRegionMode & SPECIAL_MODE_MASK) == 0)
+               {
+                     if(true == mRegionsDirtyReglist[i].DeleteDirtyRegionNode(pDirtyRegNode->mDirtyRegion.getBounds()))
+                     {
+                        mNeedspecialupdate --;
+                        //LOGI("delete special region layer=%d, mRegionsDirtyReglist=%d \n",i,mRegionsDirtyReglist[i].mDirtyRegListLength);
+                     }
+               }
+
+            }
+        }
+
+    }
+/*
+    for (size_t i=0 ; i<count ; i++) {
+        for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++){
+            DirtyRegionNode *pDirtyRegNode = NULL;
+            mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+
+           if (pDirtyRegNode != NULL){
+                LOGI("mDirtyRegionMode=%d ",pDirtyRegNode->mDirtyRegionMode);
+                if((pDirtyRegNode->mDirtyRegionMode & SPECIAL_MODE_MASK) != 0)
+                {
+                    mRegionsDirtyReglist[i].AddDirtyRegionNodeToEnd(pDirtyRegNode->mDirtyRegion.getBounds(),pDirtyRegNode->mDirtyRegionMode);
+                    mNeedspecialupdate ++;
+                    LOGI("add special region layer=%d, mRegionsDirtyReglist=%d \n",i,mRegionsDirtyReglist[i].mDirtyRegListLength);
+                }
+            }
+        }
+   }
+    */
 }
 
 void SurfaceFlinger::releaseDirtyGroup()
 {
     delete []mLayersDirtyReglist;
+    delete []mReupdateDirtyReglist;
 }
 
 void SurfaceFlinger::EinkOptPostFramebuffer()
 {
             bool bNeedPartialupdate = false;
             Region pInvalidRegion = mInvalidRegion;
+            Region lInvalidRegion = mInvalidRegion;
+
             LayerVector& currentLayers = const_cast<LayerVector&>(mDrawingState.layersSortedByZ);
             size_t count = currentLayers.size();
             sp<LayerBase> const* layers = currentLayers.array();
-            
+
             const nsecs_t now = systemTime();
             mDebugInSwapBuffers = now;
-            
+
             for (size_t i=0 ; i<count ; i++) {
                 const sp<LayerBase>& layer = layers[i];
-              
+
                     for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++){
                         DirtyRegionNode *pDirtyRegNode = NULL;
                         mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
                         if (pDirtyRegNode != NULL)
                            if(pDirtyRegNode->mDirtyRegionMode != UI_DEFAULT_MODE)
-                               {
+                           {
                                     bNeedPartialupdate = true;
                                     break;
-                                }
+                           }
                     }
                 if (bNeedPartialupdate == true) break;
             }
-            
-            if (bNeedPartialupdate == true){
-                for (size_t i=0 ; i<count ; i++) {
-                    const sp<LayerBase>& layer = layers[i];
-                  
-                    for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++){
-                        Rect dirtyRect; 
-                        DirtyRegionNode *pDirtyRegNode = NULL;
-                        int mode;
-                        mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
 
-                        if (pDirtyRegNode != NULL)
-                              pInvalidRegion = mInvalidRegion.intersect(pDirtyRegNode->mDirtyRegion);
-                          
-                          mode = pDirtyRegNode->mDirtyRegionMode;
-                          
-                          postFramebuffer(pInvalidRegion, mode);
+                //LOGI("EinkOptPostFramebuffer mInvalidRegion left=%d, top=%d, right=%d, bottom=%d \n",mInvalidRegion.getBounds().left, mInvalidRegion.getBounds().top,
+                //              mInvalidRegion.getBounds().right,mInvalidRegion.getBounds().bottom);
+            if ((mNeedspecialupdate > 0) ){
+
+                    LOGI("------special update-----------");
+                    /*
+                    for (size_t i=0 ; i<count ; i++) {
+                        for (int j = 0; j < mReupdateDirtyReglist[i].mDirtyRegListLength; j ++)
+                        {
+                            DirtyRegionNode *pDirtyRegNode = NULL;
+                            mReupdateDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+                            if (pDirtyRegNode != NULL)
+                            {
+                                mInvalidRegion.subtractSelf(pDirtyRegNode->mDirtyRegion);
+                            }
+                        }
+                    }
+                    */
+
+                    for (size_t i=0 ; i<count ; i++) {
+                        for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++)
+                        {
+                            DirtyRegionNode *pDirtyRegNode = NULL;
+                            mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+                            if (pDirtyRegNode != NULL)
+                            {
+                                mInvalidRegion.subtractSelf(pDirtyRegNode->mDirtyRegion);
+                            }
+                        }
+                    }
+
+                    int allnum = 0;
+                    Vector<Rect> rectList;
+                    Vector<Rect> allrectList;
+                    Vector<int>  allupdatemode;
+
+                    for(int j=0; j < mInvalidRegion.getRects(rectList); j++)
+                    {
+                        allrectList.add(rectList[j]);
+                        allupdatemode.add(UI_DEFAULT_MODE);
+                        //LOGI("EinkOptPostFramebuffer rect %d  left=%d, top=%d, right=%d, bottom=%d mode=%d \n",allnum, allrectList[allnum].left, allrectList[allnum].top,
+                        //      allrectList[allnum].right,allrectList[allnum].bottom,UI_DEFAULT_MODE);
+                        allnum++;
                     }
                     
-                }
-            }else{
+                    for (size_t i=0 ; i<count ; i++) {
+                        for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++)
+                        {
+                            DirtyRegionNode *pDirtyRegNode = NULL;
+                            mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+                            if (pDirtyRegNode != NULL)
+                            {
+                                lInvalidRegion = pInvalidRegion.intersect(pDirtyRegNode->mDirtyRegion);
+                                allrectList.add(lInvalidRegion.getBounds());
+                                allupdatemode.add(pDirtyRegNode->mDirtyRegionMode);
+                                //LOGI("EinkOptPostFramebuffer rect %d  left=%d, top=%d, right=%d, bottom=%d mode=%d\n",allnum, allrectList[allnum].left, allrectList[allnum].top,
+                                //    allrectList[allnum].right,allrectList[allnum].bottom,pDirtyRegNode->mDirtyRegionMode);
+                                allnum ++;
+                            }
+                        }
+                    }
 
-                postFramebuffer(mInvalidRegion, UI_DEFAULT_MODE);
-            }
-            
+                    for (size_t i=0 ; i<count ; i++) {
+                        for (int j = 0; j < mReupdateDirtyReglist[i].mDirtyRegListLength; j ++)
+                        {
+                            DirtyRegionNode *pDirtyRegNode = NULL;
+                            mReupdateDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+                            if (pDirtyRegNode != NULL)
+                            {
+                                allrectList.add(pDirtyRegNode->mDirtyRegion.getBounds());
+                                allupdatemode.add(pDirtyRegNode->mDirtyRegionMode)   ;
+                                //LOGI("EinkOptPostFramebuffer rect %d  left=%d, top=%d, right=%d, bottom=%d mode=%d\n",allnum, allrectList[allnum].left, allrectList[allnum].top,
+                                //    allrectList[allnum].right,allrectList[allnum].bottom,pDirtyRegNode->mDirtyRegionMode);
+                                allnum++;
+                            }
+                        }
+                    }
+
+                    postFramebuffer(pInvalidRegion, allrectList, allupdatemode,allnum);
+
+                }else if(bNeedPartialupdate == true )
+                {
+                    LOGI("------partial update-----------");
+                /*
+                   for (size_t i=0 ; i<count ; i++) {
+                        for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++)
+                        {
+                            DirtyRegionNode *pDirtyRegNode = NULL;
+                            mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+                            if (pDirtyRegNode != NULL)
+                            {
+                                mInvalidRegion.subtractSelf(pDirtyRegNode->mDirtyRegion);
+                            }
+                        }
+                    }
+                  */
+
+                    int allnum = 0;
+                    Vector<Rect> rectList;
+                    Vector<Rect> allrectList;
+                    Vector<int>  allupdatemode;
+                    /*
+                    for(int j=0; j < mInvalidRegion.getRects(rectList); j++)
+                    {
+                        allrectList.add(rectList[j]);
+                        allupdatemode.add(UI_DEFAULT_MODE);
+
+                        LOGI("EinkOptPostFramebuffer rect %d  left=%d, top=%d, right=%d, bottom=%d mode=%d \n",allnum, allrectList[allnum].left, allrectList[allnum].top,
+                              allrectList[allnum].right,allrectList[allnum].bottom,UI_DEFAULT_MODE);
+                        allnum++;
+                    }
+                    */
+
+                    for (size_t i=0 ; i<count ; i++) {
+                        for (int j = 0; j < mLayersDirtyReglist[i].mDirtyRegListLength; j ++)
+                        {
+                            DirtyRegionNode *pDirtyRegNode = NULL;
+                            mLayersDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+                            if (pDirtyRegNode != NULL)
+                            {
+                                lInvalidRegion = pInvalidRegion.intersect(pDirtyRegNode->mDirtyRegion);
+                                allrectList.add(lInvalidRegion.getBounds());
+                                allupdatemode.add(pDirtyRegNode->mDirtyRegionMode);
+                                //LOGI("EinkOptPostFramebuffer rect %d  left=%d, top=%d, right=%d, bottom=%d mode=%d\n",allnum, allrectList[allnum].left, allrectList[allnum].top,
+                                //    allrectList[allnum].right,allrectList[allnum].bottom,pDirtyRegNode->mDirtyRegionMode);
+                                allnum ++;
+                            }
+                        }
+                    }
+
+                    postFramebuffer(pInvalidRegion, allrectList, allupdatemode,allnum);
+
+                }
+                else
+                {
+                    LOGI("------normal update-----------");
+                    Vector<Rect> allrectList;
+                    Vector<int>  allupdatemode;
+                    allrectList.add(mInvalidRegion.getBounds());
+                    allupdatemode.add(UI_DEFAULT_MODE);
+                    //LOGI("EinkOptPostFramebuffer default rect   left=%d, top=%d, right=%d, bottom=%d \n", allrectList[0].left, allrectList[0].top,
+                    //          allrectList[0].right,allrectList[0].bottom);
+                    postFramebuffer(mInvalidRegion, allrectList,allupdatemode,1);
+                }
+
             mLastSwapBufferTime = systemTime() - now;
             mDebugInSwapBuffers = 0;
             mInvalidRegion.clear();
-            
+
 }
 
 
-void SurfaceFlinger::postFramebuffer(Region pInvalidRegion, int mode)
+void SurfaceFlinger::postFramebuffer(Region pInvalidRegion, Vector<Rect>& rectList, Vector<int>& modelist, int count)
 {
     if (!pInvalidRegion.isEmpty()) {
+
         if (UNLIKELY(mDebugFps)) {
             debugShowFPS();
         }
-        const DisplayHardware& hw(graphicPlane(0).displayHardware());
 
-        hw.flip(pInvalidRegion, mode);
+        const DisplayHardware& hw(graphicPlane(0).displayHardware());
+        hw.flip(pInvalidRegion,rectList, modelist, count);
     }
 }
 #else
@@ -1016,6 +1221,25 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
         const Region clip(dirty.intersect(layer->visibleRegionScreen));
         if (!clip.isEmpty()) {
             layer->draw(clip);
+            const Region& coveredRegion(layer->coveredRegionScreen);
+            const Region  exposedRegion = visibleRegion - coveredRegion;
+            for (int j = 0; j < mRegionsDirtyReglist[i].mDirtyRegListLength; j ++)
+            {
+                DirtyRegionNode *pDirtyRegNode = NULL;
+                mRegionsDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+                if (pDirtyRegNode != NULL)
+                {
+                    //LOGI("composeSurfaces  exposedRegion layer=%d, left=%d, top=%d, right=%d, bottom=%d \n",i,exposedRegion.getBounds().left, exposedRegion.getBounds().top,
+                    //            exposedRegion.getBounds().right,exposedRegion.getBounds().bottom);
+                    const Region specialeclip(exposedRegion.intersect(pDirtyRegNode->mDirtyRegion));
+                    if(!specialeclip.isEmpty())
+                    {
+                        //LOGI("composeSurfaces  specialeclip layer=%d, left=%d, top=%d, right=%d, bottom=%d \n",i,specialeclip.getBounds().left, specialeclip.getBounds().top,
+                        //        specialeclip.getBounds().right,specialeclip.getBounds().bottom);
+                        mReupdateDirtyReglist[i].AddDirtyRegionNodeToEnd(specialeclip.getBounds(), pDirtyRegNode->mDirtyRegionMode);
+                    }
+                }
+            }
         }
     }
 }
@@ -1065,7 +1289,11 @@ void SurfaceFlinger::debugFlashRegions()
         mInvalidRegion.dump("mInvalidRegion");
     }
 #ifdef FSL_EPDC_FB
-    hw.flip(mInvalidRegion, UI_DEFAULT_MODE);
+    Vector<Rect> allrectList;
+    Vector<int>  allupdatemode;
+    allrectList.add(mInvalidRegion.getBounds());
+    allupdatemode.add(UI_DEFAULT_MODE);
+    hw.flip(mInvalidRegion, allrectList, allupdatemode, 1);
 #else
     hw.flip(mInvalidRegion);
 #endif

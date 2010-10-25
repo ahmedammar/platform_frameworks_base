@@ -47,7 +47,7 @@ public class ThumbnailUtils {
     private static final String TAG = "ThumbnailUtils";
 
     /* Maximum pixels size for created bitmap. */
-    private static final int MAX_NUM_PIXELS_THUMBNAIL = 128 * 128;
+    private static final int MAX_NUM_PIXELS_THUMBNAIL = 512 * 384;
     private static final int MAX_NUM_PIXELS_MICRO_THUMBNAIL = 128 * 128;
     private static final int UNCONSTRAINED = -1;
 
@@ -65,7 +65,7 @@ public class ThumbnailUtils {
      * Constant used to indicate the dimension of mini thumbnail.
      * @hide Only used by media framework and media provider internally.
      */
-    public static final int TARGET_SIZE_MINI_THUMBNAIL = 96;
+    public static final int TARGET_SIZE_MINI_THUMBNAIL = 320;
 
     /**
      * Constant used to indicate the dimension of micro thumbnail.

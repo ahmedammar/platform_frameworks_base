@@ -642,8 +642,30 @@ public final class ViewRoot extends Handler implements ViewParentEink, ViewParen
     }
 
     public void invalidateChild(View child, Rect dirty) {
-         invalidateChild (child, dirty, View.UI_DEFAULT_MODE);
-         }
+        checkThread();
+        if (DEBUG_DRAW) Log.v(TAG, "Invalidate child: " + dirty);
+        if (mCurScrollY != 0 || mTranslator != null) {
+            mTempRect.set(dirty);
+            dirty = mTempRect;
+            if (mCurScrollY != 0) {
+               dirty.offset(0, -mCurScrollY);
+            }
+            if (mTranslator != null) {
+                mTranslator.translateRectInAppWindowToScreen(dirty);
+            }
+            if (mAttachInfo.mScalingRequired) {
+                dirty.inset(-1, -1);
+            }
+        }
+
+        mDirty.union(dirty);
+
+        mDirtygroup.add(new int []{dirty.left, dirty.top, dirty.right, dirty.bottom, View.UI_DEFAULT_MODE});
+
+        if (!mWillDrawSoon) {
+            scheduleTraversals();
+        }
+    }
     public void invalidateChild(View child, Rect dirty, int updateMode) {
 
         checkThread();
@@ -676,7 +698,7 @@ public final class ViewRoot extends Handler implements ViewParentEink, ViewParen
     }
 
     public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
-        invalidateChild(null, dirty, View.UI_DEFAULT_MODE);
+        invalidateChild(null, dirty );
         return null;
         }
 

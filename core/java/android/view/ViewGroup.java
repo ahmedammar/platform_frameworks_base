@@ -2464,9 +2464,56 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
      * Don't call or override this method. It is used for the implementation of
      * the view hierarchy.
      */
-      public final void invalidateChild(View child, final Rect dirty) {
-         invalidateChild( child,  dirty, UI_DEFAULT_MODE);
-      }
+    public final void invalidateChild(View child, final Rect dirty) {
+        if (ViewDebug.TRACE_HIERARCHY) {
+            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD);
+        }
+
+        ViewParent parent = this;
+
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            final int[] location = attachInfo.mInvalidateChildLocation;
+            location[CHILD_LEFT_INDEX] = child.mLeft;
+            location[CHILD_TOP_INDEX] = child.mTop;
+
+            // If the child is drawing an animation, we want to copy this flag onto
+            // ourselves and the parent to make sure the invalidate request goes
+            // through
+            final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
+
+            // Check whether the child that requests the invalidate is fully opaque
+            final boolean isOpaque = child.isOpaque() && !drawAnimation &&
+                    child.getAnimation() != null;
+            // Mark the child as dirty, using the appropriate flag
+            // Make sure we do not set both flags at the same time
+            final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
+
+            do {
+                View view = null;
+                if (parent instanceof View) {
+                    view = (View) parent;
+                }
+
+                if (drawAnimation) {
+                    if (view != null) {
+                        view.mPrivateFlags |= DRAW_ANIMATION;
+                    } else if (parent instanceof ViewRoot) {
+                        ((ViewRoot) parent).mIsAnimating = true;
+                    }
+                }
+
+                // If the parent is dirty opaque or not dirty, mark it dirty with the opaque
+                // flag coming from the child that initiated the invalidate
+                if (view != null && (view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
+                    view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
+                }
+
+                parent = parent.invalidateChildInParent(location, dirty);
+            } while (parent != null);
+        }
+    }
+    
     public final void invalidateChild(View child, final Rect dirty, final int updateMode) {
 
         if (ViewDebug.TRACE_HIERARCHY) {

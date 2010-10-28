@@ -5383,7 +5383,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param updateMode update mode for this draw
      */
     public void invalidate(Rect dirty) {
-        invalidate(dirty, UI_DEFAULT_MODE);
+        if (ViewDebug.TRACE_HIERARCHY) {
+            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
+        }
+
+        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
+            mPrivateFlags &= ~DRAWING_CACHE_VALID;
+            final ViewParent p = (ViewParent)mParent;
+			Log.d("@@@@", " invalidate(Rect dirty b) p is "+p);
+            final AttachInfo ai = mAttachInfo;
+            if (p != null && ai != null) {
+                final int scrollX = mScrollX;
+                final int scrollY = mScrollY;
+                final Rect r = ai.mTmpInvalRect;
+                r.set(dirty.left - scrollX, dirty.top - scrollY,
+                        dirty.right - scrollX, dirty.bottom - scrollY);
+                p.invalidateChild(this, r);
+            }
+        }
     }
 
     /**
@@ -5428,7 +5445,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param updateMode update mode for this draw 
     */
     public void invalidate(int l, int t, int r, int b) {
-        invalidate(l,t,r,b, UI_DEFAULT_MODE );
+        if (ViewDebug.TRACE_HIERARCHY) {
+            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
+        }
+        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
+            mPrivateFlags &= ~DRAWING_CACHE_VALID;
+            final ViewParent p =(ViewParent) mParent;
+            final AttachInfo ai = mAttachInfo;
+            if (p != null && ai != null && l < r && t < b) {
+                final int scrollX = mScrollX;
+                final int scrollY = mScrollY;
+                final Rect tmpr = ai.mTmpInvalRect;
+                tmpr.set(l - scrollX, t - scrollY, r - scrollX, b - scrollY);
+                p.invalidateChild(this, tmpr);
+            }
+        }
     } 
 
     /**
@@ -5461,7 +5492,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param updateMode update mode for this draw
      */
     public void invalidate() {
-        invalidate(UI_DEFAULT_MODE);
+        if (ViewDebug.TRACE_HIERARCHY) {
+            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
+        }
+        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
+            mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
+            final ViewParent p = (ViewParent)mParent;
+            final AttachInfo ai = mAttachInfo;
+            if (p != null && ai != null) {
+                final Rect r = ai.mTmpInvalRect;
+                r.set(0, 0, mRight - mLeft, mBottom - mTop);
+                // Don't call invalidate -- we don't want to internally scroll
+                // our own bounds
+                p.invalidateChild(this, r);
+            }
+        }
     }
 
     /**
@@ -5602,7 +5647,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #invalidate()
      */
     public void postInvalidate() {
-        postInvalidateDelayed(0, UI_DEFAULT_MODE);
+        postInvalidateDelayed(0);
     }
 
     public void postInvalidate(int updateMode) {
@@ -5621,7 +5666,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #invalidate(Rect)
      */
     public void postInvalidate(int left, int top, int right, int bottom) {
-        postInvalidateDelayed(0, left, top, right, bottom, UI_DEFAULT_MODE);
+        postInvalidateDelayed(0, left, top, right, bottom );
     }
 	
     public void postInvalidate(int left, int top, int right, int bottom, int updateMode) {
@@ -5640,7 +5685,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void postInvalidateDelayed(long delayMilliseconds) {
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
-        postInvalidateDelayed( delayMilliseconds, UI_DEFAULT_MODE);
+        if (mAttachInfo != null) {
+
+            final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
+            info.target = this;
+            info.updateMode = UI_DEFAULT_MODE;
+
+            Message msg = Message.obtain();
+            msg.what = AttachInfo.INVALIDATE_MSG;
+            msg.obj = info;
+            mAttachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
+        }
     }
     public void postInvalidateDelayed(long delayMilliseconds, int updateMode) {
         // We try only with the AttachInfo because there's no point in invalidating
@@ -5674,8 +5729,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
-        postInvalidateDelayed(delayMilliseconds,  left,  top,
-             right,  bottom,  UI_DEFAULT_MODE);
+        if (mAttachInfo != null) {
+            final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
+            info.target = this;
+            info.left = left;
+            info.top = top;
+            info.right = right;
+            info.bottom = bottom;
+            info.updateMode = UI_DEFAULT_MODE;
+
+            final Message msg = Message.obtain();
+            msg.what = AttachInfo.INVALIDATE_RECT_MSG;
+            msg.obj = info;
+            mAttachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
+        }
     }
 
     public void postInvalidateDelayed(long delayMilliseconds, int left, int top,
@@ -7497,7 +7564,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param drawable the drawable to invalidate
      */
      public void invalidateDrawable(Drawable drawable) {
-          invalidateDrawable(drawable, UI_DEFAULT_MODE);
+        if (verifyDrawable(drawable)) {
+            final Rect dirty = drawable.getBounds();
+            final int scrollX = mScrollX;
+            final int scrollY = mScrollY;
+
+            invalidate(dirty.left + scrollX, dirty.top + scrollY,
+                    dirty.right + scrollX, dirty.bottom + scrollY);
+        }
     }
 
 

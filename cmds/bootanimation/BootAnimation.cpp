@@ -331,7 +331,11 @@ bool BootAnimation::android()
             break;
 
         // 12fps: don't animate too fast to preserve CPU
+#ifdef FSL_EPDC_FB
+        const nsecs_t sleepTime = 1000000 - ns2us(systemTime() - now);
+#else
         const nsecs_t sleepTime = 83333 - ns2us(systemTime() - now);
+#endif        
         if (sleepTime > 0)
             usleep(sleepTime);
     } while (!exitPending());

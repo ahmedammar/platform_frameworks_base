@@ -506,7 +506,6 @@ public class Environment {
 
     /**
     * Returns the state of the first SD card.
-    * @hide
     */
     public static String getExternalSDStorageState() {
         return getMediaState(EXTERNAL_STORAGE_DIRECTORY_SD.getPath());
@@ -514,7 +513,6 @@ public class Environment {
 
     /**
     * Returns the state of the second SD card.
-    * @hide
     */
     public static String getExternalExtSDStorageState() {
         return getMediaState(EXTERNAL_STORAGE_DIRECTORY_EXTSD.getPath());
@@ -534,7 +532,6 @@ public class Environment {
     }
 
     * Returns the state of the U disk.
-    * @hide
     */
     public static String getExternalUDiskStorageState() {
         return getMediaState(EXTERNAL_STORAGE_DIRECTORY_UDISK.getPath());

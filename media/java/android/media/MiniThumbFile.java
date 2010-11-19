@@ -49,8 +49,8 @@ public class MiniThumbFile {
     public static final int BYTES_PER_MINTHUMB = 10000;
     private static final int HEADER_SIZE = 1 + 8 + 4;
     private Uri mUri;
-    private RandomAccessFile mMiniThumbFile;
-    private FileChannel mChannel;
+    private RandomAccessFile mMiniThumbFile[] = {null, null, null};
+    private FileChannel mChannel[] = {null, null, null};
     private ByteBuffer mBuffer;
     private static Hashtable<String, MiniThumbFile> sThumbFiles =
         new Hashtable<String, MiniThumbFile>();
@@ -69,7 +69,6 @@ public class MiniThumbFile {
     public static synchronized MiniThumbFile instance(Uri uri) {
         String type = uri.getPathSegments().get(1);
         MiniThumbFile file = sThumbFiles.get(type);
-        // Log.v(TAG, "get minithumbfile for type: "+type);
         if (file == null) {
             file = new MiniThumbFile(
                     Uri.parse("content://media/external/" + type + "/media"));
@@ -86,6 +85,22 @@ public class MiniThumbFile {
         return directoryName + "/.thumbdata" + version + "-" + mUri.hashCode();
     }
 
+    private String randomAccessExtSDFilePath(int version) {
+        String directoryName =
+                Environment.getExternalExtSDStorageDirectory().toString()
+                + "/DCIM/.thumbnails";
+        return directoryName + "/.thumbdata" + version + "-" + mUri.hashCode();
+    }
+
+    private String randomAccessUDiskFilePath(int version) {
+        String directoryName =
+                Environment.getExternalUDiskStorageDirectory().toString()
+                + "/DCIM/.thumbnails";
+        return directoryName + "/.thumbdata" + version + "-" + mUri.hashCode();
+    }
+
+
+
     private void removeOldFile() {
         String oldPath = randomAccessFilePath(MINI_THUMB_DATA_FILE_VERSION - 1);
         File oldFile = new File(oldPath);
@@ -99,7 +114,7 @@ public class MiniThumbFile {
     }
 
     private RandomAccessFile miniThumbDataFile() {
-        if (mMiniThumbFile == null) {
+        if (mMiniThumbFile[0] == null) {
             removeOldFile();
             String path = randomAccessFilePath(MINI_THUMB_DATA_FILE_VERSION);
             File directory = new File(path).getParentFile();
@@ -111,21 +126,63 @@ public class MiniThumbFile {
             }
             File f = new File(path);
             try {
-                mMiniThumbFile = new RandomAccessFile(f, "rw");
+                mMiniThumbFile[0] = new RandomAccessFile(f, "rw");
             } catch (IOException ex) {
                 // Open as read-only so we can at least read the existing
                 // thumbnails.
                 try {
-                    mMiniThumbFile = new RandomAccessFile(f, "r");
+                    mMiniThumbFile[0] = new RandomAccessFile(f, "r");
                 } catch (IOException ex2) {
                     // ignore exception
                 }
             }
-            if (mMiniThumbFile != null) {
-                mChannel = mMiniThumbFile.getChannel();
+            if (mMiniThumbFile[0] != null) {
+                mChannel[0] = mMiniThumbFile[0].getChannel();
             }
         }
-        return mMiniThumbFile;
+        return mMiniThumbFile[0];
+    }
+
+    private RandomAccessFile miniThumbDataFile(long id) {
+        //Save data into seperate disk; 0:sdcard, 1:extsd, 2:udisk
+        int index = 0;
+        index = (int)(id >> 16);
+        
+        if (mMiniThumbFile[index] == null) {
+            removeOldFile();
+
+            String path = null;
+            if (index == 1)
+                path = randomAccessExtSDFilePath(MINI_THUMB_DATA_FILE_VERSION);
+            else if (index ==2)
+                path = randomAccessUDiskFilePath(MINI_THUMB_DATA_FILE_VERSION);
+            else
+                path = randomAccessFilePath(MINI_THUMB_DATA_FILE_VERSION);
+
+            File directory = new File(path).getParentFile();
+            if (!directory.isDirectory()) {
+                if (!directory.mkdirs()) {
+                    Log.e(TAG, "Unable to create .thumbnails directory "
+                            + directory.toString());
+                }
+            }
+            File f = new File(path);
+            try {
+                mMiniThumbFile[index] = new RandomAccessFile(f, "rw");
+            } catch (IOException ex) {
+                // Open as read-only so we can at least read the existing
+                // thumbnails.
+                try {
+                    mMiniThumbFile[index] = new RandomAccessFile(f, "r");
+                } catch (IOException ex2) {
+                    // ignore exception
+                }
+            }
+            if (mMiniThumbFile[index] != null) {
+                mChannel[index] = mMiniThumbFile[index].getChannel();
+            }
+        }
+        return mMiniThumbFile[index];
     }
 
     public MiniThumbFile(Uri uri) {
@@ -134,12 +191,15 @@ public class MiniThumbFile {
     }
 
     public synchronized void deactivate() {
-        if (mMiniThumbFile != null) {
-            try {
-                mMiniThumbFile.close();
-                mMiniThumbFile = null;
-            } catch (IOException ex) {
+        for (int i = 0; i < 3; i++)
+        {
+            if (mMiniThumbFile != null) {
+                try {
+                    mMiniThumbFile[i].close();
+                    mMiniThumbFile[i] = null;
+                } catch (IOException ex) {
                 // ignore exception
+                }
             }
         }
     }
@@ -150,7 +210,12 @@ public class MiniThumbFile {
         // check the mini thumb file for the right data.  Right is
         // defined as having the right magic number at the offset
         // reserved for this "id".
-        RandomAccessFile r = miniThumbDataFile();
+        int index = 0;
+        RandomAccessFile r = miniThumbDataFile(id);
+
+        index = (int)(id >> 16);
+
+        id &= 0xffff;
         if (r != null) {
             long pos = id * BYTES_PER_MINTHUMB;
             FileLock lock = null;
@@ -158,10 +223,10 @@ public class MiniThumbFile {
                 mBuffer.clear();
                 mBuffer.limit(1 + 8);
 
-                lock = mChannel.lock(pos, 1 + 8, true);
+                lock = mChannel[index].lock(pos, 1 + 8, true);
                 // check that we can read the following 9 bytes
                 // (1 for the "status" and 8 for the long)
-                if (mChannel.read(mBuffer, pos) == 9) {
+                if (mChannel[index].read(mBuffer, pos) == 9) {
                     mBuffer.position(0);
                     if (mBuffer.get() == 1) {
                         return mBuffer.getLong();
@@ -187,9 +252,13 @@ public class MiniThumbFile {
 
     public synchronized void saveMiniThumbToFile(byte[] data, long id, long magic)
             throws IOException {
-        RandomAccessFile r = miniThumbDataFile();
+        RandomAccessFile r = miniThumbDataFile(id);
         if (r == null) return;
 
+        int index = 0;
+        index = (int)(id >> 16);
+
+        id &= 0xffff;
         long pos = id * BYTES_PER_MINTHUMB;
         FileLock lock = null;
         try {
@@ -205,8 +274,8 @@ public class MiniThumbFile {
                 mBuffer.put(data);
                 mBuffer.flip();
 
-                lock = mChannel.lock(pos, BYTES_PER_MINTHUMB, false);
-                mChannel.write(mBuffer, pos);
+                lock = mChannel[index].lock(pos, BYTES_PER_MINTHUMB, false);
+                mChannel[index].write(mBuffer, pos);
             }
         } catch (IOException ex) {
             Log.e(TAG, "couldn't save mini thumbnail data for "
@@ -234,15 +303,19 @@ public class MiniThumbFile {
      * @param data the buffer to store mini-thumbnail.
      */
     public synchronized byte [] getMiniThumbFromFile(long id, byte [] data) {
-        RandomAccessFile r = miniThumbDataFile();
+        RandomAccessFile r = miniThumbDataFile(id);
         if (r == null) return null;
 
+        int index = 0;
+        index = (int)(id >> 16);
+
+        id &= 0xffff;
         long pos = id * BYTES_PER_MINTHUMB;
         FileLock lock = null;
         try {
             mBuffer.clear();
-            lock = mChannel.lock(pos, BYTES_PER_MINTHUMB, true);
-            int size = mChannel.read(mBuffer, pos);
+            lock = mChannel[index].lock(pos, BYTES_PER_MINTHUMB, true);
+            int size = mChannel[index].read(mBuffer, pos);
             if (size > 1 + 8 + 4) { // flag, magic, length
                 mBuffer.position(0);
                 byte flag = mBuffer.get();

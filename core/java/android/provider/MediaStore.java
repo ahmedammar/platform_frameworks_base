@@ -332,7 +332,7 @@ public final class MediaStore {
                 BitmapFactory.Options options, Uri baseUri, boolean isVideo) {
             Bitmap bitmap = null;
             String filePath = null;
-            // Log.v(TAG, "getThumbnail: origId="+origId+", kind="+kind+", isVideo="+isVideo);
+            //Log.v(TAG, "getThumbnail: origId="+origId+", kind="+kind+", isVideo="+isVideo+ "uri:"+baseUri.getPath());
             // If the magic is non-zero, we simply return thumbnail if it does exist.
             // querying MediaProvider and simply return thumbnail.
             MiniThumbFile thumbFile = MiniThumbFile.instance(baseUri);

@@ -308,6 +308,8 @@ public class MediaScanner
     private Uri mPlaylistsUri;
     private boolean mProcessPlaylists, mProcessGenres;
 
+    private boolean DEBUG = false;
+
     // used when scanning the image database so we know whether we have to prune
     // old thumbnail files
     private int mOriginalCount;
@@ -533,7 +535,7 @@ public class MediaScanner
         }
         public Uri doScanFile(String path, String mimeType, long lastModified, long fileSize, boolean scanAlways) {
             Uri result = null;
-//            long t1 = System.currentTimeMillis();
+
             try {
                 FileCacheEntry entry = beginFile(path, mimeType, lastModified, fileSize);
                 // rescan for metadata if file was modified since last scan
@@ -557,8 +559,7 @@ public class MediaScanner
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
             }
-//            long t2 = System.currentTimeMillis();
-//            Log.v(TAG, "scanFile: " + path + " took " + (t2-t1));
+
             return result;
         }
 
@@ -878,7 +879,6 @@ public class MediaScanner
                 }
             }
 
-            Log.v(TAG, "isVideoFileType... " + result);
             return result;
         }
 
@@ -941,10 +941,6 @@ public class MediaScanner
         // Build the list of files from the content provider
         try {
             // Read existing files from the audio table
-            if (filePath != null) {
-                where = MediaStore.Audio.Media.DATA + "=?";
-                selectionArgs = new String[] { filePath };
-            }
             c = mMediaProvider.query(mAudioUri, AUDIO_PROJECTION, where, selectionArgs, null);
 
             if (c != null) {
@@ -973,11 +969,6 @@ public class MediaScanner
             }
 
             // Read existing files from the video table
-            if (filePath != null) {
-                where = MediaStore.Video.Media.DATA + "=?";
-            } else {
-                where = null;
-            }
             c = mMediaProvider.query(mVideoUri, VIDEO_PROJECTION, where, selectionArgs, null);
 
             if (c != null) {
@@ -1006,17 +997,13 @@ public class MediaScanner
             }
 
             // Read existing files from the images table
-            if (filePath != null) {
-                where = MediaStore.Images.Media.DATA + "=?";
-            } else {
-                where = null;
-            }
             mOriginalCount = 0;
             c = mMediaProvider.query(mImagesUri, IMAGES_PROJECTION, where, selectionArgs, null);
 
             if (c != null) {
                 try {
                     mOriginalCount = c.getCount();
+                    if (DEBUG) Log.i(TAG, String.format("After query, the count is %d.", mOriginalCount));
                     while (c.moveToNext()) {
                         long rowId = c.getLong(ID_IMAGES_COLUMN_INDEX);
                         String path = c.getString(PATH_IMAGES_COLUMN_INDEX);
@@ -1030,6 +1017,7 @@ public class MediaScanner
                            if (mCaseInsensitivePaths) {
                                key = path.toLowerCase();
                            }
+                           if (DEBUG) Log.i(TAG, "Put a image to cache");
                            mFileCache.put(key, new FileCacheEntry(mImagesUri, rowId, path,
                                    lastModified));
                        }
@@ -1042,11 +1030,6 @@ public class MediaScanner
 
             if (mProcessPlaylists) {
                 // Read existing files from the playlists table
-                if (filePath != null) {
-                    where = MediaStore.Audio.Playlists.DATA + "=?";
-                } else {
-                    where = null;
-                }
                 c = mMediaProvider.query(mPlaylistsUri, PLAYLISTS_PROJECTION, where, selectionArgs, null);
 
                 if (c != null) {
@@ -1137,6 +1120,7 @@ public class MediaScanner
     private void postscan(String[] directories) throws RemoteException {
         Iterator<FileCacheEntry> iterator = mFileCache.values().iterator();
 
+        long step1 = System.currentTimeMillis();
         while (iterator.hasNext()) {
             FileCacheEntry entry = iterator.next();
             String path = entry.mPath;
@@ -1177,13 +1161,26 @@ public class MediaScanner
             }
         }
 
+        long step2 = System.currentTimeMillis();
+
         // handle playlists last, after we know what media files are on the storage.
         if (mProcessPlaylists) {
             processPlayLists();
         }
 
+        long step3 = System.currentTimeMillis();
+
         if (mOriginalCount == 0 && mImagesUri.equals(Images.Media.getContentUri("external")))
             pruneDeadThumbnailFiles();
+
+        long end = System.currentTimeMillis();
+
+        if (DEBUG) {
+                Log.d(TAG, " step1 time: " + (step2 - step1) + "ms\n");
+                Log.d(TAG, " step2 time: " + (step3 - step2) + "ms\n");
+                Log.d(TAG, " step3 time: " + (end - step3) + "ms\n");
+                Log.d(TAG, " total time: " + (end - step1) + "ms\n");
+            }
 
         // allow GC to clean up
         mGenreCache = null;
@@ -1195,10 +1192,11 @@ public class MediaScanner
     private void initialize(String volumeName) {
         mMediaProvider = mContext.getContentResolver().acquireProvider("media");
 
-        mAudioUri = Audio.Media.EXTERNAL_CONTENT_URI;
-        mVideoUri = Video.Media.EXTERNAL_CONTENT_URI;
-        mImagesUri = Images.Media.EXTERNAL_CONTENT_URI;
-        mThumbsUri = Images.Thumbnails.EXTERNAL_CONTENT_URI;
+        
+        mAudioUri = Audio.Media.getContentUri(volumeName);
+        mVideoUri = Video.Media.getContentUri(volumeName);
+        mImagesUri = Images.Media.getContentUri(volumeName);
+        mThumbsUri = Images.Thumbnails.getContentUri(volumeName);
 
         if (!volumeName.equals("internal")) {
             // we only support playlists on external media
@@ -1218,23 +1216,32 @@ public class MediaScanner
         try {
             long start = System.currentTimeMillis();
             initialize(volumeName);
-            prescan(null);
+
+            //update the file information
+            if (DEBUG) Log.i(TAG, "Prescan start!");
+            prescan(volumeName);
             long prescan = System.currentTimeMillis();
 
-            Log.i(TAG, "scanDirectories start"+directories[0]);
+            if (DEBUG) Log.i(TAG, "scanDirectories start"+directories[0]);
             for (int i = 0; i < directories.length; i++) {
                 processDirectory(directories[i], MediaFile.sFileExtensions, mClient);
             }
             long scan = System.currentTimeMillis();
+
+            if (DEBUG) Log.i(TAG, "postscan start!");
             postscan(directories);
             long end = System.currentTimeMillis();
 
-            if (Config.LOGD) {
+
+            if (DEBUG) {
                 Log.d(TAG, " prescan time: " + (prescan - start) + "ms\n");
                 Log.d(TAG, "    scan time: " + (scan - prescan) + "ms\n");
                 Log.d(TAG, "postscan time: " + (end - scan) + "ms\n");
                 Log.d(TAG, "   total time: " + (end - start) + "ms\n");
             }
+
+
+            
         } catch (SQLException e) {
             // this might happen if the SD card is removed while the media scanner is running
             Log.e(TAG, "SQLException in MediaScanner.scan()", e);

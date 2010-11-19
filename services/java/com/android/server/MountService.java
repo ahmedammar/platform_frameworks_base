@@ -542,9 +542,9 @@ class MountService extends IMountService.Stub
         String oldState = mLegacyState[index];
         mLegacyState[index] = state;
 
-        if (index > 0)
+        if (index == 1)
         {
-            Slog.w(TAG, "When the second sd card or the third sd card acts, the state doesn't change!");
+            Slog.w(TAG, "When the second sd card acts, the state doesn't change!");
             return;
         }
 

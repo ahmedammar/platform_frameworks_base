@@ -5342,6 +5342,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         return false;
     }
 
+    public int numOfAvailableBuffer() {
+        final ViewParentEink p = (ViewParentEink)mParent;
+        return p.numOfAvailableBuffer(this);
+    }
+    
     /**
      * Mark the the area defined by dirty as needing to be drawn. If the view is
      * visible, {@link #onDraw} will be called at some point in the future.

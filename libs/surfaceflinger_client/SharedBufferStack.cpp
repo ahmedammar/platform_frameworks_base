@@ -387,6 +387,12 @@ ssize_t SharedBufferClient::dequeue()
     return dequeued;
 }
 
+ssize_t SharedBufferClient::numOfAvailableBuffer()
+{
+    SharedBufferStack& stack( *mSharedStack );    
+    return stack.available;
+}
+
 status_t SharedBufferClient::undoDequeue(int buf)
 {
     return cancel(buf);

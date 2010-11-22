@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* Copyright (c) 2010 Freescale Semiconductors Inc. */
+
 
 #ifndef ANDROID_SF_SURFACE_H
 #define ANDROID_SF_SURFACE_H
@@ -166,6 +166,8 @@ public:
 
     // setSwapRectangle() is intended to be used by GL ES clients
     void        setSwapRectangle(const Rect& r);
+    
+    int         numOfAvailableBuffer(); 
 
 
 private:

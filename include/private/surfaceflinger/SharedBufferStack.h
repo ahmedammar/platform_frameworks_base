@@ -217,6 +217,10 @@ public:
     };
     status_t setBufferCount(int bufferCount, const SetBufferCountCallback& ipc);
 
+
+    ssize_t numOfAvailableBuffer();
+
+    
 private:
     friend struct Condition;
     friend struct DequeueCondition;

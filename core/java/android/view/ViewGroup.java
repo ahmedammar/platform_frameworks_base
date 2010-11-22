@@ -2460,6 +2460,17 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
         }
     }
 
+
+
+    public int numOfAvailableBuffer(View child) {
+    
+        ViewParentEink parent = (ViewParentEink)mParent;
+        if (parent != null) {
+            return parent.numOfAvailableBuffer(this);
+        }
+        return 0;
+    }
+    
     /**
      * Don't call or override this method. It is used for the implementation of
      * the view hierarchy.

@@ -293,6 +293,16 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format)
     }
 }
 
+static jint Surface_numOfAvailableBuffer(JNIEnv* env, jobject clazz)
+{
+    const sp<Surface>& surface(getSurface(env, clazz));
+    if (!Surface::isValid(surface))
+        return 0;
+            
+    return surface->numOfAvailableBuffer();
+        
+}
+
 static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz,  jobject dirtyRect, jintArray dirtyRectGroup)
 {
     const sp<Surface>& surface(getSurface(env, clazz));
@@ -699,6 +709,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"release",             "()V",  (void*)Surface_release },
 	{"copyFrom",            "(Landroid/view/Surface;)V",  (void*)Surface_copyFrom },
 	{"isValid",             "()Z",  (void*)Surface_isValid },
+	{"numOfAvailableBuffer", "()I", (void*)Surface_numOfAvailableBuffer },	
 	{"lockCanvasNative",    "(Landroid/graphics/Rect;[I)Landroid/graphics/Canvas;",  (void*)Surface_lockCanvas },
 	{"unlockCanvasAndPost", "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvasAndPost },
 	{"unlockCanvas",        "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvas },

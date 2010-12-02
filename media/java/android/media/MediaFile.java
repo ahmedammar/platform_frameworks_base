@@ -72,8 +72,9 @@ public class MediaFile {
     public static final int FILE_TYPE_FLV     = 40;
     public static final int FILE_TYPE_RMV     = 41;
     public static final int FILE_TYPE_MKV     = 42;
+    public static final int FILE_TYPE_MPG2     = 43;
     private static final int FIRST_VIDEO_FILE_TYPE = FILE_TYPE_MP4;
-    private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_MKV;
+    private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_MPG2;
     
     // Image file types
     public static final int FILE_TYPE_JPEG    = 51;
@@ -208,6 +209,13 @@ public class MediaFile {
         if ("1".equals(value)) {
             addFileType("MKA", FILE_TYPE_MKA, "audio/matroska");
             addFileType("MKV", FILE_TYPE_MKV, "video/matroska");
+        }
+
+        //Check FSL_MPG2_PARSER property
+        value = SystemProperties.get("ro.FSL_MPG2_PARSER");
+        if ("1".equals(value)) {
+            addFileType("MPG", FILE_TYPE_MPG2, "video/mpg2");
+            addFileType("VOB", FILE_TYPE_MPG2, "video/mpg2");
         }
 
         //Check FSL_FLAC_PARSER property

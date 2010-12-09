@@ -1784,6 +1784,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } else {
                     // Otherwise, wake the device ourselves.
                     result |= ACTION_POKE_USER_ACTIVITY;
+                    result |= ACTION_WAKE_TO_SLEEP;
                 }
             }
         }
@@ -1890,6 +1891,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                     interceptPowerKeyDown(!isScreenOn || hungUp);
+                    if((result & ACTION_WAKE_TO_SLEEP) !=0 && mPowerManager.getSystemState()==2)
+                    {
+                        // only try to turn off the screen if we didn't already hang up
+                        mShouldTurnOffOnKeyUp = true;
+                        mHandler.postDelayed(mPowerLongPress,
+                                ViewConfiguration.getGlobalActionKeyTimeout());
+                        result &= ~ACTION_PASS_TO_USER;                        
+                    }
                 } else {
                     if (interceptPowerKeyUp(canceled)) {
                         result = (result & ~ACTION_POKE_USER_ACTIVITY) | ACTION_GO_TO_SLEEP;

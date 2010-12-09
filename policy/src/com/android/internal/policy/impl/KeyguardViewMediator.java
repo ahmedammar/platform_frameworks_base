@@ -337,7 +337,13 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
                                  + mDelayedShowingSequence);
 		*/
-                doKeyguard();
+                if ("1".equals(SystemProperties.get("ro.FSL_EINK_POWER")))
+                {
+                    
+                }else
+                {
+                    doKeyguard();
+                }
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
                 // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {

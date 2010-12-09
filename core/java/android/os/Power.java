@@ -77,7 +77,7 @@ public class Power
      *
      * @param on Whether you want the screen on or off
      */
-    public static native int setScreenState(boolean on);
+    public static native int setScreenState(int on);
 
     public static native int setLastUserActivityTimeout(long ms);
 

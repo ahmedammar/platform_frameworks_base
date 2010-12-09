@@ -50,4 +50,6 @@ public interface LocalPowerManager {
 
     void setScreenBrightnessOverride(int brightness);
     void setButtonBrightnessOverride(int brightness);
+    
+    int getSystemState();
 }

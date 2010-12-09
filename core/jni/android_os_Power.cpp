@@ -77,7 +77,7 @@ setLastUserActivityTimeout(JNIEnv *env, jobject clazz, jlong timeMS)
 }
 
 static int
-setScreenState(JNIEnv *env, jobject clazz, jboolean on)
+setScreenState(JNIEnv *env, jobject clazz, jint on)
 {
     return set_screen_state(on);
 }
@@ -111,7 +111,7 @@ static JNINativeMethod method_table[] = {
     { "releaseWakeLock", "(Ljava/lang/String;)V", (void*)releaseWakeLock },
     { "enableDvfs", "(Z)I", (void*)enableDvfs },
     { "setLastUserActivityTimeout", "(J)I", (void*)setLastUserActivityTimeout },
-    { "setScreenState", "(Z)I", (void*)setScreenState },
+    { "setScreenState", "(I)I", (void*)setScreenState },
     { "shutdown", "()V", (void*)android_os_Power_shutdown },
     { "rebootNative", "(Ljava/lang/String;)V", (void*)android_os_Power_reboot },
 };

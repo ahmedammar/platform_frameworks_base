@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.WorkSource;
+import android.os.SystemProperties;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings;
 import android.util.EventLog;
@@ -258,6 +259,7 @@ class PowerManagerService extends IPowerManager.Stub
     private boolean moldLPmode=false;
     private boolean mnewLPmode=false;
 
+    int mSystemState = 1;
     // could be either static or controllable at runtime
     private static final boolean mSpew = false;
     private static final boolean mDebugProximitySensor = (false || mSpew);
@@ -1644,8 +1646,30 @@ class PowerManagerService extends IPowerManager.Stub
             }
         };
 
+    public int getSystemState()
+    {
+        return mSystemState;
+    }
+
     private int setScreenStateLocked(boolean on) {
-        int err = Power.setScreenState(on);
+
+        int         state = 0;
+        if(on)      state = 1;
+        else        state = 0;
+        
+        mSystemState = state;
+        
+        if("1".equals(SystemProperties.get("ro.FSL_EINK_POWER")))
+        {
+            // suspend eink;
+            if((mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT) && (on==false))  
+            {   
+                state = 2;
+                mSystemState = 2;
+            }
+        }
+        
+        int err = Power.setScreenState(state);
         if (err == 0) {
             mLastScreenOnTime = (on ? SystemClock.elapsedRealtime() : 0);
             if (mUseSoftwareAutoBrightness) {

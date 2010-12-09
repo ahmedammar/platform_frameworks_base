@@ -105,6 +105,9 @@ public interface WindowManagerPolicy {
      */
     public final static int ACTION_GO_TO_SLEEP = 0x00000004;
 
+    
+    public final static int ACTION_WAKE_TO_SLEEP = 0x00000008;
+    
     /**
      * Interface to the Window Manager state associated with a particular
      * window.  You can hold on to an instance of this interface from the call

@@ -279,7 +279,9 @@ void LayerBase::getCurrentDirtyRegList(DirtyRegList * & CurrentDirtyRegList)
 void LayerBase::finishPageFlip()
 {
 }
-
+void LayerBase::finishPageFlip_eink()
+{
+}
 void LayerBase::invalidate()
 {
     if ((android_atomic_or(1, &mInvalidate)&1) == 0) {

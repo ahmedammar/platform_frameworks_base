@@ -108,6 +108,8 @@ public:
     volatile int32_t reserved1;
     volatile status_t status;   // surface's status code
 
+    volatile int32_t numofbuffer; // number of buffers not posted; use one reserved buffer
+    
     // not part of the conditions
     volatile int32_t reallocMask;
     volatile int8_t index[NUM_BUFFER_MAX];
@@ -117,7 +119,6 @@ public:
     Statistics  stats;
     int8_t      headBuf;        // last retired buffer
     uint8_t     reservedBytes[3];
-    int32_t     reserved;
     BufferData  buffers[NUM_BUFFER_MAX];     // 1024 bytes
 };
 
@@ -225,6 +226,9 @@ private:
     friend struct Condition;
     friend struct DequeueCondition;
     friend struct LockCondition;
+    friend struct BufferAllFreeCondition;
+    
+    int32_t computeTail() const;
 
     struct QueueUpdate : public UpdateBase {
         inline QueueUpdate(SharedBufferBase* sbb);
@@ -250,6 +254,13 @@ private:
         inline const char* name() const { return "DequeueCondition"; }
     };
 
+    struct BufferAllFreeCondition : public ConditionBase {
+        inline BufferAllFreeCondition(SharedBufferClient* sbc);
+        inline bool operator()();
+        static inline const char* name() { return "BufferAllFreeCondition"; }
+    };
+    
+    
     struct LockCondition : public ConditionBase {
         int buf;
         inline LockCondition(SharedBufferClient* sbc, int buf);
@@ -290,6 +301,8 @@ public:
     status_t resize(int newNumBuffers);
 
     SharedBufferStack::Statistics getStats() const;
+
+    ssize_t frameBufferHaveReleased();
     
 
 private:
@@ -353,6 +366,12 @@ private:
     struct RetireUpdate : public UpdateBase {
         const int numBuffers;
         inline RetireUpdate(SharedBufferBase* sbb, int numBuffers);
+        inline ssize_t operator()();
+    };
+
+    struct ReleaseFBUpdate : public UpdateBase {
+        const int numBuffers;
+        inline ReleaseFBUpdate(SharedBufferBase* sbb, int numBuffers);
         inline ssize_t operator()();
     };
 

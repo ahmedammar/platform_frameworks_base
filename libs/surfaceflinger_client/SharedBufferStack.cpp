@@ -253,6 +253,14 @@ bool SharedBufferClient::DequeueCondition::operator()() const {
     return stack.available > 0;
 }
 
+SharedBufferClient::BufferAllFreeCondition::BufferAllFreeCondition(
+        SharedBufferClient* sbc) : ConditionBase(sbc)  { 
+}
+bool SharedBufferClient::BufferAllFreeCondition::operator()() {
+    return stack.numofbuffer == 2;
+}
+
+
 SharedBufferClient::LockCondition::LockCondition(
         SharedBufferClient* sbc, int buf) : ConditionBase(sbc), buf(buf) { 
 }
@@ -326,6 +334,18 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
     return head;
 }
 
+
+SharedBufferServer::ReleaseFBUpdate::ReleaseFBUpdate(
+        SharedBufferBase* sbb, int numBuffers)
+    : UpdateBase(sbb), numBuffers(numBuffers) {
+}
+ssize_t SharedBufferServer::ReleaseFBUpdate::operator()() {
+    
+    // now that head has moved, we can increment the number of available buffers
+    stack.numofbuffer = stack.available;
+    return NO_ERROR;
+}
+
 SharedBufferServer::StatusUpdate::StatusUpdate(
         SharedBufferBase* sbb, status_t status)
     : UpdateBase(sbb), status(status) {
@@ -376,6 +396,13 @@ ssize_t SharedBufferClient::dequeue()
 
     DequeueUpdate update(this);
     updateCondition( update );
+    // NOTE: 'stack.available' is part of the conditions, however
+    // decrementing it, never changes any conditions, so we don't need
+    // to do this as part of an update.
+    if (android_atomic_dec(&stack.available) == 0) {
+        LOGW("dequeue probably called from multiple threads!");
+    }
+    stack.numofbuffer = stack.available;
 
     int dequeued = stack.index[tail];
     tail = ((tail+1 >= mNumBuffers) ? 0 : tail+1);
@@ -389,8 +416,14 @@ ssize_t SharedBufferClient::dequeue()
 
 ssize_t SharedBufferClient::numOfAvailableBuffer()
 {
-    SharedBufferStack& stack( *mSharedStack );    
-    return stack.available;
+    SharedBufferStack& stack( *mSharedStack );  
+    
+    BufferAllFreeCondition condition(this);
+    status_t err = waitForCondition(condition);
+    if (err != NO_ERROR)
+        return 0;    
+      
+    return stack.numofbuffer;
 }
 
 status_t SharedBufferClient::undoDequeue(int buf)
@@ -495,7 +528,8 @@ SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
     mSharedStack->init(identity);
     mSharedStack->token = surface;
     mSharedStack->head = num-1;
-    mSharedStack->available = num;
+    mSharedStack->available   = num;
+    mSharedStack->numofbuffer = num;
     mSharedStack->queued = 0;
     mSharedStack->reallocMask = 0;
     memset(mSharedStack->buffers, 0, sizeof(mSharedStack->buffers));
@@ -524,6 +558,22 @@ ssize_t SharedBufferServer::retireAndLock()
                 int(buf), dump("").string());
     }
     return buf;
+}
+
+
+ssize_t SharedBufferServer::frameBufferHaveReleased()
+{
+    ReleaseFBUpdate update(this, mNumBuffers);
+    ssize_t buf = updateCondition( update );
+    return buf;
+}
+
+
+status_t SharedBufferServer::unlock(int buf)
+{
+    UnlockUpdate update(this, buf);
+    status_t err = updateCondition( update );
+    return err;
 }
 
 void SharedBufferServer::setStatus(status_t status)

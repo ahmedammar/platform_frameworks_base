@@ -632,6 +632,13 @@ void Layer::finishPageFlip()
             this, mFrontBufferIndex);
 }
 
+
+void Layer::finishPageFlip_eink()
+{
+    status_t err = lcblk->frameBufferHaveReleased();
+}
+
+
 // ---------------------------------------------------------------------------
 
 Layer::SurfaceLayer::SurfaceLayer(const sp<SurfaceFlinger>& flinger,

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* Copyright (c) 2010 Freescale Semiconductors Inc. */
+/* Copyright (C) 2010 Freescale Semiconductors Inc. */
 
 #ifndef ANDROID_LAYER_H
 #define ANDROID_LAYER_H
@@ -73,6 +73,8 @@ public:
     virtual bool isSecure() const           { return mSecure; }
     virtual sp<Surface> createSurface() const;
     virtual status_t ditch();
+    
+    virtual void finishPageFlip_eink();
     
     // only for debugging
     inline sp<GraphicBuffer> getBuffer(int i) { return mBuffers[i]; }

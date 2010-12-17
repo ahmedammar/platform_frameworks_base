@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* Copyright (c) 2010 Freescale Semiconductors Inc. */
+/* Copyright (c) 2010 Freescale Semiconductor Inc. */
 
 #ifndef OMX_MEDIA_SCANNER_H_
 

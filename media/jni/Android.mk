@@ -21,7 +21,15 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libsurfaceflinger_client \
     libstagefright \
-    libcamera_client
+    libcamera_client \
+	lib_omx_player_arm11_elinux \
+	lib_omx_osal_v2_arm11_elinux \
+	lib_omx_client_arm11_elinux \
+	lib_omx_utils_v2_arm11_elinux \
+	lib_omx_core_mgr_v2_arm11_elinux \
+	lib_omx_res_mgr_v2_arm11_elinux \
+	lib_id3_parser_arm11_elinux
+
 
 LOCAL_STATIC_LIBRARIES :=
 

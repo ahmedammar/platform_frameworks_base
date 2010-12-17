@@ -515,6 +515,7 @@ public class MediaScanner
                     mFileType == MediaFile.FILE_TYPE_3GPP2 ||
                     mFileType == MediaFile.FILE_TYPE_OGG ||
                     mFileType == MediaFile.FILE_TYPE_AAC ||
+                    mFileType == MediaFile.FILE_TYPE_WAV ||
                     mFileType == MediaFile.FILE_TYPE_MID ||
                     mFileType == MediaFile.FILE_TYPE_WMA ||
                     mFileType == MediaFile.FILE_TYPE_AVI ||
@@ -549,8 +550,8 @@ public class MediaScanner
                         (!ringtones && !notifications && !alarms && !podcasts);
 
                     if( isMetadataSupported(mFileType) ) {
-                            processFile(path, mimeType, this);
-                    } else if (MediaFile.isImageFileType(mFileType)) {
+						processFile(path, mimeType, this);
+					} else if (MediaFile.isImageFileType(mFileType)) {
                         // we used to compute the width and height but it's not worth it
                     }
 

@@ -32,6 +32,7 @@
 #include "android_runtime/AndroidRuntime.h"
 
 #include <media/stagefright/StagefrightMediaScanner.h>
+#include <media/OMXMediaScanner.h>
 
 // ----------------------------------------------------------------------------
 
@@ -278,6 +279,28 @@ android_media_MediaScanner_native_init(JNIEnv *env)
         jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaScanner.mNativeContext");
         return;
     }
+}
+
+static MediaScanner *createMediaScanner() {
+
+    char valueOMX[PROPERTY_VALUE_MAX];
+    if (property_get("media.omxgm.enable-scan", valueOMX, NULL)
+        && (!strcmp(valueOMX, "1") || !strcasecmp(valueOMX, "true"))) {
+        return new OMXMediaScanner;
+    }
+
+#if BUILD_WITH_FULL_STAGEFRIGHT
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.enable-scan", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        return new StagefrightMediaScanner;
+    }
+#endif
+#ifndef NO_OPENCORE
+    return new PVMediaScanner();
+#endif
+
+    return NULL;
 }
 
 static void

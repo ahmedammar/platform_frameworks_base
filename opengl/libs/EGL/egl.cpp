@@ -1867,6 +1867,41 @@ EGLClientBuffer eglGetRenderBufferANDROID(EGLDisplay dpy, EGLSurface draw)
     return setError(EGL_BAD_DISPLAY, (EGLClientBuffer*)0);
 }
 
+// ----------------------------------------------------------------------------
+// FSL extensions
+// ----------------------------------------------------------------------------
+
+EGLBoolean eglQueryImageFSL(EGLDisplay dpy, EGLImageKHR img, EGLint attribute, EGLint* value)
+{
+    egl_display_t const * const dp = get_display(dpy);
+    if (dp == 0) {
+     return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+    }
+
+    ImageRef _i(img);
+    if (!_i.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+
+    egl_image_t* image = get_image(img);
+    bool success = false;
+    for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
+        egl_connection_t* const cnx = &gEGLImpl[i];
+        if (image->images[i] != EGL_NO_IMAGE_KHR) {
+            if (cnx->dso) {
+                if (cnx->egl.eglCreateImageKHR) {
+                    if (cnx->egl.eglQueryImageFSL(
+                        dp->disp[i].dpy, image->images[i], attribute, value)) {
+                        success = true;
+                    }
+                }
+            }
+        }
+    }
+    if (!success)
+        return EGL_FALSE;
+
+    return EGL_TRUE;
+}
+
 void eglSetImplementationAndroid(EGLBoolean impl)
 {
 	gEGLImplSWOnly = impl;

@@ -237,6 +237,46 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSetSwapRectangleANDROID (EGLDisplay dpy, EGLSur
 typedef EGLBoolean (EGLAPIENTRYP PFNEGLSETSWAPRECTANGLEANDROIDPROC) (EGLDisplay dpy, EGLSurface draw, EGLint left, EGLint top, EGLint width, EGLint height);
 #endif
 
+// ----------------------------------------------------------------------------
+// FSL extensions
+// ----------------------------------------------------------------------------
+
+#ifndef EGL_FSL_create_image 
+#define EGL_FSL_create_image  1
+
+#define EGL_NEW_IMAGE_FSL                               0x3190
+#define EGL_IMAGE_FORMAT_FSL                            0x3191
+#define EGL_FORMAT_RGBA_8888_FSL                        0x3192
+#define EGL_FORMAT_RGB_565_FSL                          0x3193
+#define EGL_FORMAT_BGRA_8888_FSL                        0x3194
+#define EGL_FORMAT_YUV_YV12_FSL                         0x3195
+#define EGL_FORMAT_YUV_NV21_FSL                         0x3196
+#define EGL_FORMAT_YUV_UYVY_FSL                         0x3197
+#define GL_TEXTURE_EXTERNAL_OES                         0x8D65
+
+#endif //EGL_FSL_create_image
+
+#ifndef EGL_FSL_query_image
+#define EGL_FSL_query_image 1
+
+#define EGL_QUERY_IMAGE_FSL 1
+#define EGL_TARGET_TYPE_FSL         0x31A0
+#define EGL_CLIENTBUFFER_TYPE_FSL   0x31A1
+#define EGL_YUV_INFO_FSL            0x31A2
+
+struct EGLImageInfoFSL
+{
+    void *mem_virt[3]; //virtual addresses for Y/U/V planes
+    int mem_phy[3]; //physical addresses for Y/U/V planes
+    int stride; //image stride
+};
+
+#ifdef EGL_EGLEXT_PROTOTYPES
+EGLAPI EGLBoolean EGLAPIENTRY eglQueryImageFSL (EGLDisplay dpy, EGLImageKHR img, EGLint attribute, EGLint* value);
+#endif /* EGL_EGLEXT_PROTOTYPES */
+typedef EGLBoolean (EGLAPIENTRYP PFNEGLQUERYIMAGEFSLPROC) (EGLDisplay dpy, EGLImageKHR img, EGLint attribute, EGLint* value);
+#endif
+
 EGLAPI void EGLAPIENTRY eglSetImplementationAndroid(EGLBoolean impl);
 typedef void (EGLAPIENTRYP PFNEGLSETIMPLEMENTATIONANDROIDPROC) (EGLBoolean impl);
 #ifdef __cplusplus

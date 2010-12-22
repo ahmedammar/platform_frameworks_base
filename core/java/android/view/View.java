@@ -5342,9 +5342,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         return false;
     }
 
-    public int numOfAvailableBuffer() {
+    public int numOfAvailableBuffer(boolean lock) {
         final ViewParentEink p = (ViewParentEink)mParent;
-        return p.numOfAvailableBuffer(this);
+        return p.numOfAvailableBuffer(this,lock);
     }
     
     /**

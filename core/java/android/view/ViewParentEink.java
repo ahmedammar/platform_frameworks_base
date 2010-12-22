@@ -58,6 +58,6 @@ public interface ViewParentEink extends ViewParent{
     public ViewParentEink invalidateChildInParent(int[] location, Rect r, int updateMode);
     
     
-    public int  numOfAvailableBuffer(View child);
+    public int  numOfAvailableBuffer(View child,boolean lock);
     
 }

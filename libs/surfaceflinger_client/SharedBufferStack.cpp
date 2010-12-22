@@ -414,15 +414,18 @@ ssize_t SharedBufferClient::dequeue()
     return dequeued;
 }
 
-ssize_t SharedBufferClient::numOfAvailableBuffer()
+ssize_t SharedBufferClient::numOfAvailableBuffer(bool lock)
 {
     SharedBufferStack& stack( *mSharedStack );  
     
-    BufferAllFreeCondition condition(this);
-    status_t err = waitForCondition(condition);
-    if (err != NO_ERROR)
-        return 0;    
-      
+    if(lock)
+    {
+        BufferAllFreeCondition condition(this);
+        status_t err = waitForCondition(condition);
+        if (err != NO_ERROR)
+            return 0;    
+    }
+     
     return stack.numofbuffer;
 }
 

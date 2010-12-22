@@ -641,9 +641,9 @@ public final class ViewRoot extends Handler implements ViewParentEink, ViewParen
         return mLayoutRequested;
     }
 
-    public int numOfAvailableBuffer(View child) {
+    public int numOfAvailableBuffer(View child,boolean lock) {
         Surface surface = mSurface;    
-        return  surface.numOfAvailableBuffer();
+        return  surface.numOfAvailableBuffer(lock);
     }
     
     public void invalidateChild(View child, Rect dirty) {

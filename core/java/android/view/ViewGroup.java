@@ -2462,11 +2462,11 @@ public abstract class ViewGroup extends View implements ViewParentEink, ViewPare
 
 
 
-    public int numOfAvailableBuffer(View child) {
+    public int numOfAvailableBuffer(View child, boolean lock) {
     
         ViewParentEink parent = (ViewParentEink)mParent;
         if (parent != null) {
-            return parent.numOfAvailableBuffer(this);
+            return parent.numOfAvailableBuffer(this,lock);
         }
         return 0;
     }

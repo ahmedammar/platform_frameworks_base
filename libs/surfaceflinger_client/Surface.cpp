@@ -930,9 +930,9 @@ int Surface::getConnectedApi() const
     return mConnected;
 }
 
-int Surface::numOfAvailableBuffer() 
+int Surface::numOfAvailableBuffer(bool lock) 
 {
-    return mSharedBufferClient->numOfAvailableBuffer();
+    return mSharedBufferClient->numOfAvailableBuffer(lock);
 }
 
 // ----------------------------------------------------------------------------

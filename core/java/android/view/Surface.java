@@ -332,7 +332,7 @@ public class Surface implements Parcelable {
     public native   void unlockCanvas(Canvas canvas);
     
     
-    public native   int  numOfAvailableBuffer();
+    public native   int  numOfAvailableBuffer(boolean lock);
     
     
     /** start/end a transaction {@hide} */

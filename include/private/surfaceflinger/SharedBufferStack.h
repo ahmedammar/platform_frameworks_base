@@ -219,7 +219,7 @@ public:
     status_t setBufferCount(int bufferCount, const SetBufferCountCallback& ipc);
 
 
-    ssize_t numOfAvailableBuffer();
+    ssize_t numOfAvailableBuffer(bool lock);
 
     
 private:

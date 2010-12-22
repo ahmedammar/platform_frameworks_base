@@ -167,7 +167,7 @@ public:
     // setSwapRectangle() is intended to be used by GL ES clients
     void        setSwapRectangle(const Rect& r);
     
-    int         numOfAvailableBuffer(); 
+    int         numOfAvailableBuffer(bool lock); 
 
 
 private:

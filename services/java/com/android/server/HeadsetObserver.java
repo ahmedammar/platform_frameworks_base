@@ -37,8 +37,8 @@ class HeadsetObserver extends UEventObserver {
     private static final String TAG = HeadsetObserver.class.getSimpleName();
     private static final boolean LOG = true;
 
-    private static final String HEADSET_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/h2w";
-    private static final String HEADSET_STATE_PATH = "/sys/class/switch/h2w/state";
+    private static final String HEADSET_UEVENT_MATCH = "DEVPATH=/devices/platform/imx-3stack-sgtl5000.0";
+    private static final String HEADSET_STATE_PATH = "/sys/devices/platform/imx-3stack-sgtl5000.0/driver/headphone";
     private static final String HEADSET_NAME_PATH = "/sys/class/switch/h2w/name";
 
     private static final int BIT_HEADSET = (1 << 0);
@@ -69,7 +69,7 @@ class HeadsetObserver extends UEventObserver {
         if (LOG) Slog.v(TAG, "Headset UEVENT: " + event.toString());
 
         try {
-            update(event.get("SWITCH_NAME"), Integer.parseInt(event.get("SWITCH_STATE")));
+            update(event.get("NAME"), Integer.parseInt(event.get("STATE")));
         } catch (NumberFormatException e) {
             Slog.e(TAG, "Could not parse switch state from event " + event);
         }
@@ -84,11 +84,15 @@ class HeadsetObserver extends UEventObserver {
         try {
             FileReader file = new FileReader(HEADSET_STATE_PATH);
             int len = file.read(buffer, 0, 1024);
-            newState = Integer.valueOf((new String(buffer, 0, len)).trim());
+            // newState = Integer.valueOf((new String(buffer, 0, len)).trim());
 
-            file = new FileReader(HEADSET_NAME_PATH);
-            len = file.read(buffer, 0, 1024);
+            //file = new FileReader(HEADSET_NAME_PATH);
+            //len = file.read(buffer, 0, 1024);
             newName = new String(buffer, 0, len).trim();
+	    if (newName.equals("headphone"))
+		newState = 1;
+	    else
+		newState = 0;
 
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "This kernel does not have wired headset support");

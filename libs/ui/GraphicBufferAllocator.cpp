@@ -14,6 +14,7 @@
 ** See the License for the specific language governing permissions and 
 ** limitations under the License.
 */
+/* Copyright (c) 2011 Freescale Semiconductor, Inc. */
 
 #define LOG_TAG "GraphicBufferAllocator"
 

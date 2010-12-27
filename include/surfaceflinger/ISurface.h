@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (c) 2010 Freescale Semiconductors Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +70,6 @@ public:
      * sets the number of buffers dequeuable for this surface.
      */
     virtual status_t setBufferCount(int bufferCount) = 0;
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) = 0; 
     virtual void setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode) = 0; 
     
     // ------------------------------------------------------------------------

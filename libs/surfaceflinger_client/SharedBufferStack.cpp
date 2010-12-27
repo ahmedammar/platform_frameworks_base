@@ -256,7 +256,7 @@ bool SharedBufferClient::DequeueCondition::operator()() const {
 SharedBufferClient::BufferAllFreeCondition::BufferAllFreeCondition(
         SharedBufferClient* sbc) : ConditionBase(sbc)  { 
 }
-bool SharedBufferClient::BufferAllFreeCondition::operator()() {
+bool SharedBufferClient::BufferAllFreeCondition::operator()() const {
     return stack.numofbuffer == 2;
 }
 
@@ -399,10 +399,12 @@ ssize_t SharedBufferClient::dequeue()
     // NOTE: 'stack.available' is part of the conditions, however
     // decrementing it, never changes any conditions, so we don't need
     // to do this as part of an update.
+#if 0
     if (android_atomic_dec(&stack.available) == 0) {
         LOGW("dequeue probably called from multiple threads!");
     }
     stack.numofbuffer = stack.available;
+#endif
 
     int dequeued = stack.index[tail];
     tail = ((tail+1 >= mNumBuffers) ? 0 : tail+1);

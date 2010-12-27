@@ -565,9 +565,6 @@ class MountService extends IMountService.Stub
             mPms.updateExternalMediaStatus(true, false);
         }
 
-        String oldState = mLegacyState;
-        mLegacyState = state;
-
         synchronized (mListeners) {
             for (int i = mListeners.size() -1; i >= 0; i--) {
                 MountServiceBinderListener bl = mListeners.get(i);

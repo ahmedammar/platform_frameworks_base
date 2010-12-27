@@ -1149,7 +1149,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         }
     } else {
         // Resampler implementation limits input sampling rate to 2 x output sampling rate.
-        if (sampleRate > mSampleRate*2) {
+        if (sampleRate > mSampleRate*8) {
             LOGE("Sample rate out of range: %d mSampleRate %d", sampleRate, mSampleRate);
             lStatus = BAD_VALUE;
             goto Exit;
@@ -4165,7 +4165,7 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
             if (reconfig) {
                 if (status == BAD_VALUE &&
                     reqFormat == mInput->format() && reqFormat == AudioSystem::PCM_16_BIT &&
-                    ((int)mInput->sampleRate() <= 2 * reqSamplingRate) &&
+                    ((int)mInput->sampleRate() <= 8 * reqSamplingRate) &&
                     (AudioSystem::popCount(mInput->channels()) < 3) && (reqChannelCount < 3)) {
                     status = NO_ERROR;
                 }

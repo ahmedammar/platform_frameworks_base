@@ -5355,6 +5355,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * WARNING: This method is destructive to dirty.
      * @param dirty the rectangle representing the bounds of the dirty region
+     * @param updateMode update mode for this draw
      */
     public void invalidate(Rect dirty, int updateMode) {
         if (ViewDebug.TRACE_HIERARCHY) {
@@ -5385,7 +5386,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * WARNING: This method is destructive to dirty.
      * @param dirty the rectangle representing the bounds of the dirty region 
-     * @param updateMode update mode for this draw
      */
     public void invalidate(Rect dirty) {
         if (ViewDebug.TRACE_HIERARCHY) {
@@ -5447,7 +5447,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param t the top position of the dirty region
      * @param r the right position of the dirty region
      * @param b the bottom position of the dirty region 
-     * @param updateMode update mode for this draw 
     */
     public void invalidate(int l, int t, int r, int b) {
         if (ViewDebug.TRACE_HIERARCHY) {
@@ -5494,7 +5493,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Invalidate the whole view. If the view is visible, {@link #onDraw} will
      * be called at some point in the future. This must be called from a
      * UI thread. To call from a non-UI thread, call {@link #postInvalidate()}. 
-     * @param updateMode update mode for this draw
      */
     public void invalidate() {
         if (ViewDebug.TRACE_HIERARCHY) {

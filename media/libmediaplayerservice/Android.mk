@@ -33,8 +33,8 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libstagefright_omx    			\
 	libstagefright_color_conversion         \
 	libstagefright_foundation               \
-	libsurfaceflinger_client
-	lib_omx_player_arm11_elinux
+	libsurfaceflinger_client		\
+	lib_omx_player_arm11_elinux		\
 	lib_omx_player_arm11_elinux \
 	lib_omx_osal_v2_arm11_elinux \
 	lib_omx_client_arm11_elinux \

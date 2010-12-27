@@ -46,7 +46,7 @@ enum {
     SUSPEND,
     RESUME,
     SET_AUX_EFFECT_SEND_LEVEL,
-    ATTACH_AUX_EFFECT
+    ATTACH_AUX_EFFECT,
     SET_AUDIO_EFFECT,
     SET_AUDIO_EQUALIZER,
     CAPTURE_CURRENT_FRAME,
@@ -455,6 +455,7 @@ status_t BnMediaPlayer::onTransact(
         case ATTACH_AUX_EFFECT: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(attachAuxEffect(data.readInt32()));
+	} break;
         case SET_AUDIO_EFFECT: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             status_t ret = setAudioEffect(data.readInt32(),data.readInt32(),data.readInt32());
@@ -512,11 +513,9 @@ status_t BnMediaPlayer::onTransact(
             reply->writeInt32(ret);
             return NO_ERROR;
         } break;
-        default:
-            return BBinder::onTransact(code, data, reply, flags);
     }
+    return BBinder::onTransact(code, data, reply, flags);
 }
-
 // ----------------------------------------------------------------------------
 
 }; // namespace android

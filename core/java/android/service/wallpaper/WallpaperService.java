@@ -680,7 +680,7 @@ public abstract class WallpaperService extends Service {
                         // If becoming visible, in preview mode the surface
                         // may have been destroyed so now we need to make
                         // sure it is re-created.
-                        updateSurface(true, true);
+                        updateSurface(true, true, true);
                     }
                     onVisibilityChanged(visible);
                 }

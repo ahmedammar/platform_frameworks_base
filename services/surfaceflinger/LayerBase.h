@@ -462,7 +462,6 @@ public:
                 uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
         virtual status_t setBufferCount(int bufferCount);
 
-        virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
         virtual void setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode);
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
         virtual void postBuffer(ssize_t offset);

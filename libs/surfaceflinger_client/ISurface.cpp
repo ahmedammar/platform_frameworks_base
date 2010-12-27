@@ -87,6 +87,7 @@ public:
         reply.read(*buffer);
         return buffer;
     }
+
     virtual void setDirtyRect(int index,int left, int top, int right, int bottom, int dirtyMode)
     {
         Parcel data, reply;

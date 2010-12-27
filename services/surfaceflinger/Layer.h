@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (C) 2010 Freescale Semiconductors Inc. */
 
 #ifndef ANDROID_LAYER_H
 #define ANDROID_LAYER_H
@@ -73,12 +74,16 @@ public:
     virtual uint32_t doTransaction(uint32_t transactionFlags);
     virtual void lockPageFlip(bool& recomputeVisibleRegions);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
+    virtual void getCurrentDirtyRegList(DirtyRegList *& CurrentDirtyRegList);
+    virtual void finishPageFlip();
     virtual bool needsBlending() const      { return mNeedsBlending; }
     virtual bool needsDithering() const     { return mNeedsDithering; }
     virtual bool needsFiltering() const;
     virtual bool isSecure() const           { return mSecure; }
     virtual sp<Surface> createSurface() const;
     virtual status_t ditch();
+    
+    virtual void finishPageFlip_eink();
     virtual void onRemoved();
     virtual bool setBypass(bool enable);
 
@@ -103,6 +108,7 @@ private:
     sp<GraphicBuffer> requestBuffer(int bufferIdx,
             uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
     status_t setBufferCount(int bufferCount);
+    void setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode);
 
     // -----------------------------------------------------------------------
 
@@ -114,6 +120,8 @@ private:
         virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
                 uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
         virtual status_t setBufferCount(int bufferCount);
+        virtual void setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode);
+
         sp<Layer> getOwner() const {
             return static_cast<Layer*>(Surface::getOwner().get());
         }
@@ -227,7 +235,7 @@ private:
     // see threading usage in declaration
     TextureManager mTextureManager;
     BufferManager mBufferManager;
-
+            DirtyRegList    mDirtyRegList[2];
     // binder thread, transaction thread
     mutable Mutex mLock;
     uint32_t mWidth;

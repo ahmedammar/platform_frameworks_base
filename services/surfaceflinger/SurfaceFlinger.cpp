@@ -1220,8 +1220,10 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
     const size_t count = layers.size();
     for (size_t i=0 ; i<count ; ++i) {
         const sp<LayerBase>& layer(layers[i]);
+	const Region& visibleRegion(layer->visibleRegionScreen);
+	if (!visibleRegion.isEmpty())  {
         const Region clip(dirty.intersect(layer->visibleRegionScreen));
-        if (!clip.isEmpty()) {
+        //if (!clip.isEmpty()) {
             layer->draw(clip);
             const Region& coveredRegion(layer->coveredRegionScreen);
             const Region  exposedRegion = visibleRegion - coveredRegion;
@@ -1242,7 +1244,8 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
                     }
                 }
             }
-        }
+        //}
+	}
     }
 }
 
@@ -2217,7 +2220,15 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
         glColorMask(1,1,1,1);
         glColor4f(vg, vg, vg, 1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        hw.flip(screenBounds);
+#ifdef FSL_EPDC_FB
+    Vector<Rect> allrectList;
+    Vector<int>  allupdatemode;
+    allrectList.add(screenBounds.getBounds());
+    allupdatemode.add(UI_DEFAULT_MODE);
+    hw.flip(screenBounds, allrectList, allupdatemode, 1);
+#else
+    hw.flip(screenBounds);
+#endif
     }
 
     h_stretch hverts(hw_w, hw_h);
@@ -2230,7 +2241,15 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
         glClear(GL_COLOR_BUFFER_BIT);
         glColor4f(1-v, 1-v, 1-v, 1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+#ifdef FSL_EPDC_FB
+        Vector<Rect> allrectList;
+        Vector<int>  allupdatemode;
+        allrectList.add(screenBounds.getBounds());
+        allupdatemode.add(UI_DEFAULT_MODE);
+        hw.flip(screenBounds, allrectList, allupdatemode, 1);
+#else
         hw.flip(screenBounds);
+#endif
     }
 
     glColorMask(1,1,1,1);
@@ -2341,7 +2360,15 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
         glClear(GL_COLOR_BUFFER_BIT);
         glColor4f(1-v, 1-v, 1-v, 1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+#ifdef FSL_EPDC_FB
+        Vector<Rect> allrectList;
+        Vector<int>  allupdatemode;
+        allrectList.add(screenBounds.getBounds());
+        allupdatemode.add(UI_DEFAULT_MODE);
+        hw.flip(screenBounds, allrectList, allupdatemode, 1);
+#else
         hw.flip(screenBounds);
+#endif
     }
 
     nbFrames = 4;
@@ -2374,7 +2401,15 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
         glColorMask(0,0,1,1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
+#ifdef FSL_EPDC_FB
+        Vector<Rect> allrectList;
+        Vector<int>  allupdatemode;
+        allrectList.add(screenBounds.getBounds());
+        allupdatemode.add(UI_DEFAULT_MODE);
+        hw.flip(screenBounds, allrectList, allupdatemode, 1);
+#else
         hw.flip(screenBounds);
+#endif
     }
 
     glColorMask(1,1,1,1);
@@ -2403,7 +2438,15 @@ status_t SurfaceFlinger::turnElectronBeamOffImplLocked(int32_t mode)
     glDisable(GL_SCISSOR_TEST);
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_SCISSOR_TEST);
+#ifdef FSL_EPDC_FB
+    Vector<Rect> allrectList;
+    Vector<int>  allupdatemode;
+    allrectList.add(Region(hw.bounds()).getBounds());
+    allupdatemode.add(UI_DEFAULT_MODE);
+    hw.flip(Region(hw.bounds()), allrectList, allupdatemode, 1);
+#else
     hw.flip( Region(hw.bounds()) );
+#endif
 
     hw.setCanDraw(false);
     return NO_ERROR;

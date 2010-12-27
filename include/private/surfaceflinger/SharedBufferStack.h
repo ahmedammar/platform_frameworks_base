@@ -256,8 +256,8 @@ private:
 
     struct BufferAllFreeCondition : public ConditionBase {
         inline BufferAllFreeCondition(SharedBufferClient* sbc);
-        inline bool operator()();
-        static inline const char* name() { return "BufferAllFreeCondition"; }
+        inline bool operator()() const;
+        inline const char* name() const { return "BufferAllFreeCondition"; }
     };
     
     
@@ -267,8 +267,6 @@ private:
         inline bool operator()() const;
         inline const char* name() const { return "LockCondition"; }
     };
-
-    int32_t computeTail() const;
 
     mutable RWLock mLock;
     int mNumBuffers;

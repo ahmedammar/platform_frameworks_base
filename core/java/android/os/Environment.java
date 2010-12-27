@@ -531,6 +531,7 @@ public class Environment {
                 com.android.internal.R.bool.config_externalStorageRemovable);
     }
 
+    /*
     * Returns the state of the U disk.
     */
     public static String getExternalUDiskStorageState() {

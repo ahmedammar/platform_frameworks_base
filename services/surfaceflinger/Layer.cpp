@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2010 Freescale Semiconductors Inc. */
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -306,6 +307,12 @@ status_t Layer::setBufferCount(int bufferCount)
         mBufferManager.resize(bufferCount);
 
     return err;
+}
+void Layer::setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode)
+{
+    Rect dirtyRect(left,top,right,bottom);
+ //   LOGD("In set DirtyRect the dirty rect is %d, %d - %d, %d ## %d",left, top, right, bottom, dirtyMode);
+    mDirtyRegList[index].AddDirtyRegionNodeToEnd(dirtyRect,dirtyMode);
 }
 
 sp<GraphicBuffer> Layer::requestBuffer(int index,
@@ -668,6 +675,26 @@ void Layer::unlockPageFlip(
         const Layer::State& s(drawingState());
         const Transform tr(planeTransform * s.transform);
         dirtyRegion = tr.transform(dirtyRegion);
+#ifdef FSL_EPDC_FB
+        //do coordinate transform for the  dirty group
+       
+        int buf = mBufferManager.getActiveBufferIndex();
+        DirtyRegionNode* tmpNode;
+        int listLength = mDirtyRegList[buf].mDirtyRegListLength;
+        for(int j = 0; j< listLength; j++)
+        {
+            if ( mDirtyRegList[buf].GetDiryRegionNode(j,tmpNode) > 0 )
+            {
+                if (tmpNode->bRegionTransform == false)
+                {
+                    tmpNode->mDirtyRegion = tr.transform(tmpNode->mDirtyRegion);
+                    tmpNode->bRegionTransform= true;
+                }
+            }
+        }
+    
+        //add the current dirty group to the list
+#endif        
 
         // At this point, the dirty region is in screen space.
         // Make sure it's constrained by the visible region (which
@@ -680,6 +707,38 @@ void Layer::unlockPageFlip(
         // (because it may never be updated and therefore never release it)
         mFreezeLock.clear();
     }
+}
+
+void Layer::getCurrentDirtyRegList(DirtyRegList * & CurrentDirtyRegList)
+{
+    int buf = mBufferManager.getActiveBufferIndex();
+    CurrentDirtyRegList = &(mDirtyRegList[buf]);
+}
+
+void Layer::finishPageFlip()
+{
+    ClientRef::Access sharedClient(mUserClientRef);
+    SharedBufferServer* lcblk(sharedClient.get());
+    if (lcblk) {
+        int buf = mBufferManager.getActiveBufferIndex();
+        if (buf >= 0) {
+#ifdef FSL_EPDC_FB
+           mDirtyRegList[buf].ClearDirtyRegionList();
+#endif
+
+            status_t err = lcblk->unlock( buf );
+            LOGE_IF(err!=NO_ERROR,
+                    "layer %p, buffer=%d wasn't locked!",
+                    this, buf);
+        }
+    }
+}
+
+void Layer::finishPageFlip_eink()
+{
+    ClientRef::Access sharedClient(mUserClientRef);
+    SharedBufferServer* lcblk(sharedClient.get());
+    status_t err = lcblk->frameBufferHaveReleased();
 }
 
 void Layer::dump(String8& result, char* buffer, size_t SIZE) const
@@ -956,6 +1015,16 @@ status_t Layer::SurfaceLayer::setBufferCount(int bufferCount)
         err = owner->setBufferCount(bufferCount);
     }
     return err;
+}
+void Layer::SurfaceLayer::setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode)
+{
+    sp<Layer> owner(getOwner());
+    if (owner != 0) {
+        if (uint32_t(index) < 2) {
+            owner->setDirtyRect(index, left, top, right, bottom, dirtyMode);
+        }
+    }
+   
 }
 
 // ---------------------------------------------------------------------------

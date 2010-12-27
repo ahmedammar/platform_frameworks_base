@@ -32,45 +32,6 @@
 
 namespace android {
 
-static int64_t getNowUs() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-
-    return (int64_t)tv.tv_usec + tv.tv_sec * 1000000;
-}
-
-struct DummySurface : public BnSurface {
-    DummySurface() {}
-
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) {
-        return NULL;
-    }
-
-    virtual status_t registerBuffers(const BufferHeap &buffers) {
-        return OK;
-    }
-
-    virtual void postBuffer(ssize_t offset) {}
-    virtual void unregisterBuffers() {}
-
-    virtual sp<OverlayRef> createOverlay(
-            uint32_t w, uint32_t h, int32_t format, int32_t orientation) {
-        return NULL;
-    }
-    virtual status_t getDestRect(int *left,int *right,int *top,int *bottom,int *rot) {
-	return NO_ERROR;
-    }
-    virtual void setDirtyRect(int index, int left, int top, int right, int bottom, int dirtyMode) 
-    {
-    }
-
-protected:
-    virtual ~DummySurface() {}
-
-    DummySurface(const DummySurface &);
-    DummySurface &operator=(const DummySurface &);
-};
-
 struct CameraSourceListener : public CameraListener {
     CameraSourceListener(const sp<CameraSource> &source);
 

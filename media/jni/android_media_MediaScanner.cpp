@@ -296,9 +296,6 @@ static MediaScanner *createMediaScanner() {
         return new StagefrightMediaScanner;
     }
 #endif
-#ifndef NO_OPENCORE
-    return new PVMediaScanner();
-#endif
 
     return NULL;
 }

@@ -571,11 +571,8 @@ EGLBoolean egl_init_drivers_locked()
     egl_connection_t* cnx;
     egl_display_t* d = &gDisplay[0];
 
-
-    char string[PROPERTY_VALUE_MAX];
-    property_get("debug.sf.enable_hgl", string, "1");
 	bool hgl = true;
-    if (!atoi(string) || gEGLImplSWOnly)
+    if (gEGLImplSWOnly)
 		hgl = false;
 
     cnx = &gEGLImpl[IMPL_SOFTWARE];

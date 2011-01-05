@@ -136,7 +136,11 @@ void DisplayHardware::init(uint32_t dpy)
     // eglGetProcAddress().
 
 	// set to EGL wrapper to load SW OpenGLES only
-	eglSetImplementationAndroid(EGL_TRUE);
+	 if (property_get("debug.sf.enable_hgl", property, "1") > 0) {
+        if (atoi(property) == 0) {
+	        eglSetImplementationAndroid(EGL_TRUE);
+        }
+    }
 
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(display, NULL, NULL);

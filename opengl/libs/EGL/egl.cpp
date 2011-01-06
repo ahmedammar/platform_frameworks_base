@@ -1492,6 +1492,18 @@ EGLBoolean eglCopyBuffers(  EGLDisplay dpy, EGLSurface surface,
 const char* eglQueryString(EGLDisplay dpy, EGLint name)
 {
     egl_display_t const * const dp = get_display(dpy);
+    if (!dp) return setError(EGL_BAD_PARAMETER, (const char *)0);
+
+    for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
+        egl_connection_t* const cnx = &gEGLImpl[i];
+        if (cnx->dso) {
+            if (cnx->egl.eglQueryString) {
+                const char *str = cnx->egl.eglQueryString(
+                        dp->disp[i].dpy, name);
+                if (str) return str;
+            }
+        }
+    }
     switch (name) {
         case EGL_VENDOR:
             return gVendorString;

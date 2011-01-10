@@ -654,7 +654,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     mClockReceiver.scheduleTimeTickEvent();
                     Intent intent = new Intent(Intent.ACTION_TIME_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                    mContext.sendBroadcast(intent);
+                    try {
+                        mContext.sendBroadcast(intent);
+                    } catch (RuntimeException e) {
+                        Slog.i(TAG, "Failure broadcasting the time chagned intent.", e);
+                    }
                 }
                 
                 synchronized (mLock) {

@@ -39,7 +39,7 @@ import android.util.AttributeSet;
 import android.util.Config;
 import android.util.Log;
 import android.util.Xml;
-
+import android.os.Build;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.util.XmlUtils;
@@ -1103,11 +1103,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             R.string.def_unlock_sound);
     }
 
-    private void loadDefaultAnimationSettings(SQLiteStatement stmt) {
-        loadFractionSetting(stmt, Settings.System.WINDOW_ANIMATION_SCALE,
+    private void loadDefaultAnimationSettings(SQLiteStatement stmt) {        
+        if ("imx50_evk".equals(Build.DEVICE))                 
+        {
+            loadFractionSetting(stmt, Settings.System.WINDOW_ANIMATION_SCALE,
+                R.fraction.def_window_animation_scale_eink, 1);
+            loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
+                R.fraction.def_window_transition_scale_eink, 1);                
+        }else
+        {
+            loadFractionSetting(stmt, Settings.System.WINDOW_ANIMATION_SCALE,
                 R.fraction.def_window_animation_scale, 1);
-        loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
-                R.fraction.def_window_transition_scale, 1);
+            loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
+                R.fraction.def_window_transition_scale, 1);            
+        }
     }
 
     private void loadDefaultHapticSettings(SQLiteStatement stmt) {

@@ -96,10 +96,13 @@ ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_CPPFLAGS += -DANDROID_SIMULATOR
 endif
 
+ifeq ($(BOARD_HAVE_VPU),true)
 	LOCAL_C_INCLUDES += $(TOP)/external/linux-lib/vpu
 	LOCAL_STATIC_LIBRARIES += libstagefright_vpuenc
 	LOCAL_SHARED_LIBRARIES += libvpu
 	LOCAL_LDLIBS += -lvpu
+	LOCAL_CPPFLAGS += -DHAVE_VPU
+endif
 
 ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl

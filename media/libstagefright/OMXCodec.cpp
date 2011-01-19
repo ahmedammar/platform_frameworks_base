@@ -32,8 +32,9 @@
 #include "include/MP3Decoder.h"
 #include "include/VorbisDecoder.h"
 #include "include/VPXDecoder.h"
+#ifdef HAVE_VPU
 #include "include/VPUEncoder.h"
-
+#endif
 #include "include/ESDS.h"
 
 #include <binder/IServiceManager.h>
@@ -86,12 +87,14 @@ FACTORY_CREATE(G711Decoder)
 FACTORY_CREATE(M4vH263Decoder)
 FACTORY_CREATE(VorbisDecoder)
 FACTORY_CREATE(VPXDecoder)
-FACTORY_CREATE_ENCODER(VPUEncoder)
 FACTORY_CREATE_ENCODER(AMRNBEncoder)
 FACTORY_CREATE_ENCODER(AMRWBEncoder)
 FACTORY_CREATE_ENCODER(AACEncoder)
 FACTORY_CREATE_ENCODER(AVCEncoder)
 FACTORY_CREATE_ENCODER(M4vH263Encoder)
+#ifdef HAVE_VPU
+FACTORY_CREATE_ENCODER(VPUEncoder)
+#endif
 
 static sp<MediaSource> InstantiateSoftwareEncoder(
         const char *name, const sp<MediaSource> &source,
@@ -107,14 +110,15 @@ static sp<MediaSource> InstantiateSoftwareEncoder(
         FACTORY_REF(AACEncoder)
         FACTORY_REF(AVCEncoder)
         FACTORY_REF(M4vH263Encoder)
+#ifdef HAVE_VPU
         FACTORY_REF(VPUEncoder)
+#endif
     };
     LOGV("InstantiateSoftwareEncoder");
     if(!strcmp(name, "VPUEncoder")){
         char value[PROPERTY_VALUE_MAX];
         if (!property_get("media.stagefright.enable-vpuenc", value, NULL)
             || !strcmp(value, "1") || !strcasecmp(value, "true")) {
-             LOGV("Load VPU Encoder First");
              return (*kFactoryInfo[sizeof(kFactoryInfo)/sizeof(FactoryInfo)-1].CreateFunc)(source, meta);
         }else{
             return NULL;

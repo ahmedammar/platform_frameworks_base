@@ -171,7 +171,7 @@ public class Environment {
        String propSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_SD.getPath());
        String propUDISK = getMediaState(EXTERNAL_STORAGE_DIRECTORY_UDISK.getPath());
        String propEXTSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_EXTSD.getPath());
-       if (propSD.equals(MEDIA_MOUNTED) || propSD.equals(MEDIA_MOUNTED_READ_ONLY)) {
+       if (propSD.equals(MEDIA_MOUNTED) || propSD.equals(MEDIA_MOUNTED_READ_ONLY) || propSD.equals(MEDIA_SHARED)) {
            return EXTERNAL_STORAGE_DIRECTORY_SD;
        } else if (propUDISK.equals(MEDIA_MOUNTED) || propUDISK.equals(MEDIA_MOUNTED_READ_ONLY)) {
            return EXTERNAL_STORAGE_DIRECTORY_UDISK;

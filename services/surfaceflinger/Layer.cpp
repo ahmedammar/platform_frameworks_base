@@ -712,7 +712,9 @@ void Layer::unlockPageFlip(
 void Layer::getCurrentDirtyRegList(DirtyRegList * & CurrentDirtyRegList)
 {
     int buf = mBufferManager.getActiveBufferIndex();
-    CurrentDirtyRegList = &(mDirtyRegList[buf]);
+    if (buf >= 0) { 
+        CurrentDirtyRegList = &(mDirtyRegList[buf]);
+    }
 }
 
 void Layer::finishPageFlip()
@@ -738,7 +740,9 @@ void Layer::finishPageFlip_eink()
 {
     ClientRef::Access sharedClient(mUserClientRef);
     SharedBufferServer* lcblk(sharedClient.get());
-    status_t err = lcblk->frameBufferHaveReleased();
+    if (lcblk) {
+        status_t err = lcblk->frameBufferHaveReleased();
+    }
 }
 
 void Layer::dump(String8& result, char* buffer, size_t SIZE) const

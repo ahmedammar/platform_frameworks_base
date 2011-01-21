@@ -66,7 +66,7 @@
 #endif
 
 #define DISPLAY_COUNT       1
-#define MAX_LAYER           10
+#define MAX_LAYER           20
 //EINK_CONVERT_MODE_NOCONVERT|EINK_INVERT_MODE_NOINVERT|EINK_DITHER_MODE_NODITHER|EINK_COMBINE_MODE_NOCOMBINE|
 //EINK_WAIT_MODE_WAIT|EINK_UPDATE_MODE_PARTIAL|EINK_AUTO_MODE_REGIONAL|EINK_WAVEFORM_MODE_AUTO;
 #define UI_DEFAULT_MODE 0x0044
@@ -482,7 +482,11 @@ void SurfaceFlinger::getDirtyGroup()
     mLayersDirtyReglist   =  new DirtyRegList[count];
     mReupdateDirtyReglist =  new DirtyRegList[count];
 
-    
+    if(count >= MAX_LAYER ) 
+    {   
+        LOGI("Layer num is larger than %d \n",MAX_LAYER);    
+        return ;
+    }    
     for (size_t i=0 ; i<count ; i++) {
         DirtyRegList * pDirtyRegList = NULL;
         const sp<LayerBase>& layer = layers[i];
@@ -509,7 +513,6 @@ void SurfaceFlinger::getDirtyGroup()
         }
     }
 
-    if(count > MAX_LAYER ) LOGI("Layer is larger than 10 \n");
     for (size_t i=0 ; i<count ; i++) {
         int length = mRegionsDirtyReglist[i].mDirtyRegListLength;
         //LOGI("layer=%d, mRegionsDirtyReglist=%d \n",i,length);
@@ -1220,32 +1223,38 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
     const size_t count = layers.size();
     for (size_t i=0 ; i<count ; ++i) {
         const sp<LayerBase>& layer(layers[i]);
-	const Region& visibleRegion(layer->visibleRegionScreen);
-	if (!visibleRegion.isEmpty())  {
-        const Region clip(dirty.intersect(layer->visibleRegionScreen));
-        //if (!clip.isEmpty()) {
-            layer->draw(clip);
-            const Region& coveredRegion(layer->coveredRegionScreen);
-            const Region  exposedRegion = visibleRegion - coveredRegion;
-            for (int j = 0; j < mRegionsDirtyReglist[i].mDirtyRegListLength; j ++)
-            {
-                DirtyRegionNode *pDirtyRegNode = NULL;
-                mRegionsDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
-                if (pDirtyRegNode != NULL)
+	    const Region& visibleRegion(layer->visibleRegionScreen);
+	    if (!visibleRegion.isEmpty())  {
+            const Region clip(dirty.intersect(layer->visibleRegionScreen));
+            if (!clip.isEmpty()) {
+                layer->draw(clip);
+            }
+
+            if(i >= MAX_LAYER) LOGI("Layer num is larger than %d \n",MAX_LAYER);
+            else
+            {            
+                const Region& coveredRegion(layer->coveredRegionScreen);
+                const Region  exposedRegion = visibleRegion - coveredRegion;
+                for (int j = 0; j < mRegionsDirtyReglist[i].mDirtyRegListLength; j ++)
                 {
-                    //LOGI("composeSurfaces  exposedRegion layer=%d, left=%d, top=%d, right=%d, bottom=%d \n",i,exposedRegion.getBounds().left, exposedRegion.getBounds().top,
-                    //            exposedRegion.getBounds().right,exposedRegion.getBounds().bottom);
-                    const Region specialeclip(exposedRegion.intersect(pDirtyRegNode->mDirtyRegion));
-                    if(!specialeclip.isEmpty())
+                    DirtyRegionNode *pDirtyRegNode = NULL;
+                    mRegionsDirtyReglist[i].GetDiryRegionNode(j,pDirtyRegNode);
+                    if (pDirtyRegNode != NULL)
                     {
+                        //LOGI("composeSurfaces  exposedRegion layer=%d, left=%d, top=%d, right=%d, bottom=%d \n",i,exposedRegion.getBounds().left, exposedRegion.getBounds().top,
+                        //            exposedRegion.getBounds().right,exposedRegion.getBounds().bottom);
+                        const Region specialeclip(exposedRegion.intersect(pDirtyRegNode->mDirtyRegion));
+                        if(!specialeclip.isEmpty())
+                        {
                         //LOGI("composeSurfaces  specialeclip layer=%d, left=%d, top=%d, right=%d, bottom=%d \n",i,specialeclip.getBounds().left, specialeclip.getBounds().top,
                         //        specialeclip.getBounds().right,specialeclip.getBounds().bottom);
                         mReupdateDirtyReglist[i].AddDirtyRegionNodeToEnd(specialeclip.getBounds(), pDirtyRegNode->mDirtyRegionMode);
+                        }
                     }
                 }
             }
-        //}
-	}
+        
+	   }
     }
 }
 

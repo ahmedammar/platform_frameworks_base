@@ -303,7 +303,7 @@ static MediaScanner *createMediaScanner() {
 static void
 android_media_MediaScanner_native_setup(JNIEnv *env, jobject thiz)
 {
-    MediaScanner *mp = new StagefrightMediaScanner;
+    MediaScanner *mp = createMediaScanner();
 
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");

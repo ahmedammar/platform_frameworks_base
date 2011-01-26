@@ -2096,6 +2096,17 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
     mPolicy->interceptKeyBeforeQueueing(eventTime, deviceId, action, /*byref*/ flags,
             keyCode, scanCode, /*byref*/ policyFlags);
 
+    if(policyFlags & POLICY_FLAG_WAIT_PASS_TO_USER)
+    {
+         long time = 0;
+         while((!mDispatchEnabled) && time < 5000) 
+         {   
+               LOGI("wait dispatch enable 100ms\n");
+               usleep(100000);
+               time = time + 100;
+         }
+         policyFlags |= POLICY_FLAG_PASS_TO_USER;
+    }
     bool needWake;
     { // acquire lock
         AutoMutex _l(mLock);

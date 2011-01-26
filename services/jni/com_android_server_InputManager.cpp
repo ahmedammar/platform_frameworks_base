@@ -38,7 +38,7 @@
 #include "../../core/jni/android_view_MotionEvent.h"
 #include "../../core/jni/android_view_InputChannel.h"
 #include "com_android_server_PowerManagerService.h"
-
+#include <cutils/properties.h>
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -871,6 +871,7 @@ void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
         const int32_t WM_ACTION_PASS_TO_USER = 1;
         const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
         const int32_t WM_ACTION_GO_TO_SLEEP = 4;
+        const int32_t WM_ACTION_WAKE_TO_SLEEP = 8;
 
         bool isScreenOn = this->isScreenOn();
         bool isScreenBright = this->isScreenBright();
@@ -901,7 +902,17 @@ void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
         if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
             android_server_PowerManagerService_userActivity(when, POWER_MANAGER_BUTTON_EVENT);
         }
-
+        {
+            char property[PROPERTY_VALUE_MAX];
+            property_get("ro.FSL_EINK_POWER", property, "0");
+            if (atoi(property))
+            {
+                if ((wmActions & WM_ACTION_WAKE_TO_SLEEP)&& (keyCode != AKEYCODE_ENDCALL)&&(keyCode != AKEYCODE_POWER)) {
+                    policyFlags |= POLICY_FLAG_WAIT_PASS_TO_USER;
+                }
+            }
+        }
+        
         if (wmActions & WM_ACTION_PASS_TO_USER) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
         }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Copyright (c) 2011 Freescale Semiconductor, Inc. */
 
 #undef LOG_TAG
 #define LOG_TAG "CursorWindow"
@@ -328,7 +329,12 @@ LOG_WINDOW("Getting string for %d,%d from %p", row, column, window);
         double value;
         if (window->getDouble(row, column, &value)) {
             char buf[32];
-            snprintf(buf, sizeof(buf), "%g", value);
+            //selete the print way by code to impove the precision
+            if (((value > 0.0001) && (value < 1000000)) || ((value < -0.0001) && (value > -1000000)))
+                snprintf(buf, sizeof(buf), "%lf", value);
+            else
+                snprintf(buf, sizeof(buf), "%e", value);
+
             return env->NewStringUTF(buf);
         }
         return NULL;

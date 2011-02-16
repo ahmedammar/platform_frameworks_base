@@ -8,8 +8,7 @@ LOCAL_SRC_FILES:= \
     android_media_MediaMetadataRetriever.cpp \
     android_media_ResampleInputStream.cpp \
     android_media_MediaProfiles.cpp \
-    android_media_AmrInputStream.cpp \
-    android_media_GES.cpp
+    android_media_AmrInputStream.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
@@ -36,7 +35,6 @@ LOCAL_STATIC_LIBRARIES :=
 
 LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
-    external/gst-editing-services \
     frameworks/base/core/jni \
     frameworks/base/media/libmedia \
     frameworks/base/media/libstagefright/codecs/amrnb/enc/src \
@@ -45,22 +43,6 @@ LOCAL_C_INCLUDES += \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, corecg graphics)
-
-CONFIGURE_PKG_CONFIG_LIBDIR := $(TOP)/external/gstreamer_aggregate/glib:$(TOP)/external/gstreamer_aggregate/gstreamer/pkgconfig:$(TOP)/external/gstreamer_aggregate/gst-plugins-base/pkgconfig:$(TOP)/external/gstreamer_aggregate/gst-editing-services
-PKG_CONFIG := PKG_CONFIG_LIBDIR=$(CONFIGURE_PKG_CONFIG_LIBDIR) PKG_CONFIG_TOP_BUILD_DIR=$(TOP) pkg-config
-
-PKG_CONFIG_CFLAGS = $(shell $(PKG_CONFIG) gst-editing-services --cflags)
-
-LOCAL_CFLAGS += $(PKG_CONFIG_CFLAGS)
-LOCAL_SHARED_LIBRARIES +=   \
-    libges-0.10             \
-    libgstreamer-0.10       \
-    libgstbase-0.10         \
-    libglib-2.0             \
-    libgthread-2.0          \
-    libgmodule-2.0          \
-    libgobject-2.0
-
 
 LOCAL_LDLIBS := -lpthread
 

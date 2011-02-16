@@ -1,0 +1,88 @@
+/*
+** Copyright 2007, The Android Open Source Project
+** Copyright 2010 Collabora Ltd
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+**/
+
+template<class gesclass>
+typename GESProxy<gesclass>::ptr GESProxy<gesclass>::setGESProxy(JNIEnv* env, jobject thiz, const typename GESProxy<gesclass>::ptr &object)
+{
+    typename GESProxy<gesclass>::Autolock lock;
+    typename GESProxy<gesclass>::ptr old = (GESProxy<gesclass>*)env->GetIntField(thiz, contextField);
+    if (object.get()) {
+        object->incStrong(thiz);
+    }
+    if (old != 0) {
+        old->decStrong(thiz);
+    }
+    env->SetIntField(thiz, contextField, (int)object.get());
+    return old;
+}
+
+template<class gesclass>
+typename GESProxy<gesclass>::ptr GESProxy<gesclass>::getGESProxy(JNIEnv* env, jobject thiz)
+{
+    typename GESProxy<gesclass>::Autolock lock;
+    GESProxy<gesclass>* const p = (GESProxy<gesclass>*)env->GetIntField(thiz, contextField);
+    return GESProxy<gesclass>::ptr(p);
+}
+
+// This function gets some field IDs, which in turn causes class initialization.
+// It is called from a static block in gesclass, which won't run until the
+// first time an instance of this class is used.
+template<class gesclass>
+void GESProxy<gesclass>::native_init(JNIEnv *env)
+{
+    LOGE("native_init<%s> enter", GESProxy<gesclass>::className);
+    jclass clazz = env->FindClass(GESProxy<gesclass>::className);
+    if (clazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/GESProxy<?>");
+        return;
+    }
+
+    contextField = env->GetFieldID(clazz, "mNativeContext", "I");
+    if (contextField == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find GESProxy<?>.mNativeContext");
+        return;
+    }
+    LOGE("native_init<%s> leave", GESProxy<gesclass>::className);
+}
+
+template<class gesclass>
+void GESProxy<gesclass>::native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+{
+    LOGV("native_setup");
+    typename GESProxy<gesclass>::ptr p = new GESProxy<gesclass>();
+    if (p == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
+        return;
+    }
+
+    // Stow our new C++ object in an opaque field in the Java object.
+    setGESProxy(env, thiz, p);
+}
+
+template<class gesclass>
+void GESProxy<gesclass>::release(JNIEnv *env, jobject thiz)
+{
+    LOGV("release");
+    setGESProxy(env, thiz, 0);
+}
+
+template<class gesclass>
+void GESProxy<gesclass>::native_finalize(JNIEnv *env, jobject thiz)
+{
+    LOGV("native_finalize");
+    release(env, thiz);
+}

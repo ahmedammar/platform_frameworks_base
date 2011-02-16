@@ -26,6 +26,22 @@
 
 using namespace android;
 
+static bool setup_ges()
+{
+  /* gst_init_check wants no consts, and seems to want to modify the contents
+     of argc and argv (it takes pointers to both). It doesn't seem to require
+     argv[0] set, so we're good to pass it totally empty stuff. */
+  char **argv = NULL;
+  int argc = 0;
+  GError *error = NULL;
+  if (!gst_init_check(&argc, &argv, &error)) {
+    LOGI("gst_init_check. I have error here. Wanna see it ? Do the code then :P");
+    return false;
+  }
+  ges_init();
+  return true;
+}
+
 static const struct {
   const char *name;
   int (*init)(JNIEnv*);
@@ -49,10 +65,16 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
   }
 
   for (size_t n=0; n<sizeof(modules)/sizeof(modules[0]); ++n) {
+    LOGI("Registering %s native methods", modules[n].name);
     if ((*modules[n].init)(env) < 0) {
       LOGE("ERROR: %s native registration failed", modules[n].name);
       goto bail;
     }
+  }
+
+  if (!setup_ges()) {
+    LOGE("ERROR: GES setup failed");
+    goto bail;
   }
 
   /* success -- return valid version number */

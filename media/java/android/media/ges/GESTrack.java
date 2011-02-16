@@ -27,7 +27,7 @@ public class GESTrack
     private final static String TAG = "GESTrack";
 
     static {
-        Log.i("GES-JNI/Java",TAG+"::static init");
+        loadLibrary();
         native_init();
     }
 

@@ -14,5 +14,19 @@
 ** limitations under the License.
 **/
 
+#include "android_media_ges_proxy.h"
+#include <ges/ges-timeline.h>
+
+class GESTimelineProxy: public GESProxy<GESTimeline> {
+protected:
+  GESTimelineProxy();
+  virtual ~GESTimelineProxy();
+
+public:
+  static void native_setup(JNIEnv *env, jobject thiz, jobject weak_this);
+  static jboolean loadFromURI(JNIEnv*, jobject, jstring uriObject);
+  static jboolean saveToURI(JNIEnv*, jobject, jstring uriObject);
+};
+
 int register_android_media_ges_GESTimeline(JNIEnv *env);
 

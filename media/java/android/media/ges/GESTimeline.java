@@ -27,7 +27,7 @@ public class GESTimeline extends GESBase
     private final static String TAG = "GESTimeline";
 
     static {
-        Log.i("GES-JNI/Java","Static init, loading shared object");
+        loadLibrary();
         native_init();
     }
 
@@ -40,6 +40,15 @@ public class GESTimeline extends GESBase
         Log.i("GES-JNI/Java",TAG+" ctor");
         native_setup(new WeakReference<GESTimeline>(this));
     }
+
+    public GESTimeline(String uri) {
+        Log.i("GES-JNI/Java",TAG+" ctor/string");
+        native_setup(new WeakReference<GESTimeline>(this));
+        loadFromURI(uri);
+    }
+
+    public native boolean loadFromURI(String uri);
+    public native boolean saveToURI(String uri);
 
     /**
      * Releases resources associated with this GESTimeline object.

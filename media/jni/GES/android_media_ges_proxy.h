@@ -15,6 +15,9 @@
 ** limitations under the License.
 **/
 
+#ifndef included_ndroid_media_ges_proxy_jni
+#define included_ndroid_media_ges_proxy_jni
+
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
@@ -28,10 +31,14 @@ private:
   static android::Mutex sLock;
   static jfieldID contextField;
 
-public:
-  GESProxy() { }
+protected:
+  gesclass *proxied;
+
+protected:
+  GESProxy(gesclass *p): proxied(p) { }
   virtual ~GESProxy() { }
 
+public:
   typedef android::sp<GESProxy> ptr;
 
   static const char * const className;
@@ -39,7 +46,6 @@ public:
 public:
   /* The base methods exposed to Java/JNI */
   static void native_init(JNIEnv *env);
-  static void native_setup(JNIEnv *env, jobject thiz, jobject weak_this);
   static void release(JNIEnv *env, jobject thiz);
   static void native_finalize(JNIEnv *env, jobject thiz);
 
@@ -49,9 +55,10 @@ private:
       Autolock(): android::Mutex::Autolock(GESProxy::sLock) { }
   };
 
-private:
+protected:
   static ptr setGESProxy(JNIEnv* env, jobject thiz, const ptr &object);
   static ptr getGESProxy(JNIEnv* env, jobject thiz);
+  static gesclass *getProxied(JNIEnv *env, jobject thiz) { return getGESProxy(env, thiz)->proxied; }
 };
 
 #include "android_media_ges_proxy.template"
@@ -63,8 +70,9 @@ private:
   template<class gesclass> jfieldID GESProxy<gesclass>::contextField
 
 #define GES_PROXY_BASE_METHODS(c) \
-  {"native_init",         "()V",                      (void *)GESProxy<c>::native_init}, \
-  {"native_setup",        "(Ljava/lang/Object;)V",    (void *)GESProxy<c>::native_setup}, \
-  {"_release",            "()V",                      (void *)GESProxy<c>::release}, \
-  {"native_finalize",     "()V",                      (void *)GESProxy<c>::native_finalize}
+  {"native_init",         "()V",                      (void *)c##Proxy::native_init}, \
+  {"_release",            "()V",                      (void *)c##Proxy::release}, \
+  {"native_finalize",     "()V",                      (void *)c##Proxy::native_finalize}
+
+#endif
 

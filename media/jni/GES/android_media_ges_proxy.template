@@ -60,20 +60,6 @@ void GESProxy<gesclass>::native_init(JNIEnv *env)
 }
 
 template<class gesclass>
-void GESProxy<gesclass>::native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
-{
-    LOGV("native_setup");
-    typename GESProxy<gesclass>::ptr p = new GESProxy<gesclass>();
-    if (p == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
-        return;
-    }
-
-    // Stow our new C++ object in an opaque field in the Java object.
-    setGESProxy(env, thiz, p);
-}
-
-template<class gesclass>
 void GESProxy<gesclass>::release(JNIEnv *env, jobject thiz)
 {
     LOGV("release");

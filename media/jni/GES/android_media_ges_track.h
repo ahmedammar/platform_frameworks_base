@@ -14,5 +14,17 @@
 ** limitations under the License.
 **/
 
+#include "android_media_ges_proxy.h"
+#include <ges/ges-track.h>
+
+class GESTrackProxy: public GESProxy<GESTrack> {
+protected:
+  GESTrackProxy();
+  virtual ~GESTrackProxy();
+
+public:
+  static void native_setup(JNIEnv *env, jobject thiz, jobject weak_this);
+};
+
 int register_android_media_ges_GESTrack(JNIEnv *env);
 

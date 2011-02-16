@@ -21,8 +21,11 @@ import android.util.Log;
 
 public class GESBase
 {
-    static {
-        Log.i("GES-JNI/Java","Static init, loading shared object");
-        System.loadLibrary("ges_jni");
-    }
+  static boolean libraryLoaded = false;
+  protected synchronized static void loadLibrary() {
+    if (libraryLoaded) returnl
+    Log.i("GES-JNI/Java","Loading shared object");
+    System.loadLibrary("ges_jni");
+    libraryLoaded = true;
+  }
 }

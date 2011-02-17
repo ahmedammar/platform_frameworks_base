@@ -22,7 +22,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-public class GESTrack
+public class GESTrack extends GESBase
 {
     private final static String TAG = "GESTrack";
 
@@ -33,13 +33,28 @@ public class GESTrack
 
     private int mNativeContext; // accessed by native methods
 
-    public GESTrack() {
+    // XXX: synced to the GESTrackType enum
+    public static final int TYPE_UNKNOWN = 1 << 0;
+    public static final int TYPE_AUDIO   = 1 << 1;
+    public static final int TYPE_VIDEO   = 1 << 2;
+    public static final int TYPE_TEXT    = 1 << 3;
+    public static final int TYPE_CUSTOM  = 1 << 4;
+
+    public static String rawAudioCaps = "audio/x-raw-int;audio/x-raw-float";
+    public static String rawVideoCaps = "video/x-raw-yuv;video/x-raw-rgb";
+
+    public GESTrack(int type, String caps) {
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        Log.i("GES-JNI/Java",TAG+" ctor");
-        native_setup(new WeakReference<GESTrack>(this));
+        Log.i("GES-JNI/Java",TAG+" ctor/type");
+        native_setup(new WeakReference<GESTrack>(this), type, caps);
     }
+
+    public native void setTimeline(GESTimeline timeline);
+    public native final GESTimeline getTimeline();
+    public native void setCaps(String caps);
+    public native String getCaps();
 
     /**
      * Releases resources associated with this GESTrack object.
@@ -54,7 +69,7 @@ public class GESTrack
     private native void _release();
 
     private static native final void native_init();
-    private native final void native_setup(Object o);
+    private native final void native_setup(Object o, int type, String caps);
     private native final void native_finalize();
 
     @Override

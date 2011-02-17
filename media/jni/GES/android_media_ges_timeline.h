@@ -19,11 +19,11 @@
 
 class GESTimelineProxy: public GESProxy<GESTimeline> {
 protected:
-  GESTimelineProxy();
+  GESTimelineProxy(GESTimeline *proxied = NULL);
   virtual ~GESTimelineProxy();
 
 public:
-  static void native_setup(JNIEnv *env, jobject thiz, jobject weak_this);
+  static void native_setup(JNIEnv *env, jobject thiz, jobject weak_this, jobject copyOf);
   static jboolean loadFromURI(JNIEnv*, jobject, jstring uriObject);
   static jboolean saveToURI(JNIEnv*, jobject, jstring uriObject);
 };

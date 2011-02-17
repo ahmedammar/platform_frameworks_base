@@ -28,10 +28,11 @@ using namespace android;
 
 DECLARE_GES_PROXY(GESTimeline);
 
-GESTimelineProxy::GESTimelineProxy():
-  GESProxy<GESTimeline>(ges_timeline_new())
+GESTimelineProxy::GESTimelineProxy(GESTimeline *proxied):
+  GESProxy<GESTimeline>(proxied ? proxied : ges_timeline_new())
 {
-  LOGI("GESTimelineProxy::GESTimelineProxy");
+  LOGI("GESTimelineProxy::GESTimelineProxy(%p)", proxied);
+  if (proxied) g_object_ref(proxied);
 }
 
 GESTimelineProxy::~GESTimelineProxy()
@@ -40,10 +41,11 @@ GESTimelineProxy::~GESTimelineProxy()
   g_object_unref(proxied);
 }
 
-void GESTimelineProxy::native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+void GESTimelineProxy::native_setup(JNIEnv *env, jobject thiz, jobject weak_this, jobject copyOf)
 {
-  LOGI("native_setup");
-  GESTimelineProxy *p = new GESTimelineProxy();
+  GESTimeline *ptr = copyOf ? getProxied(env, copyOf) : NULL;
+  LOGI("native_setup, copyOf is %p (proxied %p)", copyOf, ptr);
+  GESTimelineProxy *p = new GESTimelineProxy(ptr);
   if (p == NULL) {
     jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
     return;
@@ -105,9 +107,9 @@ jboolean GESTimelineProxy::saveToURI(JNIEnv *env, jobject thiz, jstring uriObjec
 
 static JNINativeMethod gMethods[] = {
   GES_PROXY_BASE_METHODS(GESTimeline),
-  {"native_setup",        "(Ljava/lang/Object;)V",    (void *)GESTimelineProxy::native_setup},
-  {"loadFromURI",         "(Ljava/lang/String;)Z",    (void *)GESTimelineProxy::loadFromURI},
-  {"saveToURI",           "(Ljava/lang/String;)Z",    (void *)GESTimelineProxy::saveToURI},
+  {"native_setup",        "(Ljava/lang/Object;Landroid/media/ges/GESTimeline;)V",    (void *)GESTimelineProxy::native_setup},
+  {"loadFromURI",         "(Ljava/lang/String;)Z",                     (void *)GESTimelineProxy::loadFromURI},
+  {"saveToURI",           "(Ljava/lang/String;)Z",                     (void *)GESTimelineProxy::saveToURI},
 };
 
 // This function only registers the native methods

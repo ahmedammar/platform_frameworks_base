@@ -19,11 +19,18 @@
 
 class GESTrackProxy: public GESProxy<GESTrack> {
 protected:
-  GESTrackProxy();
+  GESTrackProxy(GESTrackType type, GstCaps *caps);
   virtual ~GESTrackProxy();
 
+private:
+  static jobject newJavaObject(JNIEnv *env, const char *type, void *ptr);
+
 public:
-  static void native_setup(JNIEnv *env, jobject thiz, jobject weak_this);
+  static void native_setup(JNIEnv *env, jobject thiz, jobject weak_this, jint type, jstring capsObject);
+  static void setTimeline(JNIEnv*, jobject, jobject timelineObject);
+  static jobject getTimeline(JNIEnv*, jobject);
+  static void setCaps(JNIEnv*, jobject, jstring capsObject);
+  static jobject getCaps(JNIEnv*, jobject);
 };
 
 int register_android_media_ges_GESTrack(JNIEnv *env);

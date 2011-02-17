@@ -38,12 +38,20 @@ public class GESTimeline extends GESBase
          * It's easier to create it here than in C++.
          */
         Log.i("GES-JNI/Java",TAG+" ctor");
-        native_setup(new WeakReference<GESTimeline>(this));
+        native_setup(new WeakReference<GESTimeline>(this), null);
+    }
+
+    public GESTimeline(GESTimeline copyOf) {
+        /* Native setup requires a weak reference to our object.
+         * It's easier to create it here than in C++.
+         */
+        Log.i("GES-JNI/Java",TAG+" ctor");
+        native_setup(new WeakReference<GESTimeline>(this), copyOf);
     }
 
     public GESTimeline(String uri) {
         Log.i("GES-JNI/Java",TAG+" ctor/string");
-        native_setup(new WeakReference<GESTimeline>(this));
+        native_setup(new WeakReference<GESTimeline>(this), null);
         loadFromURI(uri);
     }
 
@@ -63,7 +71,7 @@ public class GESTimeline extends GESBase
     private native void _release();
 
     private static native final void native_init();
-    private native final void native_setup(Object o);
+    private native final void native_setup(Object o, GESTimeline copyOf);
     private native final void native_finalize();
 
     @Override

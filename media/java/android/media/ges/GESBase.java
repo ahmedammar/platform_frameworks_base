@@ -23,7 +23,7 @@ public class GESBase
 {
   static boolean libraryLoaded = false;
   protected synchronized static void loadLibrary() {
-    if (libraryLoaded) returnl
+    if (libraryLoaded) return;
     Log.i("GES-JNI/Java","Loading shared object");
     System.loadLibrary("ges_jni");
     libraryLoaded = true;

@@ -55,10 +55,12 @@ private:
       Autolock(): android::Mutex::Autolock(GESProxy::sLock) { }
   };
 
+public:
+  static gesclass *getProxied(JNIEnv *env, jobject thiz) { return getGESProxy(env, thiz)->proxied; }
+
 protected:
   static ptr setGESProxy(JNIEnv* env, jobject thiz, const ptr &object);
   static ptr getGESProxy(JNIEnv* env, jobject thiz);
-  static gesclass *getProxied(JNIEnv *env, jobject thiz) { return getGESProxy(env, thiz)->proxied; }
 };
 
 #include "android_media_ges_proxy.template"

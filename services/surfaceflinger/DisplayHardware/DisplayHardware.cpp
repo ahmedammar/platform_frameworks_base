@@ -256,8 +256,11 @@ void DisplayHardware::init(uint32_t dpy)
     }
     // when we have the choice between PARTIAL_UPDATES and SWAP_RECTANGLE
     // choose PARTIAL_UPDATES, which should be more efficient
+#ifdef FSL_EPDC_FB
+#else
     if (mFlags & PARTIAL_UPDATES)
         mFlags &= ~SWAP_RECTANGLE;
+#endif
 #endif
 
     LOGI("EGL informations:");

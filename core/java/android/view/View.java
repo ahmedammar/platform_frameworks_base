@@ -1102,7 +1102,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
 
     public static final int UI_DEFAULT_MODE = EINK_CONVERT_MODE_NOCONVERT|EINK_INVERT_MODE_NOINVERT|EINK_DITHER_MODE_NODITHER|EINK_COMBINE_MODE_NOCOMBINE|
-                                              EINK_WAIT_MODE_WAIT|EINK_UPDATE_MODE_PARTIAL|EINK_AUTO_MODE_REGIONAL|EINK_WAVEFORM_MODE_AUTO;
+                                              EINK_WAIT_MODE_NOWAIT|EINK_UPDATE_MODE_PARTIAL|EINK_AUTO_MODE_REGIONAL|EINK_WAVEFORM_MODE_AUTO;
 
     /**
      * Base View state sets

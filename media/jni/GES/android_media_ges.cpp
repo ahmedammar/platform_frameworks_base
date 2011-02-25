@@ -23,6 +23,7 @@
 #include "android_runtime/AndroidRuntime.h"
 #include "android_media_ges_timeline.h"
 #include "android_media_ges_track.h"
+#include "android_media_ges_ops.h"
 
 using namespace android;
 
@@ -34,8 +35,17 @@ static bool setup_ges()
   char **argv = NULL;
   int argc = 0;
   GError *error = NULL;
+
+  LOGE("Initializing GStreamer and GES");
+
   if (!gst_init_check(&argc, &argv, &error)) {
-    LOGI("gst_init_check. I have error here. Wanna see it ? Do the code then :P");
+    if (error) {
+      LOGE("gst_init_check failed: %s", error->message);
+      g_error_free(error);
+    }
+    else {
+      LOGE("gst_init_check failed");
+    }
     return false;
   }
   ges_init();
@@ -48,6 +58,7 @@ static const struct {
 } modules[] = {
   { "GESTimeline", register_android_media_ges_GESTimeline },
   { "GESTrack", register_android_media_ges_GESTrack },
+  { "GESOps", register_android_media_ges_ops },
 };
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)

@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
     android_media_ges_timeline.cpp \
     android_media_ges_track.cpp \
     android_media_ges_proxy.cpp \
+    android_media_ges_ops.cpp \
     android_media_ges.cpp
 
 LOCAL_SHARED_LIBRARIES := \
@@ -26,8 +27,9 @@ PKG_CONFIG_CFLAGS = $(shell $(PKG_CONFIG) gst-editing-services --cflags)
 LOCAL_CFLAGS += $(PKG_CONFIG_CFLAGS)
 LOCAL_SHARED_LIBRARIES +=   \
     libges-0.10             \
-    libgstreamer-0.10       \
+    libgstpbutils-0.10      \
     libgstbase-0.10         \
+    libgstreamer-0.10       \
     libglib-2.0             \
     libgthread-2.0          \
     libgmodule-2.0          \

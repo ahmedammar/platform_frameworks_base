@@ -70,6 +70,21 @@
 
 #include <OMX.h>
 
+/* gst-android */
+#include "GstPlayer.h"
+
+/* desktop Linux needs a little help with gettid() */
+#if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
+#define __KERNEL__
+# include <linux/unistd.h>
+#ifdef _syscall0
+_syscall0(pid_t,gettid)
+#else
+pid_t gettid() { return syscall(__NR_gettid);}
+#endif
+#undef __KERNEL__
+#endif
+
 namespace {
 using android::media::Metadata;
 using android::status_t;
@@ -535,7 +550,7 @@ void MediaPlayerService::Client::disconnect()
 }
 
 static player_type getDefaultPlayerType() {
-    return STAGEFRIGHT_PLAYER;
+    return GST_PLAYER;
 }
 
 player_type getPlayerType(int fd, int64_t offset, int64_t length)
@@ -628,6 +643,10 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
         case TEST_PLAYER:
             LOGV("Create Test Player stub");
             p = new TestPlayerStub();
+            break;
+        case GST_PLAYER:
+            LOGV("Create GstPlayer");
+            p = new GstPlayer;
             break;
         default:
             LOGE("Unknown player type: %d", playerType);

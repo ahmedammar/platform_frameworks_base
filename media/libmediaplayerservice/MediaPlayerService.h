@@ -80,6 +80,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual float           msecsPerFrame() const;
         virtual status_t        getPosition(uint32_t *position);
         virtual int             getSessionId();
+        virtual AudioTrack      *getTrack() { LOGE("AudioOutput getTrack()"); return mTrack; }
 
         virtual status_t        open(
                 uint32_t sampleRate, int channelCount,
@@ -137,6 +138,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual float           msecsPerFrame() const;
         virtual status_t        getPosition(uint32_t *position);
         virtual int             getSessionId();
+        virtual AudioTrack      *getTrack() { LOGE("AudioCache getTrack()"); return NULL; }
 
         virtual status_t        open(
                 uint32_t sampleRate, int channelCount, int format,

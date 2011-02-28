@@ -12,7 +12,7 @@ LOCAL_SRC_FILES:= \
     android_media_Utils.cpp \
     android_mtp_MtpDatabase.cpp \
     android_mtp_MtpDevice.cpp \
-    android_mtp_MtpServer.cpp \
+    android_mtp_MtpServer.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \

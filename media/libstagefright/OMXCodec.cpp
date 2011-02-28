@@ -186,17 +186,20 @@ static const CodecInfo kDecoderInfo[] = {
 //    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacdec" },
     { MEDIA_MIMETYPE_AUDIO_G711_ALAW, "G711Decoder" },
     { MEDIA_MIMETYPE_AUDIO_G711_MLAW, "G711Decoder" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.Freescale.std.video_decoder.mpeg4.hw-based" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.decoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.decoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.SEC.MPEG4.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Decoder" },
 //    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.PV.mpeg4dec" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.Freescale.std.video_decoder.h263.hw-based" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.7x30.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.SEC.H263.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Decoder" },
 //    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263dec" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.Freescale.std.video_decoder.avc.hw-based" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
@@ -409,6 +412,11 @@ uint32_t OMXCodec::getComponentQuirks(
     }
     if (!strncmp(componentName, "OMX.qcom.7x30.video.decoder.", 28)) {
         quirks |= kRequiresAllocateBufferOnInputPorts;
+        quirks |= kRequiresAllocateBufferOnOutputPorts;
+        quirks |= kDefersOutputBufferAllocation;
+    }
+
+    if (!strncmp(componentName, "OMX.Freescale.std.video_decoder.",32))	{
         quirks |= kRequiresAllocateBufferOnOutputPorts;
         quirks |= kDefersOutputBufferAllocation;
     }

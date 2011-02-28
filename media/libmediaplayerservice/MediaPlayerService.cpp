@@ -808,12 +808,12 @@ player_type getPlayerType(const char* url)
             return PV_PLAYER;
         }
     }
-
+#ifndef NO_OPENCORE
     // Use PV_PLAYER for rtsp for now
     if (!strncasecmp(url, "rtsp://", 7)) {
         return PV_PLAYER;
     }
-
+#endif
     return getDefaultPlayerType();
 }
 

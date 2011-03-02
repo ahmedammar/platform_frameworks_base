@@ -305,6 +305,7 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
         intentFilter.addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_HDMI_PLUG);        
         context.registerReceiver(mReceiver, intentFilter);
 
         // Register for media button intent broadcasts.
@@ -1921,6 +1922,22 @@ public class AudioService extends IAudioService.Stub {
                         mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
                     }
                 }
+            } else if (action.equals(Intent.ACTION_HDMI_PLUG)) {
+                int state = intent.getIntExtra("state", 0);
+
+                    boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HDMI);
+                    if (state == 0 && isConnected) {
+                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HDMI,
+                                AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                "");
+                        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HDMI);
+                    } else if (state == 1 && !isConnected)  {
+                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HDMI,
+                                AudioSystem.DEVICE_STATE_AVAILABLE,
+                                "");
+                        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HDMI), "");
+                    }
+
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_AUDIO_STATE,
                                                BluetoothHeadset.STATE_ERROR);

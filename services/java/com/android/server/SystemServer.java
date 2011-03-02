@@ -121,6 +121,7 @@ class ServerThread extends Thread {
         BluetoothService bluetooth = null;
         BluetoothA2dpService bluetoothA2dp = null;
         HeadsetObserver headset = null;
+        HDMIObserver HDMI = null;
         DockObserver dock = null;
         UsbObserver usb = null;
         UiModeManagerService uiMode = null;
@@ -388,6 +389,14 @@ class ServerThread extends Thread {
                 Slog.e(TAG, "Failure starting HeadsetObserver", e);
             }
 
+            try {
+                Slog.i(TAG, "HDMI Observer");
+                // Listen for wired headset changes
+                HDMI = new HDMIObserver(context);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting HDMIObserver", e);
+            }
+            
             try {
                 Slog.i(TAG, "Dock Observer");
                 // Listen for dock station changes

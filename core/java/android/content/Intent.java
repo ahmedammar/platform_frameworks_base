@@ -1812,6 +1812,20 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.HEADSET_PLUG";
 
     /**
+     * Broadcast Action: Wired HDMI plugged in or unplugged.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>name</em> - HDMI type, human readable string </li>
+     * </ul>
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_HDMI_PLUG =
+            "android.intent.action.HDMI_PLUG";
+            
+    /**
      * Broadcast Action: An outgoing call is about to be placed.
      *
      * <p>The Intent will have the following extra value:

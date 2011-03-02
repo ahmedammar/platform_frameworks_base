@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2011 Freescale Semiconductor Inc.
 // Copyright 2010 The Android Open Source Project
 //
 // The input reader.
@@ -23,6 +24,7 @@
 #define DEBUG_POINTER_ASSIGNMENT 0
 
 #include <cutils/log.h>
+#include <cutils/properties.h>
 #include <ui/InputReader.h>
 
 #include <stddef.h>
@@ -1421,6 +1423,17 @@ bool TouchInputMapper::configureSurfaceLocked() {
         width = mRawAxes.x.getRange();
         height = mRawAxes.y.getRange();
     }
+
+     char  hwrotBuf[PROPERTY_VALUE_MAX];
+     property_get("ro.sf.hwrotation", hwrotBuf, "0");
+     orientation = (orientation + atoi(hwrotBuf) / 90 ) % 4;
+
+     if (orientation == InputReaderPolicyInterface::ROTATION_90 ||
+	 orientation == InputReaderPolicyInterface::ROTATION_270) {
+	     int tmp = width;
+	     width = height;
+	     height = tmp;
+     }
 
     bool orientationChanged = mLocked.surfaceOrientation != orientation;
     if (orientationChanged) {

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* Copyright (C) 2011 Freescale Semiconductor Inc. */
+
 #ifndef ANDROID_FRAMEBUFFER_NATIVE_WINDOW_H
 #define ANDROID_FRAMEBUFFER_NATIVE_WINDOW_H
 
@@ -57,6 +59,9 @@ public:
     status_t setUpdateRectangle(Vector < Rect > &rectList, Vector < int > &modelist, int count);
 #else
     status_t setUpdateRectangle(const Rect& updateRect);
+#ifdef SECOND_DISPLAY_SUPPORT
+    status_t setSecRotation(int secRotation);
+#endif
 #endif
     status_t compositionComplete();
     

@@ -42,6 +42,9 @@ ifeq ($(HAVE_FSL_EPDC_FB),true)
 LOCAL_CFLAGS += -DFSL_EPDC_FB
 endif
 
+ifeq ($(HAVE_FSL_IMX_IPU),true)
+LOCAL_CFLAGS += -DSECOND_DISPLAY_SUPPORT
+endif
 
 include $(BUILD_SHARED_LIBRARY)
 

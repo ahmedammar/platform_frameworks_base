@@ -36,6 +36,10 @@ ifeq ($(HAVE_FSL_EPDC_FB),true)
 LOCAL_CFLAGS += -DFSL_EPDC_FB
 endif
 
+ifeq ($(HAVE_FSL_IMX_IPU),true)
+LOCAL_CFLAGS += -DSECOND_DISPLAY_SUPPORT
+endif
+
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)
 	ifeq ($(HOST_OS),linux)

@@ -566,13 +566,6 @@ ssize_t SharedBufferServer::frameBufferHaveReleased()
 }
 
 
-status_t SharedBufferServer::unlock(int buf)
-{
-    UnlockUpdate update(this, buf);
-    status_t err = updateCondition( update );
-    return err;
-}
-
 void SharedBufferServer::setStatus(status_t status)
 {
     if (status < NO_ERROR) {

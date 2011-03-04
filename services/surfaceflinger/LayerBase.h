@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* Copyright (c) 2010 Freescale Semiconductors Inc. */
+/* Copyright (C) 2011 Freescale Semiconductors Inc. */
 
 #ifndef ANDROID_LAYER_BASE_H
 #define ANDROID_LAYER_BASE_H
@@ -323,7 +323,6 @@ public:
     /**
      * finishPageFlip - called after all surfaces have drawn.
      */
-    virtual void finishPageFlip();
     virtual void finishPageFlip_eink();
     /**
      * needsBlending - true if this surface needs blending

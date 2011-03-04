@@ -717,24 +717,7 @@ void Layer::getCurrentDirtyRegList(DirtyRegList * & CurrentDirtyRegList)
     }
 }
 
-void Layer::finishPageFlip()
-{
-    ClientRef::Access sharedClient(mUserClientRef);
-    SharedBufferServer* lcblk(sharedClient.get());
-    if (lcblk) {
-        int buf = mBufferManager.getActiveBufferIndex();
-        if (buf >= 0) {
-#ifdef FSL_EPDC_FB
-           mDirtyRegList[buf].ClearDirtyRegionList();
-#endif
 
-            status_t err = lcblk->unlock( buf );
-            LOGE_IF(err!=NO_ERROR,
-                    "layer %p, buffer=%d wasn't locked!",
-                    this, buf);
-        }
-    }
-}
 
 void Layer::finishPageFlip_eink()
 {

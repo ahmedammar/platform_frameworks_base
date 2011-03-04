@@ -416,8 +416,6 @@ bool SurfaceFlinger::threadLoop()
         hw.compositionComplete();
 
         
-        unlockClients();
-
         EinkOptPostFramebuffer();
 
         releaseDirtyGroup();
@@ -445,7 +443,6 @@ bool SurfaceFlinger::threadLoop()
         // inform the h/w that we're done compositing
         hw.compositionComplete();
         // release the clients before we flip ('cause flip might block)
-        unlockClients();
 
         postFramebuffer();
 #endif
@@ -1293,16 +1290,6 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
     }
 }
 
-void SurfaceFlinger::unlockClients()
-{
-    const LayerVector& drawingLayers(mDrawingState.layersSortedByZ);
-    const size_t count = drawingLayers.size();
-    sp<LayerBase> const* const layers = drawingLayers.array();
-    for (size_t i=0 ; i<count ; ++i) {
-        const sp<LayerBase>& layer = layers[i];
-        layer->finishPageFlip();
-    }
-}
 
 void SurfaceFlinger::unlockClients_eink()
 {

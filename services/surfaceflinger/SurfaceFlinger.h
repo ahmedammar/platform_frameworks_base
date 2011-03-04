@@ -319,7 +319,6 @@ private:
             void        postFramebuffer();
 #endif            
             void        composeSurfaces(const Region& dirty);
-            void        unlockClients();
             void        unlockClients_eink();
 
             ssize_t     addClientLayer(const sp<Client>& client,

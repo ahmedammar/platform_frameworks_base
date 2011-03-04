@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* Copyright (C) 2010 Freescale Semiconductors Inc. */
+/* Copyright (C) 2011 Freescale Semiconductors Inc. */
 
 #ifndef ANDROID_LAYER_H
 #define ANDROID_LAYER_H
@@ -75,7 +75,6 @@ public:
     virtual void lockPageFlip(bool& recomputeVisibleRegions);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
     virtual void getCurrentDirtyRegList(DirtyRegList *& CurrentDirtyRegList);
-    virtual void finishPageFlip();
     virtual bool needsBlending() const      { return mNeedsBlending; }
     virtual bool needsDithering() const     { return mNeedsDithering; }
     virtual bool needsFiltering() const;

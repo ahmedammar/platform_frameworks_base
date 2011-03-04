@@ -276,9 +276,7 @@ void LayerBase::unlockPageFlip(
 void LayerBase::getCurrentDirtyRegList(DirtyRegList * & CurrentDirtyRegList)
 {
 }
-void LayerBase::finishPageFlip()
-{
-}
+
 void LayerBase::finishPageFlip_eink()
 {
 }

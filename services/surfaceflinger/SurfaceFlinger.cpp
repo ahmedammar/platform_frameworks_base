@@ -787,7 +787,6 @@ void SurfaceFlinger::postFramebuffer()
              secRotation = 0x0;
          break;
         }
-        LOGI("secRotation %d", secRotation); 
         //hw.flip(mInvalidRegion);
         hw.flip(mInvalidRegion,secRotation);
         #else

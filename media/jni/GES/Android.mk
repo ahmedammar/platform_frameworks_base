@@ -16,11 +16,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libmedia
 
-LOCAL_CFLAGS += \
-    external/gst-editing-services
-
-PKG_CONFIG := PKG_CONFIG_PATH=$(PWD)/external/gstreamer/pkgconfig:$(PWD)/external/gst-editing-services/pkgconfig:external/gst-plugins-base/pkgconfig:$(PWD)/external/glib \
-    PKG_CONFIG_TOP_BUILD_DIR=/ pkg-config
+CONFIGURE_PKG_CONFIG_LIBDIR := $(TOP)/external/gstreamer_aggregate/glib:$(TOP)/external/gstreamer_aggregate/gstreamer/pkgconfig:$(TOP)/external/gstreamer_aggregate/gst-plugins-base/pkgconfig:$(TOP)/external/gstreamer_aggregate/gst-editing-services/pkgconfig
+PKG_CONFIG := PKG_CONFIG_LIBDIR=$(CONFIGURE_PKG_CONFIG_LIBDIR) PKG_CONFIG_TOP_BUILD_DIR=$(TOP) pkg-config
 
 PKG_CONFIG_CFLAGS = $(shell $(PKG_CONFIG) gst-editing-services --cflags)
 
@@ -39,5 +36,6 @@ LOCAL_LDLIBS := -lpthread
 
 LOCAL_MODULE:= libges_jni
 LOCAL_MODULE_TAGS := eng
+LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)

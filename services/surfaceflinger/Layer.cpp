@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* Copyright (c) 2010 Freescale Semiconductors Inc. */
+/* Copyright 2010-2011 Freescale Semiconductor Inc. */
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -721,6 +721,12 @@ void Layer::getCurrentDirtyRegList(DirtyRegList * & CurrentDirtyRegList)
 
 void Layer::finishPageFlip_eink()
 {
+#ifdef FSL_EPDC_FB
+    int buf = mBufferManager.getActiveBufferIndex();
+    if (buf >= 0) {
+        mDirtyRegList[buf].ClearDirtyRegionList();
+    }
+#endif
     ClientRef::Access sharedClient(mUserClientRef);
     SharedBufferServer* lcblk(sharedClient.get());
     if (lcblk) {

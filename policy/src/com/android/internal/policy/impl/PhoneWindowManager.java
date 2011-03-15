@@ -1894,6 +1894,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if((result & ACTION_WAKE_TO_SLEEP) !=0 && mPowerManager.getSystemState()==2)
                     {
                         // only try to turn off the screen if we didn't already hang up
+                        mPowerKeyHandled = false;
                         mHandler.postDelayed(mPowerLongPress,
                                 ViewConfiguration.getGlobalActionKeyTimeout());
                         result &= ~ACTION_PASS_TO_USER;                        

@@ -373,40 +373,41 @@ public class MediaMetadataRetriever
      * text, in the data source, such as a mp4 or 3gpp file.
      */
     public static final int METADATA_KEY_NUM_TRACKS      = 10;
-	public static final int METADATA_KEY_IS_DRM_CRIPPLED = 11;
-	public static final int METADATA_KEY_CODEC           = 12;
-	public static final int METADATA_KEY_RATING          = 13;
-	public static final int METADATA_KEY_COMMENT         = 14;
-	public static final int METADATA_KEY_COPYRIGHT       = 15;
-	public static final int METADATA_KEY_BIT_RATE        = 16;
-	public static final int METADATA_KEY_FRAME_RATE      = 17;
-	public static final int METADATA_KEY_VIDEO_FORMAT    = 18;
-	public static final int METADATA_KEY_VIDEO_HEIGHT    = 19;
-	public static final int METADATA_KEY_VIDEO_WIDTH     = 20;
     /**
      * The metadata key to retrieve the information of the writer (such as
      * lyricist) of the data source.
      */
-	public static final int METADATA_KEY_WRITER          = 21;
+	public static final int METADATA_KEY_WRITER          = 11;
     /**
      * The metadata key to retrieve the mime type of the data source. Some
      * example mime types include: "video/mp4", "audio/mp4", "audio/amr-wb",
      * etc.
      */
-	public static final int METADATA_KEY_MIMETYPE        = 22;
-    /**
-     * The metadata key to retrieve the numberic string that describes which
-     * part of a set the audio data source comes from.
-     */
-	public static final int METADATA_KEY_DISC_NUMBER     = 23;
+	public static final int METADATA_KEY_MIMETYPE        = 12;
     /**
      * The metadata key to retrieve the information about the performers or
      * artist associated with the data source.
      */
-	public static final int METADATA_KEY_ALBUMARTIST     = 24;
+	public static final int METADATA_KEY_ALBUMARTIST     = 13;
+    /**
+     * The metadata key to retrieve the numberic string that describes which
+     * part of a set the audio data source comes from.
+     */
+	public static final int METADATA_KEY_DISC_NUMBER     = 14;
     /**
      * The metadata key to retrieve the music album compilation status.
      */
-	public static final int METADATA_KEY_COMPILATION     = 25;
+	public static final int METADATA_KEY_COMPILATION     = 15;
+
+	public static final int METADATA_KEY_IS_DRM_CRIPPLED = 16;
+	public static final int METADATA_KEY_CODEC           = 17;
+	public static final int METADATA_KEY_RATING          = 18;
+	public static final int METADATA_KEY_COMMENT         = 19;
+	public static final int METADATA_KEY_COPYRIGHT       = 20;
+	public static final int METADATA_KEY_BIT_RATE        = 21;
+	public static final int METADATA_KEY_FRAME_RATE      = 22;
+	public static final int METADATA_KEY_VIDEO_FORMAT    = 23;
+	public static final int METADATA_KEY_VIDEO_HEIGHT    = 24;
+	public static final int METADATA_KEY_VIDEO_WIDTH     = 25;
     // Add more here...
 }

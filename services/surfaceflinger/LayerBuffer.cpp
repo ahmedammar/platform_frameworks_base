@@ -193,8 +193,8 @@ sp<OverlayRef> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t f,
 {
     sp<OverlayRef> result;
     Mutex::Autolock _l(mLock);
-    if (mSource != 0)
-        return result;
+//    if (mSource != 0)
+//        return result;
 
     sp<OverlaySource> source = new OverlaySource(*this, &result, w, h, f, orientation);
     if (result != 0) {

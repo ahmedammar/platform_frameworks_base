@@ -43,9 +43,9 @@ static bool setup_ges()
       LOGE("gst_init_check failed: %s", error->message);
       g_error_free(error);
     }
-    else {
+    else
       LOGE("gst_init_check failed");
-    }
+
     return false;
   }
   ges_init();

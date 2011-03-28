@@ -44,7 +44,9 @@ void gesops_cut_jni(JNIEnv *env, jobject thiz, jstring inputUriObject, jint star
 
   TRACE();
 
-  // TODO: I'm not convinced it's really const inside GES, so pass a dupe for safety for now
+  /* TODO: I'm not convinced it's really const inside GES, so pass a
+   * dupe for safety for now
+   */
   input_uri_copy = strdup(input_uri);
   output_uri_copy = strdup(output_uri);
 
@@ -97,7 +99,9 @@ jint gesops_cut_start_jni(JNIEnv *env, jobject thiz, jstring inputUriObject, jin
 
   TRACE();
 
-  // TODO: I'm not convinced it's really const inside GES, so pass a dupe for safety for now
+  /* TODO: I'm not convinced it's really const inside GES, so pass a
+   * dupe for safety for now
+   */
   input_uri_copy = strdup(input_uri);
   output_uri_copy = strdup(output_uri);
 

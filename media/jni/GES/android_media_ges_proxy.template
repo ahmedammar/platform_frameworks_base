@@ -34,7 +34,8 @@ template<class gesclass>
 typename GESProxy<gesclass>::ptr GESProxy<gesclass>::getGESProxy(JNIEnv* env, jobject thiz)
 {
     typename GESProxy<gesclass>::Autolock lock;
-    GESProxy<gesclass>* const p = (GESProxy<gesclass>*)env->GetIntField(thiz, contextField);
+    GESProxy<gesclass>* const p = (GESProxy<gesclass>*)env->GetIntField(thiz,
+                                   contextField);
     return GESProxy<gesclass>::ptr(p);
 }
 
@@ -47,13 +48,15 @@ void GESProxy<gesclass>::native_init(JNIEnv *env)
     LOGE("native_init<%s> enter", GESProxy<gesclass>::className);
     jclass clazz = env->FindClass(GESProxy<gesclass>::className);
     if (clazz == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/GESProxy<?>");
+        jniThrowException(env, "java/lang/RuntimeException",
+                          "Can't find android/media/GESProxy<?>");
         return;
     }
 
     contextField = env->GetFieldID(clazz, "mNativeContext", "I");
     if (contextField == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find GESProxy<?>.mNativeContext");
+        jniThrowException(env, "java/lang/RuntimeException",
+                          "Can't find GESProxy<?>.mNativeContext");
         return;
     }
     LOGE("native_init<%s> leave", GESProxy<gesclass>::className);

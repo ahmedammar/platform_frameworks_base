@@ -46,7 +46,7 @@ jobject GESTrackProxy::newJavaObject(JNIEnv *env, const char *type, void *ptr)
   jniThrowException(env, "java/lang/RuntimeException", "Unimplemented");
   return NULL;
 #else
-  /* Find and ref the class */
+  // Find and ref the class
   LOGI("Searching for %s class", type);
   jclass c = env->FindClass(type);
   if (c == NULL) {
@@ -54,7 +54,7 @@ jobject GESTrackProxy::newJavaObject(JNIEnv *env, const char *type, void *ptr)
     return NULL;
   }
 
-  /* Find ctor */
+  // Find ctor
   LOGI("Searching for %s ctor", type);
   jmethodID ctorid = env->GetMethodID(c, "<init>", "(Landroid/media/ges/GESTimeline;)V");
   if (ctorid == 0) {
@@ -62,7 +62,7 @@ jobject GESTrackProxy::newJavaObject(JNIEnv *env, const char *type, void *ptr)
     return NULL;
   }
 
-  /* Create the new object */
+  // Create the new object */
   LOGI("Allocating a new %s object for proxied %p", type, ptr);
   jobject o = env->NewObject(c, ctorid, (int)ptr);
   if (env->ExceptionCheck() != 0) {
@@ -89,7 +89,8 @@ void GESTrackProxy::native_setup(JNIEnv *env, jobject thiz, jobject weak_this, j
       jniThrowException(env, "java/lang/RuntimeException", "caps are null");
       return;
     }
-    GESTrackProxy *p = new GESTrackProxy((GESTrackType)type, gst_caps_from_string(caps));
+    GESTrackProxy *p = new GESTrackProxy((GESTrackType)type,
+                                         gst_caps_from_string(caps));
     if (p == NULL) {
       jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
       return;
@@ -133,12 +134,11 @@ jobject GESTrackProxy::getTimeline(JNIEnv *env, jobject thiz)
   }
   const GESTimeline *timeline = ges_track_get_timeline(p);
   LOGI("getTimeline: timeline from track %p is %p", p, timeline);
-  if (!timeline) {
-    /* It's OK, it can be */
-    return NULL;
-  }
+  if (!timeline)
+    return NULL; // It's OK, it can be
 
-  return newJavaObject(env, GESTimelineProxy::className, (void*)timeline); // TODO: constness thrown away
+  // TODO: constness thrown away
+  return newJavaObject(env, GESTimelineProxy::className, (void*)timeline);
 }
 
 void GESTrackProxy::setCaps(JNIEnv *env, jobject thiz, jstring capsObject)

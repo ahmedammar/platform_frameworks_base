@@ -115,7 +115,8 @@ static JNINativeMethod gMethods[] = {
 // This function only registers the native methods
 int register_android_media_ges_GESTimeline(JNIEnv *env)
 {
-    LOGI("Registering %d native methods for %s", NELEM(gMethods), GESProxy<GESTimeline>::className);
+    LOGI("Registering %d native methods for %s", NELEM(gMethods),
+         GESProxy<GESTimeline>::className);
     return AndroidRuntime::registerNativeMethods(env,
                 GESProxy<GESTimeline>::className, gMethods, NELEM(gMethods));
 }

@@ -450,7 +450,8 @@ bool SurfaceFlinger::threadLoop()
         
     } else {
         // pretend we did the post
-        hw.compositionComplete();
+        // comment out the compisitionComplete() due to clock on in early suspend
+        //hw.compositionComplete();
         usleep(16667); // 60 fps period
     }
     return true;

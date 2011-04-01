@@ -440,11 +440,14 @@ bool SurfaceFlinger::threadLoop()
         handleRepaint();
         logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
 
-        // inform the h/w that we're done compositing
-        hw.compositionComplete();
-        // release the clients before we flip ('cause flip might block)
+	// call glFinish and postfb only when actual repaint is done
+	if (!mInvalidRegion.isEmpty()) {
+            // inform the h/w that we're done compositing
+            hw.compositionComplete();
+            // release the clients before we flip ('cause flip might block)
 
-        postFramebuffer();
+            postFramebuffer();
+	}
 #endif
 
         

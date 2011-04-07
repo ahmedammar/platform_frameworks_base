@@ -42,6 +42,7 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	lib_omx_core_mgr_v2_arm11_elinux \
 	lib_omx_res_mgr_v2_arm11_elinux \
 	lib_id3_parser_arm11_elinux \
+	libgstmetadataretriever \
 	libgstplayer
 
 LOCAL_STATIC_LIBRARIES := \

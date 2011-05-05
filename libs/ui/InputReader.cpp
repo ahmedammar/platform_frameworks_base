@@ -1425,11 +1425,13 @@ bool TouchInputMapper::configureSurfaceLocked() {
     }
 
      char  hwrotBuf[PROPERTY_VALUE_MAX];
+     int32_t hwrotation;
      property_get("ro.sf.hwrotation", hwrotBuf, "0");
-     orientation = (orientation + atoi(hwrotBuf) / 90 ) % 4;
+     hwrotation = atoi(hwrotBuf) / 90;
+     orientation = (orientation + hwrotation ) % 4;
 
-     if (orientation == InputReaderPolicyInterface::ROTATION_90 ||
-	 orientation == InputReaderPolicyInterface::ROTATION_270) {
+     if (hwrotation == InputReaderPolicyInterface::ROTATION_90 ||
+	 hwrotation == InputReaderPolicyInterface::ROTATION_270) {
 	     int tmp = width;
 	     width = height;
 	     height = tmp;

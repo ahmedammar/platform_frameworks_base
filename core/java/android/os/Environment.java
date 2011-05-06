@@ -94,10 +94,10 @@ public class Environment {
             = getDirectory("EXTERNAL_STORAGE_SD", "/sdcard");
 
     private static final File EXTERNAL_STORAGE_DIRECTORY_EXTSD
-             = getDirectory("EXTERNAL_STORAGE_EXTSD", "/extsd");
+             = getDirectory("EXTERNAL_STORAGE_EXTSD", "/sdcard/extsd");
 
     private static final File EXTERNAL_STORAGE_DIRECTORY_UDISK
-             = getDirectory("EXTERNAL_STORAGE_UDISK", "/udisk");
+             = getDirectory("EXTERNAL_STORAGE_UDISK", "/sdcard/udisk");
 
     private static final File EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY_SD
             = new File (new File(getDirectory("EXTERNAL_STORAGE_SD", "/sdcard"),
@@ -164,22 +164,7 @@ public class Environment {
      * @see #isExternalStorageRemovable()
      */
     public static File getExternalStorageDirectory() {
-        // Try to be smarter
-        // Return EXTERNAL_STORAGE_DIRECTORY_SD if SD card is ready
-        // Return EXTERNAL_STORAGE_DIRECTORY_UDISK if SD card is absent but udisk is ready
-        // Return EXTERNAL_STORAGE_DIRECTORY_SD if both sd card and udisk are not ready
-       String propSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_SD.getPath());
-       String propUDISK = getMediaState(EXTERNAL_STORAGE_DIRECTORY_UDISK.getPath());
-       String propEXTSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_EXTSD.getPath());
-       if (propSD.equals(MEDIA_MOUNTED) || propSD.equals(MEDIA_MOUNTED_READ_ONLY) || propSD.equals(MEDIA_SHARED)) {
-           return EXTERNAL_STORAGE_DIRECTORY_SD;
-       } else if (propUDISK.equals(MEDIA_MOUNTED) || propUDISK.equals(MEDIA_MOUNTED_READ_ONLY)) {
-           return EXTERNAL_STORAGE_DIRECTORY_UDISK;
-       } else if (propEXTSD.equals(MEDIA_MOUNTED) || propEXTSD.equals(MEDIA_MOUNTED_READ_ONLY)) {
-           return EXTERNAL_STORAGE_DIRECTORY_EXTSD;
-       } else {
-          return EXTERNAL_STORAGE_DIRECTORY_SD;
-       }
+        return EXTERNAL_STORAGE_DIRECTORY_SD;
     }
 
     /**
@@ -486,22 +471,7 @@ public class Environment {
      * <p>See {@link #getExternalStorageDirectory()} for more information.
      */
     public static String getExternalStorageState() {
-       // Try to be smarter
-       // Return MEDIA_MOUNTED or MEDIA_MOUNTED_READ_ONLY if SD card is ready
-       // Return MEDIA_MOUNTED or MEDIA_MOUNTED_READ_ONLY if SD card is absent but udisk is ready
-       // Return state of SD if both sd card and udisk are not ready
-        String propSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_SD.getPath());
-        String propUDISK = getMediaState(EXTERNAL_STORAGE_DIRECTORY_UDISK.getPath());
-        String propEXTSD = getMediaState(EXTERNAL_STORAGE_DIRECTORY_EXTSD.getPath());
-       if (propSD.equals(MEDIA_MOUNTED) || propSD.equals(MEDIA_MOUNTED_READ_ONLY)) {
-           return propSD;
-       } else if (propUDISK.equals(MEDIA_MOUNTED) || propUDISK.equals(MEDIA_MOUNTED_READ_ONLY)) {
-           return propUDISK;
-       } else if (propEXTSD.equals(MEDIA_MOUNTED) || propEXTSD.equals(MEDIA_MOUNTED_READ_ONLY)) {
-           return propEXTSD;
-        } else {
-           return propSD;
-       }
+        return getMediaState(EXTERNAL_STORAGE_DIRECTORY_SD.getPath());
     }
 
     /**
@@ -529,6 +499,42 @@ public class Environment {
     public static boolean isExternalStorageRemovable() {
         return Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_externalStorageRemovable);
+    }
+
+    /**
+     * Returns whether the primary "externalSD" storage device is removable.
+     * If true is returned, this device is for example an SD card that the
+     * user can remove.  If false is returned, the storage is built into
+     * the device and can not be physically removed.
+     *
+     */    
+    public static boolean isExternalSDStorageRemovable() {
+        return Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_externalStorageRemovable);
+    }
+
+    /**
+     * Returns whether the primary "externalExtSD" storage device is removable.
+     * If true is returned, this device is for example an ExtSD card that the
+     * user can remove.  If false is returned, the storage is built into
+     * the device and can not be physically removed.
+     *
+     */    
+    public static boolean isExternalExtSDStorageRemovable() {
+        return Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_externalExtSDStorageRemovable);
+    }
+
+    /**
+     * Returns whether the primary "externalUDisk" storage device is removable.
+     * If true is returned, this device is for example U Disk that the
+     * user can remove.  If false is returned, the storage is built into
+     * the device and can not be physically removed.
+     *
+     */
+    public static boolean isExternalUDiskStorageRemovable() {
+        return Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_externalUDiskStorageRemovable);
     }
 
     /*

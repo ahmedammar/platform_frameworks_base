@@ -152,6 +152,8 @@ class MountService extends IMountService.Stub
     private boolean                               mReady = false;
     private boolean                               mSendUmsConnectedOnBoot = false;
 
+    private int                                   FormatIndex = 0;
+        
     /**
      * Private hash of currently mounted secure containers.
      * Used as a lock in methods to manipulate secure containers.
@@ -343,8 +345,7 @@ class MountService extends IMountService.Stub
                     if (!mUpdatingStatus) {
                         if (DEBUG_UNMOUNT) Slog.i(TAG, "Updating external media status on PackageManager");
                         mUpdatingStatus = true;
-                        if (ucb.path.equals(Environment.getExternalSDStorageDirectory().getPath()))
-                            mPms.updateExternalMediaStatus(false, true);
+                        mPms.updateExternalMediaStatus(false, true);
                     }
                     break;
                 }
@@ -541,12 +542,6 @@ class MountService extends IMountService.Stub
 
         String oldState = mLegacyState[index];
         mLegacyState[index] = state;
-
-        if (index == 1)
-        {
-            Slog.w(TAG, "When the second sd card acts, the state doesn't change!");
-            return;
-        }
 
         // Update state on PackageManager
         if (Environment.MEDIA_UNMOUNTED.equals(state)) {
@@ -1059,7 +1054,6 @@ class MountService extends IMountService.Stub
                     try {
                         int rc;
                         Slog.w(TAG, "Disabling UMS after cable disconnect");
-
                         if (getVolumeState(pathSD).equals(Environment.MEDIA_SHARED))
                         {
                             doShareUnshareVolume(pathSD, "ums", false);
@@ -1243,6 +1237,7 @@ class MountService extends IMountService.Stub
     }
 
     public void setUsbMassStorageEnabled(boolean enable) {
+
         waitForReady();
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
@@ -1259,15 +1254,6 @@ class MountService extends IMountService.Stub
         String vsUDisk = getVolumeState(pathUDisk);
 
         String method = "ums";
-        if (enable && vsSD.equals(Environment.MEDIA_MOUNTED)) {
-            // Override for isUsbMassStorageEnabled()
-            setUmsEnabling(enable);
-            UmsEnableCallBack umscb = new UmsEnableCallBack(pathSD, method, true);
-            mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_PM_UPDATE, umscb));
-            // Clear override
-            setUmsEnabling(false);
-        }
-
         if (enable && vsExtSD.equals(Environment.MEDIA_MOUNTED)) {
             // Override for isUsbMassStorageEnabled()
             setUmsEnabling(enable);
@@ -1285,6 +1271,15 @@ class MountService extends IMountService.Stub
             // Clear override
             setUmsEnabling(false);
         }
+
+        if (enable && vsSD.equals(Environment.MEDIA_MOUNTED)) {
+            // Override for isUsbMassStorageEnabled()
+            setUmsEnabling(enable);
+            UmsEnableCallBack umscb = new UmsEnableCallBack(pathSD, method, true);
+            mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_PM_UPDATE, umscb));
+            // Clear override
+            setUmsEnabling(false);
+        }
         /*
          * If we disabled UMS then mount the volume
          */
@@ -1292,7 +1287,6 @@ class MountService extends IMountService.Stub
 
             //Change the state
             setUmsEnabling(false);
-
             doShareUnshareVolume(pathSD, method, enable);
             if (doMountVolume(pathSD) != StorageResultCode.OperationSucceeded) {
                 Slog.e(TAG, "Failed to remount " + pathSD +
@@ -1385,6 +1379,7 @@ class MountService extends IMountService.Stub
                 Environment.MEDIA_REMOVED.equals(volState) ||
                 Environment.MEDIA_SHARED.equals(volState) ||
                 Environment.MEDIA_UNMOUNTABLE.equals(volState)) {
+                if (DEBUG_UNMOUNT) Slog.i(TAG, "Unmounting return directely!");
             // Media already unmounted or cannot be unmounted.
             // TODO return valid return code when adding observer call back.
             return;
@@ -1396,8 +1391,15 @@ class MountService extends IMountService.Stub
     public int formatVolume(String path) {
         validatePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         waitForReady();
-
         return doFormatVolume(path);
+    }
+
+    public void setFormatIndex(int index) {
+        FormatIndex = index;
+    }
+
+    public int getFormatIndex() {
+        return FormatIndex;
     }
 
     public int []getStorageUsers(String path) {

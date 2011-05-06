@@ -164,6 +164,13 @@ status_t MediaScanner::doProcessDirectory(
                 // for example, the Mac ".Trashes" directory
                 if (name[0] == '.') continue;
 
+                //When path is "/mnt/sdcard", ignore "/mnt/sdcard/extsd" and "/mnt/sdcard/udisk"
+                if ((!strcmp(path, "/mnt/sdcard/extsd") && !strcmp(name, "extsd"))
+                        || (!strcmp(path, "/mnt/sdcard/udisk") && !strcmp(name, "udisk"))) {
+                    SLOGI("Ignore %s:%s.", path, name);
+                    continue;
+                }
+
                 strcat(fileSpot, "/");
                 int err = doProcessDirectory(path, pathRemaining - nameLength - 1, extensions, client, exceptionCheck, exceptionEnv);
                 if (err) {

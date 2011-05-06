@@ -80,7 +80,13 @@
          it is removable; if it is built in to the device, it is not removable.
          The default product has external storage on an SD card, which is
          removable. -->
-    <bool name="config_externalStorageRemovable" product="default">true</bool>
+    <bool name="config_externalStorageRemovable" product="default">false</bool>
+
+    <!-- The ext sd is removable.-->
+    <bool name="config_externalExtSDStorageRemovable" product="default">true</bool>
+
+    <!-- The u disk is removable.-->
+    <bool name="config_externalUDiskStorageRemovable" product="default">true</bool>
 
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->

@@ -4985,8 +4985,13 @@ public class WindowManagerService extends IWindowManager.Stub
                                               pointer.getHeight(),
                                               PixelFormat.TRANSPARENT,
                                               Surface.FX_SURFACE_NORMAL);
+                Rect dirty = new Rect();
+                dirty.left = 0;
+                dirty.top = 0;
+                dirty.right = pointer.getWidth();
+                dirty.bottom = pointer.getHeight();
 
-                Canvas canvas = mPointerSurface.lockCanvas(null);
+                Canvas canvas = mPointerSurface.lockCanvas(dirty);
                 canvas.drawBitmap(pointer, 0, 0, new Paint());
                 mPointerSurface.unlockCanvasAndPost(canvas);
             } catch (Surface.OutOfResourcesException e) {

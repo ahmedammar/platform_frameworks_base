@@ -734,6 +734,7 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_COUNT);
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_DELAY_MS);
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS);
+            MOVED_TO_SECURE.add(Secure.ETHERNET_ON);
         }
 
         /**
@@ -1195,6 +1196,48 @@ public final class Settings {
          * @hide
          */
         public static final String WIFI_NUM_ALLOWED_CHANNELS = "wifi_num_allowed_channels";
+
+        /**
+         * Whether to use static IP and other static network attributes.
+         * <p>
+         * Set to 1 for true and 0 for false.
+         */
+        public static final String ETHERNET_USE_STATIC_IP = "ethernet_use_static_ip";
+
+        /**
+         * The static IP address.
+         * <p>
+         * Example: "192.168.1.51"
+         */
+        public static final String ETHERNET_STATIC_IP = "ethernet_static_ip";
+
+        /**
+         * If using static IP, the gateway's IP address.
+         * <p>
+         * Example: "192.168.1.1"
+         */
+        public static final String ETHERNET_STATIC_GATEWAY = "ethernet_static_gateway";
+
+        /**
+         * If using static IP, the net mask.
+         * <p>
+         * Example: "255.255.255.0"
+         */
+        public static final String ETHERNET_STATIC_NETMASK = "ethernet_static_netmask";
+
+        /**
+         * If using static IP, the primary DNS's IP address.
+         * <p>
+         * Example: "192.168.1.1"
+         */
+        public static final String ETHERNET_STATIC_DNS1 = "ethernet_static_dns1";
+
+        /**
+         * If using static IP, the secondary DNS's IP address.
+         * <p>
+         * Example: "192.168.1.2"
+         */
+        public static final String ETHERNET_STATIC_DNS2 = "ethernet_static_dns2";
 
         /**
          * Determines whether remote devices may discover and/or connect to
@@ -1812,6 +1855,12 @@ public final class Settings {
             NOTIFICATION_LIGHT_PULSE,
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS,
+            ETHERNET_USE_STATIC_IP,
+            ETHERNET_STATIC_IP,
+            ETHERNET_STATIC_GATEWAY,
+            ETHERNET_STATIC_NETMASK,
+            ETHERNET_STATIC_DNS1,
+            ETHERNET_STATIC_DNS2,
         };
 
         // Settings moved to Settings.Secure
@@ -2043,6 +2092,13 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS =
             Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_ON} instead
+         */
+        @Deprecated
+        public static final String ETHERNET_ON = Secure.ETHERNET_ON;
+        
     }
 
     /**
@@ -2701,6 +2757,20 @@ public final class Settings {
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
             "wifi_mobile_data_transition_wakelock_timeout_ms";
 
+        /**
+         * Whether the Wi-Fi should be on.  Only the Wi-Fi service should touch this.
+         */
+        public static final String ETHERNET_ON = "ethernet_on";
+
+        /**
+         * Used to save the Wifi_ON state prior to tethering.
+         * This state will be checked to restore Wifi after
+         * the user turns off tethering.
+         *
+         * @hide
+         */
+        public static final String ETHERNET_SAVED_STATE = "ethernet_saved_state";
+        
         /**
          * Whether background data usage is allowed by the user. See
          * ConnectivityManager for more info.
@@ -3500,7 +3570,7 @@ public final class Settings {
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
-            UI_NIGHT_MODE
+            UI_NIGHT_MODE,
         };
 
         /**

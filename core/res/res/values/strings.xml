@@ -1117,6 +1117,28 @@
       the background data usage setting.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessEthernetState">view Ethernet state</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessEthernetState">Allows an application to view
+      the information about the state of Ethernet.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_changeEthernetMulticastState">allow Ethernet Multicast
+      reception</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_changeEthernetMulticastState">Allows an application to
+      receive packets not directly addressed to your device.  This can be
+      useful when discovering services offered near by.  It uses more power
+      than the non-multicast mode.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_changeEthernetState">change Ethernet state</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_changeEthernetState">Allows an application to connect
+      to and disconnect from Ethernet access points, and to make changes to
+      configured Ethernet networks.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessWifiState">view Wi-Fi state</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessWifiState">Allows an application to view

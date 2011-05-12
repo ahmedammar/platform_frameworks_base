@@ -332,6 +332,13 @@
         android:description="@string/permdesc_accessWifiState"
         android:label="@string/permlab_accessWifiState" />
 
+    <!-- Allows applications to access information about Ethernet networks -->
+    <permission android:name="android.permission.ACCESS_ETHERNET_STATE"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="normal"
+        android:description="@string/permdesc_accessEthernetState"
+        android:label="@string/permlab_accessEthernetState" />
+
     <!-- Allows applications to connect to paired bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH"
         android:permissionGroup="android.permission-group.NETWORK"
@@ -842,12 +849,27 @@
         android:description="@string/permdesc_changeWifiState"
         android:label="@string/permlab_changeWifiState" />
 
+    <!-- Allows applications to change Ethernet connectivity state -->
+    <permission android:name="android.permission.CHANGE_ETHERNET_STATE"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_changeEthernetState"
+        android:label="@string/permlab_changeEthernetState" />
+
+
     <!-- Allows applications to enter Wi-Fi Multicast mode -->
     <permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_changeWifiMulticastState"
         android:label="@string/permlab_changeWifiMulticastState" />
+
+    <!-- Allows applications to enter Ethernet Multicast mode -->
+    <permission android:name="android.permission.CHANGE_ETHERNET_MULTICAST_STATE"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_changeEthernetMulticastState"
+        android:label="@string/permlab_changeEthernetMulticastState" />
 
     <!-- Allows applications to discover and pair bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH_ADMIN"

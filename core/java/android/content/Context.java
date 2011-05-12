@@ -1459,6 +1459,16 @@ public abstract class Context {
     public static final String WIFI_SERVICE = "wifi";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.EthernetManager} for handling management of
+     * Wi-Fi access.
+     *
+     * @see #getSystemService
+     * @see android.net.EthernetManager
+     */
+    public static final String ETHERNET_SERVICE = "ethernet";
+
+    /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.AudioManager} for handling management of volume,
      * ringer modes and audio routing.

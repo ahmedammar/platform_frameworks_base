@@ -273,7 +273,7 @@ public abstract class NetworkStateTracker extends Handler {
      * @param extraInfo optional {@code String} providing extra information about the state change
      */
     public void setDetailedState(NetworkInfo.DetailedState state, String reason, String extraInfo) {
-        if (DBG) Log.d(TAG, "setDetailed state, old ="+mNetworkInfo.getDetailedState()+" and new state="+state);
+        Log.d(TAG, "setDetailed state, old ="+mNetworkInfo.getDetailedState()+" and new state="+state);
         if (state != mNetworkInfo.getDetailedState()) {
             boolean wasConnecting = (mNetworkInfo.getState() == NetworkInfo.State.CONNECTING);
             String lastReason = mNetworkInfo.getReason();

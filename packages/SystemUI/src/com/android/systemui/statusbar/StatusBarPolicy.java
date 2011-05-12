@@ -337,6 +337,11 @@ public class StatusBarPolicy {
         };
     private static final int sWifiTemporarilyNotConnectedImage =
             R.drawable.stat_sys_wifi_signal_0;
+    
+    //ethernet
+    private static final int sEthernetSignalImage =
+            R.drawable.stat_sys_ethernet_signal_0;
+
 
     private int mLastWifiSignalLevel = -1;
     private boolean mIsWifiConnected = false;
@@ -741,6 +746,22 @@ public class StatusBarPolicy {
                 mService.setIcon("wifi", iconId, 0);
                 // Hide the icon since we're not connected
                 mService.setIconVisibility("wifi", false);
+            }
+            updateSignalStrength(); // apply any change in mInetCondition
+            break;
+        case ConnectivityManager.TYPE_ETHERNET:
+            mInetCondition = inetCondition;
+            if (info.isConnected()) {
+                int iconId = sEthernetSignalImage;
+                mService.setIcon("ethernet", iconId, 0);
+                // Hide the icon since we're not connected
+                mService.setIconVisibility("ethernet", true);            
+            }else
+            {
+                int iconId = sEthernetSignalImage;
+                mService.setIcon("ethernet", iconId, 0);
+                // Hide the icon since we're not connected
+                mService.setIconVisibility("ethernet", false);                   
             }
             updateSignalStrength(); // apply any change in mInetCondition
             break;

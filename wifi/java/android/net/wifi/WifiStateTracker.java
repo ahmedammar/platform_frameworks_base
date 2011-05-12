@@ -1185,7 +1185,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                         handleDisconnectedState(DetailedState.DISCONNECTED, false);
                         setDetailedStateInternal(saveState);
                     }
-
+                    mTornDownByConnMgr = false;
                     configureInterface();
                     mLastBssid = result.BSSID;
                     mLastSsid = mWifiInfo.getSSID();

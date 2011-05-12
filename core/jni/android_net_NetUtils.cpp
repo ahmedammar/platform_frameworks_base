@@ -154,6 +154,7 @@ static jboolean android_net_utils_runDhcp(JNIEnv* env, jobject clazz, jstring if
     uint32_t lease;
 
     const char *nameStr = env->GetStringUTFChars(ifname, NULL);
+        LOGW("nameStr %s",nameStr);
     result = ::dhcp_do_request(nameStr, &ipaddr, &gateway, &mask,
                                         &dns1, &dns2, &server, &lease);
     env->ReleaseStringUTFChars(ifname, nameStr);

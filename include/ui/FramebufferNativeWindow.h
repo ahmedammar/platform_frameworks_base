@@ -81,7 +81,7 @@ private:
     framebuffer_device_t* fbDev;
     alloc_device_t* grDev;
 
-    sp<NativeBuffer> buffers[2];
+    sp<NativeBuffer> buffers[3];
     sp<NativeBuffer> front;
     
     mutable Mutex mutex;

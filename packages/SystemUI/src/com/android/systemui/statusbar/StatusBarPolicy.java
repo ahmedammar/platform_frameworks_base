@@ -342,6 +342,10 @@ public class StatusBarPolicy {
     private static final int sEthernetSignalImage =
             R.drawable.stat_sys_ethernet_signal_0;
 
+    //hdmi
+    private static final int sHdmiSignalImage =
+            R.drawable.stat_sys_hdmi_signal_0;
+
 
     private int mLastWifiSignalLevel = -1;
     private boolean mIsWifiConnected = false;
@@ -402,6 +406,9 @@ public class StatusBarPolicy {
                      action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
                 // TODO - stop using other means to get wifi/mobile info
                 updateConnectivity(intent);
+            }
+            else if (action.equals(Intent.ACTION_HDMI_PLUG)){
+                updateHdmi(intent);
             }
         }
     };
@@ -508,6 +515,7 @@ public class StatusBarPolicy {
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
+        filter.addAction(Intent.ACTION_HDMI_PLUG);        
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // load config to determine if to distinguish Hspa data icon
@@ -767,6 +775,25 @@ public class StatusBarPolicy {
             break;
         }
     }
+
+    private void updateHdmi(Intent intent) {
+        int state = intent.getIntExtra("state", 0);
+        if(state == 1)
+        {
+                int iconId = sHdmiSignalImage;
+                mService.setIcon("hdmi", iconId, 0);
+                // Hide the icon since we're not connected
+                mService.setIconVisibility("hdmi", true);              
+        }else
+        {
+                int iconId = sHdmiSignalImage;
+                mService.setIcon("hdmi", iconId, 0);
+                // Hide the icon since we're not connected
+                mService.setIconVisibility("hdmi", false);         
+        }
+    }
+    
+    
 
     private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override

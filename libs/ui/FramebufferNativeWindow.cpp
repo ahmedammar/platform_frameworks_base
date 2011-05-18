@@ -98,16 +98,22 @@ FramebufferNativeWindow::FramebufferNativeWindow()
         mUpdateOnDemand = (fbDev->setUpdateRect != 0);
         
         // initialize the buffer FIFO
+#ifndef FSL_EPDC_FB
         mNumBuffers = 3;
         mNumFreeBuffers = 3;
+#else
+        mNumBuffers = 2;
+        mNumFreeBuffers = 2;
+#endif
         mBufferHead = mNumBuffers-1;
         buffers[0] = new NativeBuffer(
                 fbDev->width, fbDev->height, fbDev->format, GRALLOC_USAGE_HW_FB);
         buffers[1] = new NativeBuffer(
                 fbDev->width, fbDev->height, fbDev->format, GRALLOC_USAGE_HW_FB);
+#ifndef FSL_EPDC_FB
         buffers[2] = new NativeBuffer(
                 fbDev->width, fbDev->height, fbDev->format, GRALLOC_USAGE_HW_FB);
-        
+#endif
         err = grDev->alloc(grDev,
                 fbDev->width, fbDev->height, fbDev->format, 
                 GRALLOC_USAGE_HW_FB, &buffers[0]->handle, &buffers[0]->stride);
@@ -121,14 +127,14 @@ FramebufferNativeWindow::FramebufferNativeWindow()
 
         LOGE_IF(err, "fb buffer 1 allocation failed w=%d, h=%d, err=%s",
                 fbDev->width, fbDev->height, strerror(-err));
-
+#ifndef FSL_EPDC_FB
         err = grDev->alloc(grDev,
                 fbDev->width, fbDev->height, fbDev->format, 
                 GRALLOC_USAGE_HW_FB, &buffers[2]->handle, &buffers[2]->stride);
 
         LOGE_IF(err, "fb buffer 2 allocation failed w=%d, h=%d, err=%s",
                 fbDev->width, fbDev->height, strerror(-err));
-
+#endif
         const_cast<uint32_t&>(ANativeWindow::flags) = fbDev->flags; 
         const_cast<float&>(ANativeWindow::xdpi) = fbDev->xdpi;
         const_cast<float&>(ANativeWindow::ydpi) = fbDev->ydpi;
@@ -155,8 +161,10 @@ FramebufferNativeWindow::~FramebufferNativeWindow()
             grDev->free(grDev, buffers[0]->handle);
         if (buffers[1] != NULL)
             grDev->free(grDev, buffers[1]->handle);
+#ifndef FSL_EPDC_FB
         if (buffers[2] != NULL)
             grDev->free(grDev, buffers[2]->handle);
+#endif
         gralloc_close(grDev);
     }
 

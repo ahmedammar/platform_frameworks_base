@@ -17,6 +17,8 @@ import android.os.storage.StorageManager;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
+import android.net.Uri;
+
 
 import com.android.internal.R;
 
@@ -47,6 +49,8 @@ public class ExternalStorageFormatter extends Service
     private boolean mFactoryReset = false;
     private boolean mAlwaysReset = false;
 
+    private String path = null;
+
     StorageEventListener mStorageListener = new StorageEventListener() {
         @Override
         public void onStorageStateChanged(String path, String oldState, String newState) {
@@ -73,6 +77,7 @@ public class ExternalStorageFormatter extends Service
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        path = intent.getData().toString();
         if (FORMAT_AND_FACTORY_RESET.equals(intent.getAction())) {
             mFactoryReset = true;
         }
@@ -133,26 +138,20 @@ public class ExternalStorageFormatter extends Service
     }
 
     void updateProgressState() {
-        int index = 0;
-        try {
-            index = getMountService().getFormatIndex();
-        } catch (RemoteException e) {
-            Log.e(TAG, "getFormatIndex error!");
-        }
         final String sdStatus = Environment.getExternalSDStorageState();
         final String extsdStatus = Environment.getExternalExtSDStorageState();
         final String udiskStatus = Environment.getExternalUDiskStorageState();
         String status = null;
 
-        if (index == 0)
+        if (path.equals(Environment.getExternalSDStorageDirectory().toString()))
             status = sdStatus;
-        else if (index == 1)
+        else if (path.equals(Environment.getExternalExtSDStorageDirectory().toString()))
             status = extsdStatus;
-        else if (index == 2)
+        else if (path.equals(Environment.getExternalUDiskStorageDirectory().toString()))
             status = udiskStatus;
 
 
-        if (index == 0) {
+        if (path.equals(Environment.getExternalSDStorageDirectory().toString())) {
             if (Environment.MEDIA_MOUNTED.equals(extsdStatus)
                     || Environment.MEDIA_MOUNTED_READ_ONLY.equals(extsdStatus)) {
                 updateProgressDialog(R.string.progress_unmounting);
@@ -182,13 +181,7 @@ public class ExternalStorageFormatter extends Service
                 || Environment.MEDIA_MOUNTED_READ_ONLY.equals(status)) {
             updateProgressDialog(R.string.progress_unmounting);
             IMountService mountService = getMountService();
-            String extStoragePath = null;
-            if (index == 0)
-                extStoragePath = Environment.getExternalSDStorageDirectory().toString();
-            else if (index == 1)
-                extStoragePath = Environment.getExternalExtSDStorageDirectory().toString();
-            else if (index == 2)
-                extStoragePath = Environment.getExternalUDiskStorageDirectory().toString();
+            String extStoragePath = path;
             try {
                 mountService.unmountVolume(extStoragePath, true);
             } catch (RemoteException e) {
@@ -202,18 +195,13 @@ public class ExternalStorageFormatter extends Service
             final String extSDStoragePath = Environment.getExternalSDStorageDirectory().toString();
             final String extExtSDStoragePath = Environment.getExternalExtSDStorageDirectory().toString();
             final String extUDiskStoragePath = Environment.getExternalUDiskStorageDirectory().toString();
+            final String pathSlc = path;
             if (mountService != null) {
                 new Thread() {
                     public void run() {
                         boolean success = false;
                         try {
-                            int sel = getMountService().getFormatIndex();
-                            if (sel == 0)
-                                mountService.formatVolume(extSDStoragePath);
-                            else if (sel == 1)
-                                mountService.formatVolume(extExtSDStoragePath);
-                            else if (sel == 2)
-                                mountService.formatVolume(extUDiskStoragePath);
+                            mountService.formatVolume(pathSlc);
                             success = true;
                         } catch (Exception e) {
                             Toast.makeText(ExternalStorageFormatter.this,
@@ -233,14 +221,19 @@ public class ExternalStorageFormatter extends Service
                             sendBroadcast(new Intent("android.intent.action.MASTER_CLEAR"));
                         } else {
                             try {
-                                int sel = getMountService().getFormatIndex();
-                                if (sel == 0)
+                                if (pathSlc.equals(extSDStoragePath))
                                 {
                                     mountService.mountVolume(extSDStoragePath);
+                                    if (Environment.MEDIA_MOUNTED.equals(extsdStatus)
+                                            || Environment.MEDIA_MOUNTED_READ_ONLY.equals(extsdStatus))
+                                        mountService.mountVolume(extExtSDStoragePath);
+                                    if (Environment.MEDIA_MOUNTED.equals(udiskStatus)
+                                            || Environment.MEDIA_MOUNTED_READ_ONLY.equals(udiskStatus))
+                                    mountService.mountVolume(extUDiskStoragePath); 
                                 }
-                                else if (sel == 1)
+                                else if (pathSlc.equals(extExtSDStoragePath))
                                     mountService.mountVolume(extExtSDStoragePath);
-                                else if (sel == 2)
+                                else if (pathSlc.equals(extUDiskStoragePath))
                                     mountService.mountVolume(extUDiskStoragePath); 
                             } catch (RemoteException e) {
                                 Log.w(TAG, "Failed talking with mount service", e);

@@ -121,36 +121,6 @@ public interface IMountService extends IInterface {
                 }
             }
 
-            public void setFormatIndex(int index) throws RemoteException {
-                Parcel _data = Parcel.obtain();
-                Parcel _reply = Parcel.obtain();
-                try {
-                    _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeInt(index);
-                    mRemote.transact(Stub.TRANSACTION_setFormatIndex, _data, _reply, 0);
-                    _reply.readException();
-                } finally {
-                    _reply.recycle();
-                    _data.recycle();
-                }                
-            }
-
-            public int getFormatIndex() throws RemoteException {
-                Parcel _data = Parcel.obtain();
-                Parcel _reply = Parcel.obtain();
-                int _result;
-                try {
-                    _data.writeInterfaceToken(DESCRIPTOR);
-                    mRemote.transact(Stub.TRANSACTION_getFormatIndex, _data, _reply, 0);
-                    _reply.readException();
-                    _result = _reply.readInt();
-                } finally {
-                    _reply.recycle();
-                    _data.recycle();
-                }
-                return _result;             
-            }
-
             /**
              * Returns true if a USB mass storage host is enabled (media is
              * shared)
@@ -651,12 +621,6 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_getMountedObbPath = IBinder.FIRST_CALL_TRANSACTION + 24;
 
-        static final int TRANSACTION_setFormatIndex = IBinder.FIRST_CALL_TRANSACTION + 25;
-
-        static final int TRANSACTION_getFormatIndex = IBinder.FIRST_CALL_TRANSACTION + 26;
-
-        
-
         /**
          * Cast an IBinder object into an IMountService interface, generating a
          * proxy if needed.
@@ -931,22 +895,6 @@ public interface IMountService extends IInterface {
                     reply.writeString(mountedPath);
                     return true;
                 }
-                case TRANSACTION_setFormatIndex: {
-                    data.enforceInterface(DESCRIPTOR);
-                    int index;
-                    index = data.readInt();
-                    setFormatIndex(index);
-                    reply.writeNoException();
-                    return true;
-
-                }
-                case TRANSACTION_getFormatIndex: {
-                    data.enforceInterface(DESCRIPTOR);
-                    int index = getFormatIndex();
-                    reply.writeNoException();
-                    reply.writeInt(index);
-                    return true;
-                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1096,10 +1044,6 @@ public interface IMountService extends IInterface {
      * for storage related status changes.
      */
     public void unmountVolume(String mountPoint, boolean force) throws RemoteException;
-
-    public void setFormatIndex(int index) throws RemoteException;
-
-    public int getFormatIndex() throws RemoteException;
 
     /**
      * Unregisters an IMountServiceListener

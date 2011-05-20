@@ -1394,14 +1394,6 @@ class MountService extends IMountService.Stub
         return doFormatVolume(path);
     }
 
-    public void setFormatIndex(int index) {
-        FormatIndex = index;
-    }
-
-    public int getFormatIndex() {
-        return FormatIndex;
-    }
-
     public int []getStorageUsers(String path) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();

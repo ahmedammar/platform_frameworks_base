@@ -85,6 +85,7 @@ FramebufferNativeWindow::FramebufferNativeWindow()
     if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &module) == 0) {
         int stride;
         int err;
+        int i;
         err = framebuffer_open(module, &fbDev);
         LOGE_IF(err, "couldn't open framebuffer HAL (%s)", strerror(-err));
         
@@ -98,43 +99,28 @@ FramebufferNativeWindow::FramebufferNativeWindow()
         mUpdateOnDemand = (fbDev->setUpdateRect != 0);
         
         // initialize the buffer FIFO
-#ifndef FSL_EPDC_FB
-        mNumBuffers = 3;
-        mNumFreeBuffers = 3;
-#else
-        mNumBuffers = 2;
-        mNumFreeBuffers = 2;
-#endif
+        mNumBuffers = fbDev->reserved[0];
+        if (mNumBuffers != 3 && mNumBuffers != 2) {
+            LOGE("The framebuffer number got from HAL is not supported(%d)", mNumBuffers);
+            return;
+        }
+        mNumFreeBuffers = mNumBuffers;
+
         mBufferHead = mNumBuffers-1;
-        buffers[0] = new NativeBuffer(
-                fbDev->width, fbDev->height, fbDev->format, GRALLOC_USAGE_HW_FB);
-        buffers[1] = new NativeBuffer(
-                fbDev->width, fbDev->height, fbDev->format, GRALLOC_USAGE_HW_FB);
-#ifndef FSL_EPDC_FB
-        buffers[2] = new NativeBuffer(
-                fbDev->width, fbDev->height, fbDev->format, GRALLOC_USAGE_HW_FB);
-#endif
-        err = grDev->alloc(grDev,
-                fbDev->width, fbDev->height, fbDev->format, 
-                GRALLOC_USAGE_HW_FB, &buffers[0]->handle, &buffers[0]->stride);
 
-        LOGE_IF(err, "fb buffer 0 allocation failed w=%d, h=%d, err=%s",
-                fbDev->width, fbDev->height, strerror(-err));
+        for (i = 0; i < mNumBuffers; i++)
+            buffers[i] = new NativeBuffer(
+                    fbDev->width, fbDev->height, fbDev->format, GRALLOC_USAGE_HW_FB);
 
-        err = grDev->alloc(grDev,
-                fbDev->width, fbDev->height, fbDev->format, 
-                GRALLOC_USAGE_HW_FB, &buffers[1]->handle, &buffers[1]->stride);
+        for (i = 0; i < mNumBuffers; i++) {
+            err = grDev->alloc(grDev,
+                    fbDev->width, fbDev->height, fbDev->format,
+                    GRALLOC_USAGE_HW_FB, &buffers[i]->handle, &buffers[i]->stride);
 
-        LOGE_IF(err, "fb buffer 1 allocation failed w=%d, h=%d, err=%s",
-                fbDev->width, fbDev->height, strerror(-err));
-#ifndef FSL_EPDC_FB
-        err = grDev->alloc(grDev,
-                fbDev->width, fbDev->height, fbDev->format, 
-                GRALLOC_USAGE_HW_FB, &buffers[2]->handle, &buffers[2]->stride);
+            LOGE_IF(err, "fb buffer %d allocation failed w=%d, h=%d, err=%s",
+                    i, fbDev->width, fbDev->height, strerror(-err));
+        }
 
-        LOGE_IF(err, "fb buffer 2 allocation failed w=%d, h=%d, err=%s",
-                fbDev->width, fbDev->height, strerror(-err));
-#endif
         const_cast<uint32_t&>(ANativeWindow::flags) = fbDev->flags; 
         const_cast<float&>(ANativeWindow::xdpi) = fbDev->xdpi;
         const_cast<float&>(ANativeWindow::ydpi) = fbDev->ydpi;
@@ -157,14 +143,10 @@ FramebufferNativeWindow::FramebufferNativeWindow()
 FramebufferNativeWindow::~FramebufferNativeWindow() 
 {
     if (grDev) {
-        if (buffers[0] != NULL)
-            grDev->free(grDev, buffers[0]->handle);
-        if (buffers[1] != NULL)
-            grDev->free(grDev, buffers[1]->handle);
-#ifndef FSL_EPDC_FB
-        if (buffers[2] != NULL)
-            grDev->free(grDev, buffers[2]->handle);
-#endif
+        int i;
+        for (i = 0; i < mNumBuffers; i++)
+            if (buffers[i] != NULL)
+                grDev->free(grDev, buffers[i]->handle);
         gralloc_close(grDev);
     }
 

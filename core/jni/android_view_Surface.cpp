@@ -15,7 +15,7 @@
  */
 
 #define LOG_TAG "Surface"
-/* Copyright (c) 2010 Freescale Semiconductors Inc. */
+/* Copyright (c) 2011 Freescale Semiconductor, Inc. */
 
 #include <stdio.h>
 

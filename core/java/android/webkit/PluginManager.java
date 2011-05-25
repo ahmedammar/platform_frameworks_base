@@ -183,6 +183,11 @@ public class PluginManager {
 		    Log.w(LOGTAG, "no signature for " + pkgInfo.packageName);
                     continue;
                 }
+
+		// Temp disable signature test, if you want to
+		// signature test, please de-comment it following...
+
+		/*
                 if (SystemProperties.getBoolean("ro.secure", false)) {
                     boolean signatureMatch = false;
                     for (Signature signature : signatures) {
@@ -198,6 +203,7 @@ public class PluginManager {
                         continue;
                     }
                 }
+		*/
 
                 // determine the type of plugin from the manifest
                 if (serviceInfo.metaData == null) {

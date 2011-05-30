@@ -77,7 +77,10 @@ public class ExternalStorageFormatter extends Service
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        path = intent.getData().toString();
+        if (intent.getData() != null)
+            path = intent.getData().toString();
+        else
+            path = Environment.getExternalSDStorageDirectory().toString();
         if (FORMAT_AND_FACTORY_RESET.equals(intent.getAction())) {
             mFactoryReset = true;
         }
@@ -143,13 +146,18 @@ public class ExternalStorageFormatter extends Service
         final String udiskStatus = Environment.getExternalUDiskStorageState();
         String status = null;
 
-        if (path.equals(Environment.getExternalSDStorageDirectory().toString()))
+        if (path == null) {
+            path = Environment.getExternalSDStorageDirectory().toString();
             status = sdStatus;
-        else if (path.equals(Environment.getExternalExtSDStorageDirectory().toString()))
-            status = extsdStatus;
-        else if (path.equals(Environment.getExternalUDiskStorageDirectory().toString()))
-            status = udiskStatus;
-
+        }
+        else {
+            if (path.equals(Environment.getExternalSDStorageDirectory().toString()))
+                status = sdStatus;
+            else if (path.equals(Environment.getExternalExtSDStorageDirectory().toString()))
+                status = extsdStatus;
+            else if (path.equals(Environment.getExternalUDiskStorageDirectory().toString()))
+                status = udiskStatus;
+        }
 
         if (path.equals(Environment.getExternalSDStorageDirectory().toString())) {
             if (Environment.MEDIA_MOUNTED.equals(extsdStatus)

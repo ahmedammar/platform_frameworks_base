@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* Copyright 2010-2011 Freescale Semiconductor Inc. */
+
 #ifndef _UI_INPUT_READER_H
 #define _UI_INPUT_READER_H
 

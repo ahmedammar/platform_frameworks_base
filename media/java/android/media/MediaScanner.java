@@ -19,6 +19,8 @@ package android.media;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -102,6 +104,9 @@ import java.util.Iterator;
  *
  * {@hide}
  */
+/* Copyright (c) 2011 Freescale Semiconductor, Inc. */
+
+
 public class MediaScanner
 {
     static {
@@ -386,6 +391,73 @@ public class MediaScanner
         mDefaultAlarmAlertFilename = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
                 + Settings.System.ALARM_ALERT);
     }
+    public void database_batch_update() {
+        Log.d(TAG, "media scanner starts");
+        try {
+            ContentProviderResult[] cpr = mMediaProvider.applyBatch(cpOperations);
+
+            int i=0;
+            for (FileCacheEntry entry : entryList) {
+                // previously the entry's mRowId was 0, so we set it here
+                if (entry != null) {
+                    long rowId = ContentUris.parseId(cpr[i].uri);
+                    entry.mRowId = rowId;
+
+                    // if it has genre, we need to set the rowId for genre table
+                    if (genreUriList.get(i) != null && genreRowIDList.get(i) == 0)
+                        genreRowIDList.set(i,rowId);
+                }
+                i++;
+            }
+
+            cpOperations.clear();
+            i=0;
+            for (Uri uri : genreUriList) {
+                // if it has genre, we need to set the rowId for genre table
+                if (uri != null) {
+                    ContentValues values = new ContentValues();
+                    values.put(MediaStore.Audio.Genres.Members.AUDIO_ID, genreRowIDList.get(i));
+                    cpOperations.add(ContentProviderOperation.newInsert(uri)
+                            .withValues(values).build());
+                }
+                i++;
+            }
+            mMediaProvider.applyBatch(cpOperations);
+        } catch (Exception ex) {
+            Log.w(TAG, ex);
+            return;
+        } finally {
+            nUpdatedFiles += nFilesForUpdate;
+            nFilesForUpdate = 0;
+            clearBuffer();
+            Log.d(TAG, "media scanner ends");
+        }
+    }
+    public void setScanningForBatch(boolean _bScanningForBatch){
+        bScanningForBatch = _bScanningForBatch;
+    }
+    public void init_database_batch_update() {
+        clearBuffer();
+        nUpdatedFiles = 0;
+        nFilesForUpdate = 0;
+    }
+    private void clearBuffer() {
+        cpOperations.clear();
+        entryList.clear();
+        genreUriList.clear();
+        genreRowIDList.clear();
+    }
+    public int getUpdatedFileSize_database_batch_update() {
+        return nUpdatedFiles;
+    }
+    private ArrayList<ContentProviderOperation> cpOperations = new ArrayList<ContentProviderOperation>();
+    private ArrayList<FileCacheEntry> entryList = new ArrayList<FileCacheEntry>();
+    private ArrayList<Uri> genreUriList = new ArrayList<Uri>();
+    private ArrayList<Long> genreRowIDList = new ArrayList<Long>();
+    private boolean bScanningForBatch = false;
+    private final int nMaxBatchSize = 100;
+    private int nUpdatedFiles = 0;
+    private int nFilesForUpdate = 0;
 
     private MyMediaScannerClient mClient = new MyMediaScannerClient();
 
@@ -537,6 +609,7 @@ public class MediaScanner
         public Uri doScanFile(String path, String mimeType, long lastModified, long fileSize, boolean scanAlways) {
             Uri result = null;
 
+        long step3 = System.currentTimeMillis();
             try {
                 FileCacheEntry entry = beginFile(path, mimeType, lastModified, fileSize);
                 // rescan for metadata if file was modified since last scan
@@ -550,17 +623,26 @@ public class MediaScanner
                         (!ringtones && !notifications && !alarms && !podcasts);
 
                     if( isMetadataSupported(mFileType) ) {
+
+        long step1 = System.currentTimeMillis();
 						processFile(path, mimeType, this);
+        long step2 = System.currentTimeMillis();
+                Log.d(TAG, "processFile step1 time: " + (step2 - step1) + "ms\n");
 					} else if (MediaFile.isImageFileType(mFileType)) {
                         // we used to compute the width and height but it's not worth it
                     }
 
+        long step1 = System.currentTimeMillis();
                     result = endFile(entry, ringtones, notifications, alarms, music, podcasts);
+        long step2 = System.currentTimeMillis();
+                Log.d(TAG, "endFile step1 time: " + (step2 - step1) + "ms\n");
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
             }
 
+        long step4 = System.currentTimeMillis();
+                Log.d(TAG, "doScanFile step1 time: " + (step4 - step3) + "ms\n");
             return result;
         }
 
@@ -691,6 +773,28 @@ public class MediaScanner
         private Uri endFile(FileCacheEntry entry, boolean ringtones, boolean notifications,
                 boolean alarms, boolean music, boolean podcasts)
                 throws RemoteException {
+
+            boolean bBatchMode = bScanningForBatch;
+            if (notifications && !mDefaultNotificationSet) {
+                if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
+                    Log.i("ljs","bBatchMode = false; -- notifications");
+                    bBatchMode = false;
+                }
+            } else if (ringtones && !mDefaultRingtoneSet) {
+                if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
+                    Log.i("ljs","bBatchMode = false; -- ringtones");
+                    bBatchMode = false;
+                }
+            } else if (alarms && !mDefaultAlarmSet) {
+                if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
+                    Log.i("ljs","bBatchMode = false; -- alarms");
+                    bBatchMode = false;
+                }
+            }
+
             // update database
             Uri tableUri;
             boolean isAudio = MediaFile.isAudioFileType(mFileType);
@@ -807,18 +911,32 @@ public class MediaScanner
             }
 
             Uri result = null;
+ 
             if (rowId == 0) {
-                // new file, insert it
-                result = mMediaProvider.insert(tableUri, values);
-                if (result != null) {
-                    rowId = ContentUris.parseId(result);
-                    entry.mRowId = rowId;
+                if (bBatchMode) {
+                    cpOperations.add(ContentProviderOperation.newInsert(tableUri)
+                            .withValues(values).build());
+                    entryList.add(entry);
+                } else {
+                    result = mMediaProvider.insert(tableUri, values);
+
+                    if (result != null) {
+                        rowId = ContentUris.parseId(result);
+                        entry.mRowId = rowId;
+                    }
                 }
+
             } else {
                 // updated file
                 result = ContentUris.withAppendedId(tableUri, rowId);
-                mMediaProvider.update(result, values, null, null);
+                if (bBatchMode) {
+                    cpOperations.add(ContentProviderOperation.newUpdate(result)
+                            .withValues(values).build());
+                    entryList.add(null);
+                } else
+                    mMediaProvider.update(result, values, null, null);
             }
+
             if (mProcessGenres && mGenre != null) {
                 String genre = mGenre;
                 Uri uri = mGenreCache.get(genre);
@@ -853,13 +971,30 @@ public class MediaScanner
                 }
 
                 if (uri != null) {
-                    // add entry to audio_genre_map
-                    values.clear();
-                    values.put(MediaStore.Audio.Genres.Members.AUDIO_ID, Long.valueOf(rowId));
-                    mMediaProvider.insert(uri, values);
+                    if (bBatchMode) {
+                        genreUriList.add(uri);
+                        genreRowIDList.add(rowId);
+                    } else {
+                        // add entry to audio_genre_map
+                        values.clear();
+                        values.put(MediaStore.Audio.Genres.Members.AUDIO_ID, Long.valueOf(rowId));
+                        mMediaProvider.insert(uri, values);
+                    }
+                 }
+                else {
+                    if (bBatchMode) {
+                        genreUriList.add(null);
+                        genreRowIDList.add((long)0);
+                    }
                 }
             }
-
+            else {
+                if (bBatchMode) {
+                    genreUriList.add(null);
+                    genreRowIDList.add((long)0);
+                }
+            }
+ 
             if (notifications && !mDefaultNotificationSet) {
                 if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
@@ -877,6 +1012,12 @@ public class MediaScanner
                         doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
                     setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
                     mDefaultAlarmSet = true;
+                }
+            }
+            if (bBatchMode) {
+                nFilesForUpdate++;
+                if (nFilesForUpdate >= nMaxBatchSize) {
+                    database_batch_update();
                 }
             }
 
@@ -1120,6 +1261,7 @@ public class MediaScanner
 
     private void postscan(String[] directories) throws RemoteException {
         Iterator<FileCacheEntry> iterator = mFileCache.values().iterator();
+        ArrayList<ContentProviderOperation> _cpOperations = new ArrayList<ContentProviderOperation>();
 
         long step1 = System.currentTimeMillis();
         while (iterator.hasNext()) {
@@ -1150,21 +1292,29 @@ public class MediaScanner
                 MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
                 int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
                 
-                if (MediaFile.isPlayListFileType(fileType)) {
-                    ContentValues values = new ContentValues();
-                    values.put(MediaStore.Audio.Playlists.DATA, "");
-                    values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, 0);
-                    mMediaProvider.update(ContentUris.withAppendedId(mPlaylistsUri, entry.mRowId), values, null, null);
+                 if (MediaFile.isPlayListFileType(fileType)) {
+                     ContentValues values = new ContentValues();
+                     values.put(MediaStore.Audio.Playlists.DATA, "");
+                     values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, 0);
+                    _cpOperations.add(ContentProviderOperation.newUpdate(ContentUris.withAppendedId(mPlaylistsUri, entry.mRowId))
+                            .withValues(values).build());
                 } else {
-                    mMediaProvider.delete(ContentUris.withAppendedId(entry.mTableUri, entry.mRowId), null, null);
+                    _cpOperations.add(ContentProviderOperation.newDelete(ContentUris.withAppendedId(entry.mTableUri, entry.mRowId))
+                            .build());
                     iterator.remove();
                 }
             }
+         }
+ 
+        try {
+            mMediaProvider.applyBatch(_cpOperations);
+        } catch (Exception ex) {
+            Log.w(TAG, ex);
+            return;
         }
 
-        long step2 = System.currentTimeMillis();
-
-        // handle playlists last, after we know what media files are on the storage.
+         long step2 = System.currentTimeMillis();
+         // handle playlists last, after we know what media files are on the storage.
         if (mProcessPlaylists) {
             processPlayLists();
         }
@@ -1220,16 +1370,22 @@ public class MediaScanner
 
             //update the file information
             if (DEBUG) Log.i(TAG, "Prescan start!");
-            prescan(volumeName);
-            long prescan = System.currentTimeMillis();
-
-            if (DEBUG) Log.i(TAG, "scanDirectories start"+directories[0]);
-            for (int i = 0; i < directories.length; i++) {
-                processDirectory(directories[i], MediaFile.sFileExtensions, mClient);
-            }
+             prescan(volumeName);
+             long prescan = System.currentTimeMillis();
+ 
+            setScanningForBatch(true);
+            init_database_batch_update();
+             if (DEBUG) Log.i(TAG, "scanDirectories start"+directories[0]);
+             for (int i = 0; i < directories.length; i++) {
+                 processDirectory(directories[i], MediaFile.sFileExtensions, mClient);
+             }
+            long ss = System.currentTimeMillis();
+            database_batch_update();
+            setScanningForBatch(false);
+            long sss = System.currentTimeMillis();
+            Log.d(TAG, " DB update: " + (sss - ss) + "ms\n");
             long scan = System.currentTimeMillis();
-
-            if (DEBUG) Log.i(TAG, "postscan start!");
+             if (DEBUG) Log.i(TAG, "postscan start!");
             postscan(directories);
             long end = System.currentTimeMillis();
 

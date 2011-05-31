@@ -3413,6 +3413,14 @@ void MouseInputMapper::sync(nsecs_t when) {
             return;
         }
 
+        float temp;
+        if ((orientation == InputReaderPolicyInterface::ROTATION_90) ||
+            (orientation == InputReaderPolicyInterface::ROTATION_270)) {
+            temp = screenHeight;
+            screenHeight = screenWidth;
+            screenWidth = temp;
+        }
+
         mAccumulator.absX = (mAccumulator.absX + x) > screenWidth ? screenWidth - 1 : ((mAccumulator.absX + x) < 0 ? 0 : mAccumulator.absX + x);
         mAccumulator.absY = (mAccumulator.absY + y) > screenHeight ? screenHeight - 1 : ((mAccumulator.absY + y) < 0 ? 0 : mAccumulator.absY + y);
         pointerCoords.x = mAccumulator.absX;
@@ -3424,33 +3432,6 @@ void MouseInputMapper::sync(nsecs_t when) {
         pointerCoords.toolMajor = 0;
         pointerCoords.toolMinor = 0;
         pointerCoords.orientation = 0;
-
-        float temp;
-        switch (orientation) {
-        case InputReaderPolicyInterface::ROTATION_90:
-            temp = x;
-            x = y;
-            y = - temp;
-            temp = screenHeight;
-            screenHeight = screenWidth;
-            screenWidth = temp;
-            break;
-
-        case InputReaderPolicyInterface::ROTATION_180:
-            x = - x;
-            y = - y;
-            break;
-
-        case InputReaderPolicyInterface::ROTATION_270:
-            temp = x;
-            x = - y;
-            y = temp;
-            temp = screenHeight;
-            screenHeight = screenWidth;
-            screenWidth = temp;
-            break;
-        }
-
     } // release lock
 
     int32_t metaState = mContext->getGlobalMetaState();

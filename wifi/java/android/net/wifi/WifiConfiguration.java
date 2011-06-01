@@ -103,10 +103,14 @@ public class WifiConfiguration implements Parcelable {
         /** IEEE 802.1X using EAP authentication and (optionally) dynamically
          * generated WEP keys. */
         public static final int IEEE8021X = 3;
-
+        /** {@hide} */
+        public static final int WAPI_PSK=4;
+        /** {@hide} */
+        public static final int WAPI_CERT=5;
         public static final String varName = "key_mgmt";
 
-        public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X" };
+	// public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X" };
+        public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X", "WAPI_PSK", "WAPI_CERT" };
     }
 
     /**
@@ -120,9 +124,12 @@ public class WifiConfiguration implements Parcelable {
         /** WPA2/IEEE 802.11i */
         public static final int RSN = 1;
 
+	/** {@hide} */
+        public static final int WAPI = 2;
+
         public static final String varName = "proto";
 
-        public static final String[] strings = { "WPA", "RSN" };
+        public static final String[] strings = { "WPA", "RSN", "WAPI" };
     }
 
     /**
@@ -155,10 +162,11 @@ public class WifiConfiguration implements Parcelable {
         public static final int TKIP = 1;
         /** AES in Counter mode with CBC-MAC [RFC 3610, IEEE 802.11i/D7.0] */
         public static final int CCMP = 2;
-
+	/** {@hide} */
+        public static final int SMS4 = 3;
         public static final String varName = "pairwise";
 
-        public static final String[] strings = { "NONE", "TKIP", "CCMP" };
+        public static final String[] strings = { "NONE", "TKIP", "CCMP", "SMS4" };
     }
 
     /**
@@ -182,9 +190,11 @@ public class WifiConfiguration implements Parcelable {
         /** AES in Counter mode with CBC-MAC [RFC 3610, IEEE 802.11i/D7.0] */
         public static final int CCMP = 3;
 
-        public static final String varName = "group";
+	/** {@hide} */
+        public static final int SMS4 = 4;
 
-        public static final String[] strings = { "WEP40", "WEP104", "TKIP", "CCMP" };
+        public static final String varName = "group";
+        public static final String[] strings = { "WEP40", "WEP104", "TKIP", "CCMP", "SMS4" };
     }
 
     /** Possible status of a network configuration. */

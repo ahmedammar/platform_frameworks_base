@@ -71,7 +71,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class WifiStateTracker extends NetworkStateTracker {
 
     private static final boolean LOCAL_LOGD = Config.LOGD || false;
-    
+
     private static final String TAG = "WifiStateTracker";
 
     // Event log tags (must be in sync with event-log-tags)
@@ -1674,6 +1674,15 @@ public class WifiStateTracker extends NetworkStateTracker {
      * This is done by checking isDriverStopped() to
      * be false.
      */
+
+    /**
+     * Load the AP driver and firmware
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
+    public synchronized boolean loadApDriver() {
+        return WifiNative.loadApDriver();
+    }
 
     /**
      * Load the driver and firmware

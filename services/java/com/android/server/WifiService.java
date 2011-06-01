@@ -98,7 +98,8 @@ public class WifiService extends IWifiManager.Stub {
     private static final Pattern scanResultPattern = Pattern.compile("\t+");
     private final WifiStateTracker mWifiStateTracker;
     /* TODO: fetch a configurable interface */
-    private static final String SOFTAP_IFACE = "wl0.1";
+    //     private static final String SOFTAP_IFACE = "wl0.1";
+    private static final String SOFTAP_IFACE = "wlap0";
 
     private Context mContext;
     private int mWifiApState;
@@ -722,7 +723,9 @@ public class WifiService extends IWifiManager.Stub {
                 wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
             }
 
-            if (!mWifiStateTracker.loadDriver()) {
+            Slog.e(TAG, "ath: load Wi-Fi driver for AP mode.");
+//            if (!mWifiStateTracker.loadDriver()) {
+            if (!mWifiStateTracker.loadApDriver()) {
                 Slog.e(TAG, "Failed to load Wi-Fi driver for AP mode");
                 setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.NO_DRIVER_UNLOAD);
                 return false;
@@ -1041,6 +1044,7 @@ public class WifiService extends IWifiManager.Stub {
         int netId = config.networkId;
         boolean newNetwork = netId == -1;
         boolean doReconfig = false;
+        int currentPriority = -1;
         // networkId of -1 means we want to create a new network
         synchronized (mWifiStateTracker) {
             if (newNetwork) {
@@ -1052,12 +1056,26 @@ public class WifiService extends IWifiManager.Stub {
                     return -1;
                 }
                 doReconfig = true;
+            } else  {
+                String priorityVal = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.priorityVarName);
+                currentPriority = -1;
+                if (!TextUtils.isEmpty(priorityVal)) {
+                        try {
+                            currentPriority = Integer.parseInt(priorityVal);
+                        } catch (NumberFormatException ignore) {
+                        }
+                }
             }
-            mNeedReconfig = mNeedReconfig || doReconfig;
-        }
+            doReconfig = currentPriority != config.priority;
 
+            mNeedReconfig = mNeedReconfig || doReconfig;
+                        if (mNeedReconfig == true)
+                                Slog.d(TAG, "AP Mode: config :need to reconfig");
+                        else
+                                Slog.d(TAG, "AP mode: config: no need to reconfig");
+        }
         setVariables: {
-            /*
+	    /*
              * Note that if a networkId for a non-existent network
              * was supplied, then the first setNetworkVariable()
              * will fail, so we don't bother to make a separate check

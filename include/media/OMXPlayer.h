@@ -26,7 +26,7 @@ namespace android {
 class OMXPlayer : public MediaPlayerInterface
 {
 public:
-                        OMXPlayer(int nMediaType = 0);
+                        OMXPlayer(int nMediaType);
     virtual             ~OMXPlayer();
 
     virtual status_t    initCheck();

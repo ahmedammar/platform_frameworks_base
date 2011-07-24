@@ -100,7 +100,7 @@ void MetadataRetrieverClient::disconnect()
 static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
 {
     sp<MediaMetadataRetrieverBase> p;
-    switch (playerType & 0xff) {
+    switch (playerType) {
         case STAGEFRIGHT_PLAYER:
         {
             p = new StagefrightMetadataRetriever;
@@ -118,7 +118,7 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
             break;
         case OMX_PLAYER:
             LOGV("Create OMXMetadataRetriever.\n");
-            p = new OMXMetadataRetriever(playerType >> 8);
+            p = new OMXMetadataRetriever();
             break;
         default:
             // TODO:

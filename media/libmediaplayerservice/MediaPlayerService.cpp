@@ -718,13 +718,13 @@ player_type getPlayerType(int fd, int64_t offset, int64_t length)
     char value[PROPERTY_VALUE_MAX];
     if (property_get("media.omxgm.enable-player", value, NULL) && (!strcmp(value, "1"))) {
         char url[128];
-        int ret = 0;
+        bool ret = false;
         OMXPlayerType *pType = new OMXPlayerType();
         sprintf(url, "sharedfd://%d:%lld:%lld",  fd, offset, length);
         ret = pType->IsSupportedContent(url);
         delete pType;
-        if(ret)
-            return (player_type)(OMX_PLAYER | (ret << 8));
+        if(ret == true)
+            return OMX_PLAYER;
     }
 
     long ident = *((long*)buf);
@@ -825,7 +825,7 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
         notify_callback_f notifyFunc)
 {
     sp<MediaPlayerBase> p;
-    switch (playerType & 0xff) {
+    switch (playerType) {
 #ifndef NO_OPENCORE
         case PV_PLAYER:
             LOGV(" create PVPlayer");
@@ -842,7 +842,7 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
             break;
         case OMX_PLAYER:
             LOGV(" Create OMXPlayer.\n");
-            p = new OMXPlayer(playerType >> 8);
+            p = new OMXPlayer();
             break;
         case TEST_PLAYER:
             LOGV("Create Test Player stub");

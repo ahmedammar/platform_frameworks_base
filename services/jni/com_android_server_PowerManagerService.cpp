@@ -120,8 +120,8 @@ static void android_server_PowerManagerService_nativeInit(JNIEnv* env, jobject o
 static void android_server_PowerManagerService_nativeSetPowerState(JNIEnv* env,
         jobject serviceObj, jboolean screenOn, jboolean screenBright) {
     AutoMutex _l(gPowerManagerLock);
-    gScreenOn = screenOn;
-    gScreenBright = screenBright;
+    gScreenOn = true; //screenOn;
+    gScreenBright = true; //screenBright;
 }
 
 static void android_server_PowerManagerService_nativeStartSurfaceFlingerAnimation(JNIEnv* env,

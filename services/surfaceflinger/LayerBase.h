@@ -259,7 +259,7 @@ protected:
                 Transform       mTransform;
                 GLfloat         mVertices[4][2];
                 Rect            mTransformedBounds;
-            
+
                 // these are protected by an external lock
                 State           mCurrentState;
                 State           mDrawingState;
@@ -273,11 +273,12 @@ protected:
 
                 // atomic
     volatile    int32_t         mInvalidate;
-                
+
 
 public:
     // called from class SurfaceFlinger
     virtual ~LayerBase();
+    int             mUsage;
 
 private:
     LayerBase(const LayerBase& rhs);

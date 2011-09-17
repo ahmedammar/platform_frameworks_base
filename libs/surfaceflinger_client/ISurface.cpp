@@ -122,6 +122,9 @@ public:
         data.writeInt32(buffers.format);
         data.writeInt32(buffers.transform);
         data.writeInt32(buffers.flags);
+        data.writeInt32(buffers.yuv_offsets[0]);
+        data.writeInt32(buffers.yuv_offsets[1]);
+        data.writeInt32(buffers.yuv_size);
         data.writeStrongBinder(buffers.heap->asBinder());
         remote()->transact(REGISTER_BUFFERS, data, &reply);
         status_t result = reply.readInt32();
@@ -220,6 +223,9 @@ status_t BnSurface::onTransact(
             buffer.format = data.readInt32();
             buffer.transform = data.readInt32();
             buffer.flags = data.readInt32();
+            buffer.yuv_offsets[0] = data.readInt32();
+            buffer.yuv_offsets[1] = data.readInt32();
+            buffer.yuv_size = data.readInt32();
             buffer.heap = interface_cast<IMemoryHeap>(data.readStrongBinder());
             status_t err = registerBuffers(buffer);
             reply->writeInt32(err);

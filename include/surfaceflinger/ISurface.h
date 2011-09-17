@@ -87,9 +87,9 @@ public:
         BufferHeap();
         
         BufferHeap(uint32_t w, uint32_t h,
-                int32_t hor_stride, int32_t ver_stride, 
+                int32_t hor_stride, int32_t ver_stride,
                 PixelFormat format, const sp<IMemoryHeap>& heap);
-        
+
         BufferHeap(uint32_t w, uint32_t h,
                 int32_t hor_stride, int32_t ver_stride, 
                 PixelFormat format, uint32_t transform, uint32_t flags,
@@ -104,6 +104,8 @@ public:
         PixelFormat format;
         uint32_t transform;
         uint32_t flags;
+        uint32_t yuv_offsets[2];
+        uint32_t yuv_size;
         sp<IMemoryHeap> heap;
     };
     

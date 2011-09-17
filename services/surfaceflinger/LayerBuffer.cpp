@@ -75,9 +75,9 @@ void LayerBuffer::onFirstRef()
     }
 
     // since our copybit not support multi instance, comment it out 
-    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
+    /*if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
         copybit_open(module, &mBlitEngine);
-    } 
+    }*/
 }
 
 sp<LayerBaseClient::Surface> LayerBuffer::createSurface() const
@@ -309,20 +309,18 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers,
     src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
     src.img.handle  = 0;
 
+    src.glindex = offset/buffers.yuv_size;
+
     gralloc_module_t const * module = LayerBuffer::getGrallocModule();
     if (module && module->perform) {
         int err = module->perform(module,
                 GRALLOC_MODULE_PERFORM_CREATE_HANDLE_FROM_BUFFER,
                 buffers.heap->heapID(), bufferSize,
-                offset, buffers.heap->base(),
+                offset, buffers.yuv_offsets[0], buffers.yuv_offsets[1], buffers.heap->base(),
                 &src.img.handle);
         // we can fail here is the passed buffer is purely software
         mSupportsCopybit = (err == NO_ERROR);
     }
-    //LOGI("Buffer: src.img.base: %p src.img.handle: %p", src.img.base, &src.img.handle);
-    private_handle_t* hnd = (private_handle_t*)&src.img.handle;
-
-    
  }
 
 LayerBuffer::Buffer::~Buffer()
@@ -404,6 +402,7 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
 
 LayerBuffer::BufferSource::~BufferSource()
 {    
+    int i;
     class MessageDestroyTexture : public MessageBase {
         SurfaceFlinger* flinger;
         GLuint name;
@@ -417,14 +416,17 @@ LayerBuffer::BufferSource::~BufferSource()
         }
     };
 
-    if (mTexture.name != -1U) {
-        // GL textures can only be destroyed from the GL thread
-        getFlinger()->mEventQueue.postMessage(
-                new MessageDestroyTexture(getFlinger(), mTexture.name) );
-    }
-    if (mTexture.image != EGL_NO_IMAGE_KHR) {
-        EGLDisplay dpy(getFlinger()->graphicPlane(0).getEGLDisplay());
-        eglDestroyImageKHR(dpy, mTexture.image);
+    for (i=0; i<20; i++)
+    {
+        if (mTexture[i].name != -1U) {
+            // GL textures can only be destroyed from the GL thread
+            getFlinger()->mEventQueue.postMessage(
+                    new MessageDestroyTexture(getFlinger(), mTexture[i].name) );
+        }
+        if (mTexture[i].image != EGL_NO_IMAGE_KHR) {
+            EGLDisplay dpy(getFlinger()->graphicPlane(0).getEGLDisplay());
+            eglDestroyImageKHR(dpy, mTexture[i].image);
+        }
     }
 }
 
@@ -436,12 +438,13 @@ void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
         buffers = mBufferHeap;
         if (buffers.heap != 0) {
             const size_t memorySize = buffers.heap->getSize();
-            if ((size_t(offset) + mBufferSize) > memorySize) {
+            /* FIXME: BufferHeap created with wrong size */
+            /*if ((size_t(offset) + mBufferSize) > memorySize) {
                 LOGE("LayerBuffer::BufferSource::postBuffer() "
                      "invalid buffer (offset=%d, size=%d, heap-size=%d",
                      int(offset), int(mBufferSize), int(memorySize));
                 return;
-            }
+            }*/
         }
     }
 
@@ -475,6 +478,10 @@ void LayerBuffer::BufferSource::setBuffer(const sp<LayerBuffer::Buffer>& buffer)
     mBuffer = buffer;
 }
 
+
+static int buffer_initialized = 0;
+static int count = 0;
+
 void LayerBuffer::BufferSource::onDraw(const Region& clip) const 
 {
     sp<Buffer> ourBuffer(getBuffer());
@@ -492,36 +499,35 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     if (GLExtensions::getInstance().haveDirectTexture()) {
         err = INVALID_OPERATION;
         if (ourBuffer->supportsCopybit()) {
-            //LOGI("EGL_ANDROID_image_native_buffer defined and Copybit supported");
             copybit_device_t* copybit = mLayer.mBlitEngine;
             if (copybit && err != NO_ERROR) {
                 // create our EGLImageKHR the first time
                 err = initTempBuffer();
                 if (err == NO_ERROR) {
+                    buffer_initialized = 1;
                     // NOTE: Assume the buffer is allocated with the proper USAGE flags
                     const NativeBuffer& dst(mTempBuffer);
                     region_iterator clip(Region(Rect(dst.crop.r, dst.crop.b)));
                     copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
                     copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
                     copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
-                    //LOGI("dst: base(%p) src: base(%p)", dst.img.base, src.img.base);
                     err = copybit->stretch(copybit, &dst.img, &src.img,
                             &dst.crop, &src.crop, &clip);
-                    //err = copybit->blit(copybit, &dst.img, &src.img, &clip);
                     if (err != NO_ERROR) {
-                        clearTempBufferImage();
+                        clearTempBufferImage(count);
                     }
                 }
             }
         }
+    }
+    if (GLExtensions::getInstance().haveDirectTexture()) {
+        err = initTempBuffer();
     }
     else
 #endif
     {
         err = INVALID_OPERATION;
     }
-
-    /*LOGI("src.img.base: %p", src.img.base);*/
 
     if (err != NO_ERROR) {
         LOGI("Falling on slower video texture path.");
@@ -535,11 +541,11 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         t.format = src.img.format;
         t.data = (GGLubyte*)src.img.base;
         const Region dirty(Rect(t.width, t.height));
-        mTextureManager.loadTexture(&mTexture, dirty, t);
+        mTextureManager.loadTexture(&mTexture[0], dirty, t);
     }
 
     mLayer.setBufferTransform(mBufferHeap.transform);
-    mLayer.drawWithOpenGL(clip, mTexture);
+    mLayer.drawWithOpenGL(clip, mTexture[src.glindex/*0*/]);
 }
 
 status_t LayerBuffer::BufferSource::initTempBuffer() const
@@ -549,7 +555,7 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
     uint32_t w = mLayer.mTransformedBounds.width();
     uint32_t h = mLayer.mTransformedBounds.height();
     //LOGI("initTempBuffer w:%d h:%d buffers.w:%d buffers.h:%d", w, h, buffers.w, buffers.h);
-    if (buffers.w * h != buffers.h * w) {
+    /*if (buffers.w * h != buffers.h * w) {
         int t = w; w = h; h = t;
     }
     //LOGI("initTempBuffer w:%d h:%d", w, h);
@@ -564,81 +570,67 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
     else if (w > buffers.w*up)  w = buffers.w*up;
     if (buffers.h > h*down)     h = buffers.h / down;
     else if (h > buffers.h*up)  h = buffers.h*up;
-    //LOGI("initTempBuffer w:%d h:%d", w, h);
+    LOGI("initTempBuffer w:%d h:%d", w, h);
+    */
+    
+    sp<Buffer> ourBuffer(getBuffer());
+    NativeBuffer src(ourBuffer->getBuffer());
 
-    if (mTexture.image != EGL_NO_IMAGE_KHR) {
+    int index = src.glindex;
+ 
+    w = buffers.w;
+    h = buffers.h;
+    
+    if (mTexture[index].image != EGL_NO_IMAGE_KHR) {
         // we have an EGLImage, make sure the needed size didn't change
-        if (w!=mTexture.width || h!= mTexture.height) {
+        if (w!=mTexture[index].width || h!= mTexture[index].height) {
             // delete the EGLImage and texture
             LOGI("initTempBuffer width or height mismatch, clearing.");
-            clearTempBufferImage();
+            clearTempBufferImage(index);
         } else {
             // we're good, we have an EGLImageKHR and it's (still) the
             // right size
             return NO_ERROR;
         }
     }
-
+    
     // figure out if we need linear filtering
-    if (buffers.w * h == buffers.h * w) {
+    /*if (buffers.w * h == buffers.h * w) {
         // same pixel area, don't use filtering
         mLayer.mNeedsFiltering = false;
-    }
+    }*/
+    mLayer.mNeedsFiltering = true;
+
+    private_handle_t* y = (private_handle_t *)src.img.handle;
+    LOGI("%i ++ fd:%i size:%p offset:%p base:%p phys:%p", index, y->fd, y->size, y->offset, y->base, y->phys);
 
     // Allocate a temporary buffer and create the corresponding EGLImageKHR
     // once the EGLImage has been created we don't need the
     // graphic buffer reference anymore.
     sp<GraphicBuffer> buffer = new GraphicBuffer(
-            w, h, HAL_PIXEL_FORMAT_RGB_565,
+            w, h, HAL_PIXEL_FORMAT_YCbCr_422_SP,
             GraphicBuffer::USAGE_HW_TEXTURE |
-            GraphicBuffer::USAGE_HW_2D);
+            GraphicBuffer::USAGE_HW_2D, buffers.w, (native_handle_t *)src.img.handle, 0);
 
     status_t err = buffer->initCheck();
     if (err == NO_ERROR) {
-        NativeBuffer& dst(mTempBuffer);
-
-        // construct an EGL_NATIVE_BUFFER_ANDROID
-        android_native_buffer_t* native_buffer = buffer->getNativeBuffer();
-
-        private_handle_t * native_handle = (private_handle_t *)native_buffer->handle;
-
-        dst.img.w = w;//buffer->getStride();
-        dst.img.h = h;
-        dst.img.format = native_buffer->format;
-        dst.img.handle = native_handle;
-        dst.img.base = (void*) native_handle->base;
-        dst.crop.l = 0;
-        dst.crop.t = 0;
-        dst.crop.r = w;
-        dst.crop.b = h;
-
-        //LOGI("native_buffer format:%x w:%d h:%d", native_buffer->format, native_buffer->width, native_buffer->height);
-
-        //LOGI("private_handle phys:%p base:%p", (void*)native_handle->phys, (void*)native_handle->base);
-
-        //uint8_t *p = (uint8_t*) native_handle->base;//(uint8_t*) mmap((void*)native_handle->phys, 0x1000000, PROT_READ | PROT_WRITE, MAP_PRIVATE, mfd, 0);
-
-        //for (int i=0; i<native_handle->size; i++,p++)
-        //    *p = 0xbc;
-
         EGLDisplay dpy(getFlinger()->graphicPlane(0).getEGLDisplay());
-        err = mTextureManager.initEglImage(&mTexture, dpy, buffer);
+        err = mTextureManager.initEglImage(&mTexture[index], dpy, buffer);
     }
-    //LOGI("GraphicBuffer: handle %p", buffer->handle);
     return err;
 }
 
-void LayerBuffer::BufferSource::clearTempBufferImage() const
+void LayerBuffer::BufferSource::clearTempBufferImage(int index) const
 {
-    //LOGI("clearTempBufferImage()");
+    LOGI("clearTempBufferImage()");
     // delete the image
     EGLDisplay dpy(getFlinger()->graphicPlane(0).getEGLDisplay());
-    eglDestroyImageKHR(dpy, mTexture.image);
+    eglDestroyImageKHR(dpy, mTexture[index].image);
 
     // and the associated texture (recreate a name)
-    glDeleteTextures(1, &mTexture.name);
+    glDeleteTextures(1, &mTexture[index].name);
     Texture defaultTexture;
-    mTexture = defaultTexture;
+    mTexture[index] = defaultTexture;
 }
 
 // ---------------------------------------------------------------------------

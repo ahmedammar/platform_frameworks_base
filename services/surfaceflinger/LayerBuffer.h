@@ -92,6 +92,7 @@ private:
     struct NativeBuffer {
         copybit_image_t   img;
         copybit_rect_t    crop;
+        int               glindex;
     };
 
     static gralloc_module_t const* sGrallocModule;
@@ -138,13 +139,13 @@ private:
         virtual void destroy() { }
     private:
         status_t initTempBuffer() const;
-        void clearTempBufferImage() const;
+        void clearTempBufferImage(int index) const;
         mutable Mutex                   mBufferSourceLock;
         sp<Buffer>                      mBuffer;
         status_t                        mStatus;
         ISurface::BufferHeap            mBufferHeap;
         size_t                          mBufferSize;
-        mutable Texture                 mTexture;
+        mutable Texture                 mTexture[20];
         mutable NativeBuffer            mTempBuffer;
         mutable TextureManager          mTextureManager;
     };

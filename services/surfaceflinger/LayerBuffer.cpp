@@ -438,13 +438,12 @@ void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
         buffers = mBufferHeap;
         if (buffers.heap != 0) {
             const size_t memorySize = buffers.heap->getSize();
-            /* FIXME: BufferHeap created with wrong size */
-            /*if ((size_t(offset) + mBufferSize) > memorySize) {
+            if ((size_t(offset) + mBufferSize) > memorySize) {
                 LOGE("LayerBuffer::BufferSource::postBuffer() "
                      "invalid buffer (offset=%d, size=%d, heap-size=%d",
                      int(offset), int(mBufferSize), int(memorySize));
                 return;
-            }*/
+            }
         }
     }
 

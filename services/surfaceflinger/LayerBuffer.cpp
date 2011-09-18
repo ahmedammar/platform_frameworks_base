@@ -395,8 +395,8 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
     }
 
     mBufferHeap = buffers;
-    mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);    
-    mBufferSize = info.getScanlineSize(buffers.hor_stride)*buffers.ver_stride;
+    mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);
+    mBufferSize = buffers.yuv_size;//info.getScanlineSize(buffers.hor_stride)*buffers.ver_stride;
     mLayer.forceVisibilityTransaction();
 }
 

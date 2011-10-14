@@ -283,7 +283,8 @@ public:     // hack to work around gcc 4.0.3 bug
           GraphicPlane&     graphicPlane(int dpy);
           void              signalEvent();
           void              repaintEverything();
-
+          void              setDisplayRefresh(bool value);
+          void              setVideoRefresh(bool value);
 private:
             void        waitForEvent();
             void        handleConsoleEvents();
@@ -405,6 +406,8 @@ private:
 
    // only written in the main thread, only read in other threads
    volatile     int32_t                     mSecureFrameBuffer;
+                bool                        mDisplayRefresh;
+                bool                        mVideoRefresh;
 };
 
 // ---------------------------------------------------------------------------

@@ -99,7 +99,9 @@ SurfaceFlinger::SurfaceFlinger()
         mLastTransactionTime(0),
         mBootFinished(false),
         mConsoleSignals(0),
-        mSecureFrameBuffer(0)
+        mSecureFrameBuffer(0),
+        mDisplayRefresh(false),
+        mVideoRefresh(false)
 {
     init();
 }
@@ -328,6 +330,16 @@ void SurfaceFlinger::waitForEvent()
     }
 }
 
+void SurfaceFlinger::setDisplayRefresh(bool value)
+{
+    mDisplayRefresh = value;
+}
+
+void SurfaceFlinger::setVideoRefresh(bool value)
+{
+    mVideoRefresh = value;
+}
+
 void SurfaceFlinger::signalEvent() {
     mEventQueue.invalidate();
 }
@@ -463,7 +475,7 @@ void SurfaceFlinger::postFramebuffer()
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const nsecs_t now = systemTime();
     mDebugInSwapBuffers = now;
-    hw.flip(mSwapRegion);
+    hw.flip(mSwapRegion, mDisplayRefresh, mVideoRefresh);
     mLastSwapBufferTime = systemTime() - now;
     mDebugInSwapBuffers = 0;
     mSwapRegion.clear();
@@ -732,6 +744,8 @@ void SurfaceFlinger::commitTransaction()
 void SurfaceFlinger::handlePageFlip()
 {
     bool visibleRegions = mVisibleRegionsDirty;
+    mDisplayRefresh = false;
+    mVideoRefresh = false;
     const LayerVector& currentLayers(mDrawingState.layersSortedByZ);
     visibleRegions |= lockPageFlip(currentLayers);
 
@@ -740,6 +754,7 @@ void SurfaceFlinger::handlePageFlip()
         if (visibleRegions) {
             Region opaqueRegion;
             computeVisibleRegions(currentLayers, mDirtyRegion, opaqueRegion);
+            mDisplayRefresh = true;
 
             /*
              *  rebuild the visible layer list
@@ -1037,7 +1052,7 @@ void SurfaceFlinger::debugFlashRegions()
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
 
-    hw.flip(mSwapRegion);
+    hw.flip(mSwapRegion, mDisplayRefresh, mVideoRefresh);
 
     if (mDebugRegion > 1)
         usleep(mDebugRegion * 1000);
@@ -2000,7 +2015,7 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
         glColorMask(1,1,1,1);
         glColor4f(vg, vg, vg, 1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        hw.flip(screenBounds);
+        hw.flip(screenBounds, mDisplayRefresh, mVideoRefresh);
     }
 
     h_stretch hverts(hw_w, hw_h);
@@ -2013,7 +2028,7 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
         glClear(GL_COLOR_BUFFER_BIT);
         glColor4f(1-v, 1-v, 1-v, 1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        hw.flip(screenBounds);
+        hw.flip(screenBounds, mDisplayRefresh, mVideoRefresh);
     }
 
     glColorMask(1,1,1,1);
@@ -2121,7 +2136,7 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
         glClear(GL_COLOR_BUFFER_BIT);
         glColor4f(1-v, 1-v, 1-v, 1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        hw.flip(screenBounds);
+        hw.flip(screenBounds, mDisplayRefresh, mVideoRefresh);
     }
 
     nbFrames = 4;
@@ -2154,7 +2169,7 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
         glColorMask(0,0,1,1);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-        hw.flip(screenBounds);
+        hw.flip(screenBounds, mDisplayRefresh, mVideoRefresh);
     }
 
     glColorMask(1,1,1,1);
@@ -2191,7 +2206,7 @@ status_t SurfaceFlinger::turnElectronBeamOffImplLocked(int32_t mode)
     glDisable(GL_SCISSOR_TEST);
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_SCISSOR_TEST);
-    hw.flip( Region(hw.bounds()) );
+    hw.flip( Region(hw.bounds()), mDisplayRefresh, mVideoRefresh);
 
     return NO_ERROR;
 }

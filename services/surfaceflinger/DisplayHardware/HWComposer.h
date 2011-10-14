@@ -56,7 +56,7 @@ public:
     status_t disable();
 
     // commits the list
-    status_t commit() const;
+    status_t commit(bool refresh, bool vRefresh) const;
 
     // release hardware resources
     status_t release() const;

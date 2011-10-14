@@ -354,7 +354,7 @@ int DisplayHardware::getCurrentBufferIndex() const {
     return mNativeWindow->getCurrentBufferIndex();
 }
 
-void DisplayHardware::flip(const Region& dirty) const
+void DisplayHardware::flip(const Region& dirty, bool refresh, bool vRefresh) const
 {
     checkGLErrors();
 
@@ -377,7 +377,7 @@ void DisplayHardware::flip(const Region& dirty) const
     mPageFlipCount++;
 
     if (mHwc->initCheck() == NO_ERROR) {
-        mHwc->commit();
+        mHwc->commit(refresh, vRefresh);
     } else {
         eglSwapBuffers(dpy, surface);
     }

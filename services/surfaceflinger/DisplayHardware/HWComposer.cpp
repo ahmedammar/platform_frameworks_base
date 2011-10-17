@@ -134,7 +134,8 @@ size_t HWComposer::getLayerCount(int type) const {
 }
 
 status_t HWComposer::commit(bool refresh, bool vRefresh) const {
-    int err = mHwc->set(mHwc, mDpy, mSur, mList, refresh, vRefresh);
+    mHwc->setUpdateMode(mHwc, refresh, vRefresh);
+    int err = mHwc->set(mHwc, mDpy, mSur, mList);
     if (mList) {
         mList->flags &= ~HWC_GEOMETRY_CHANGED;
     }
@@ -143,7 +144,7 @@ status_t HWComposer::commit(bool refresh, bool vRefresh) const {
 
 status_t HWComposer::release() const {
     if (mHwc) {
-        int err = mHwc->set(mHwc, NULL, NULL, NULL, true, true);
+        int err = mHwc->set(mHwc, NULL, NULL, NULL);
         return (status_t)err;
     }
     return NO_ERROR;

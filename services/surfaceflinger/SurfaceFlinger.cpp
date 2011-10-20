@@ -450,7 +450,7 @@ bool SurfaceFlinger::threadLoop()
         if (!mSwapRegion.isEmpty()) {
             // inform the h/w that we're done compositing
             logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
-            hw.compositionComplete();
+            if(mDisplayRefresh) hw.compositionComplete();
             // release the clients before we flip ('cause flip might block)
 
             logger.log(GraphicLog::SF_SWAP_BUFFERS, index);

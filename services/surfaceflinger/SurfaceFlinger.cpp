@@ -1003,7 +1003,7 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
         }
         const sp<LayerBase>& layer(layers[i]);
         const Region clip(dirty.intersect(layer->visibleRegionScreen));
-        if (!clip.isEmpty()) {
+        if (!clip.isEmpty() && mDisplayRefresh) {
             layer->draw(clip);
         }
     }

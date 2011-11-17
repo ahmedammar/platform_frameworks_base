@@ -67,7 +67,7 @@ DisplayHardwareBase::DisplayEventThread::~DisplayEventThread()
 
 bool DisplayHardwareBase::DisplayEventThread::threadLoop()
 {
-    int err = 0;
+/*    int err = 0;
     char buf;
     int fd;
 
@@ -97,7 +97,7 @@ bool DisplayHardwareBase::DisplayEventThread::threadLoop()
         LOGD("Screen about to return, flinger = %p", flinger.get());
         if (flinger != 0)
             flinger->screenAcquired(0);
-    }
+    }*/
     return true;
 }
 

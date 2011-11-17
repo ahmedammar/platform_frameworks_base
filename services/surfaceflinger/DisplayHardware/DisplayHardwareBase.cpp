@@ -42,6 +42,7 @@ namespace android {
 
 static char const * const kSleepFileName = "/sys/power/wait_for_fb_sleep";
 static char const * const kWakeFileName  = "/sys/power/wait_for_fb_wake";
+static char const * const kFbconSysDir = "/sys/class/graphics/fbcon";
 
 // ----------------------------------------------------------------------------
 

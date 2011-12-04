@@ -273,19 +273,19 @@ void Layer::onDraw(const Region& clip) const
     }
 
     if (!isProtected()) {
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTextureName);
+        glBindTexture(GL_TEXTURE_2D, mTextureName);
         GLenum filter = GL_NEAREST;
         if (getFiltering() || needsFiltering() || isFixedSize() || isCropped()) {
             // TODO: we could be more subtle with isFixedSize()
             filter = GL_LINEAR;
         }
-        glTexParameterx(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, filter);
-        glTexParameterx(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, filter);
+        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
         glMatrixMode(GL_TEXTURE);
         glLoadMatrixf(mTextureMatrix);
         glMatrixMode(GL_MODELVIEW);
-        glDisable(GL_TEXTURE_2D);
-        glEnable(GL_TEXTURE_EXTERNAL_OES);
+        glDisable(GL_TEXTURE_EXTERNAL_OES);
+        glEnable(GL_TEXTURE_2D);
     } else {
         glBindTexture(GL_TEXTURE_2D, mFlinger->getProtectedTexName());
         glMatrixMode(GL_TEXTURE);
@@ -463,8 +463,8 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
             recomputeVisibleRegions = true;
         }
 
-        glTexParameterx(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterx(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         // update the layer size and release freeze-lock
         const Layer::State& front(drawingState());

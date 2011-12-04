@@ -30,7 +30,7 @@
 
 #include <ui/egl/android_natives.h>
 
-#define NUM_FRAME_BUFFERS  2
+#define NUM_FRAME_BUFFERS  3
 
 extern "C" EGLNativeWindowType android_createDisplaySurface(void);
 

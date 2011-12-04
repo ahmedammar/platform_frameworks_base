@@ -97,14 +97,19 @@ FramebufferNativeWindow::FramebufferNativeWindow()
         mUpdateOnDemand = (fbDev->setUpdateRect != 0);
         
         // initialize the buffer FIFO
-        mNumBuffers = NUM_FRAME_BUFFERS;
-        mNumFreeBuffers = NUM_FRAME_BUFFERS;
+        mNumBuffers = fbDev->reserved[0];
+        if (mNumBuffers != 3 && mNumBuffers != 2) {
+            LOGE("The framebuffer number got from HAL is not supported(%d)", mNumBuffers);
+            return;
+        }
+        mNumFreeBuffers = mNumBuffers;
         mBufferHead = mNumBuffers-1;
 
         for (i = 0; i < mNumBuffers; i++)
         {
                 buffers[i] = new NativeBuffer(
                         fbDev->width, fbDev->height, fbDev->format, GRALLOC_USAGE_HW_FB);
+                LOGD("buffers[%d]: %p", i, buffers[i].get());
         }
 
         for (i = 0; i < mNumBuffers; i++)
@@ -151,6 +156,8 @@ FramebufferNativeWindow::~FramebufferNativeWindow()
             grDev->free(grDev, buffers[0]->handle);
         if (buffers[1] != NULL)
             grDev->free(grDev, buffers[1]->handle);
+        if (buffers[2] != NULL)
+            grDev->free(grDev, buffers[2]->handle);
         gralloc_close(grDev);
     }
 
@@ -223,6 +230,7 @@ int FramebufferNativeWindow::dequeueBuffer(ANativeWindow* window,
     self->mCurrentBufferIndex = index;
 
     *buffer = self->buffers[index].get();
+
 
     logger.log(GraphicLog::SF_FB_DEQUEUE_AFTER, index);
     return 0;

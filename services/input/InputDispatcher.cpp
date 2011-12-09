@@ -3392,7 +3392,7 @@ void InputDispatcher::setInputDispatchMode(bool enabled, bool frozen) {
                 resetAndDropEverythingLocked("dispatcher is being disabled");
             }
 
-            mDispatchEnabled = enabled;
+            mDispatchEnabled = true;//enabled;
             mDispatchFrozen = frozen;
             changed = true;
         } else {

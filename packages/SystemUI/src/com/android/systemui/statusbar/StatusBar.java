@@ -124,9 +124,9 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
         final Display defaultDisplay 
             = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
-        if (ActivityManager.isHighEndGfx(defaultDisplay)) {
+        /*if (ActivityManager.isHighEndGfx(defaultDisplay)) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        }
+        }*/
 
         lp.gravity = getStatusBarGravity();
         lp.setTitle("StatusBar");

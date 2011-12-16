@@ -15,7 +15,7 @@
         android:persistent="true"
         android:allowClearUserData="false"
         android:allowBackup="false"
-        android:hardwareAccelerated="true"
+        android:hardwareAccelerated="false"
         android:label="@string/app_label"
         android:icon="@drawable/ic_launcher_settings">
 
@@ -37,8 +37,9 @@
                 android:exported="true" />
 
         <service android:name=".ImageWallpaper"
-                android:permission="android.permission.BIND_WALLPAPER"
-                android:exported="true" />
+            android:permission="android.permission.BIND_WALLPAPER"
+            android:hardwareAccelerated="false"
+            android:exported="true" />
 
         <receiver android:name=".BootReceiver" >
             <intent-filter>

@@ -30,7 +30,7 @@
 
 #include <ui/egl/android_natives.h>
 
-#define NUM_FRAME_BUFFERS  2
+#define NUM_FRAME_BUFFERS  3
 
 extern "C" EGLNativeWindowType android_createDisplaySurface(void);
 
@@ -76,7 +76,7 @@ private:
     framebuffer_device_t* fbDev;
     alloc_device_t* grDev;
 
-    sp<NativeBuffer> buffers[3];
+    sp<NativeBuffer> buffers[NUM_FRAME_BUFFERS];
     sp<NativeBuffer> front;
     
     mutable Mutex mutex;

@@ -701,11 +701,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * @see #handleShow()
      */
     private void showLocked() {
-        if (DEBUG) Log.d(TAG, "showLocked");
+        /*if (DEBUG) Log.d(TAG, "showLocked");
         // ensure we stay awake until we are finished displaying the keyguard
         mShowKeyguardWakeLock.acquire();
         Message msg = mHandler.obtainMessage(SHOW);
-        mHandler.sendMessage(msg);
+        mHandler.sendMessage(msg);*/
     }
 
     /**
@@ -713,9 +713,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * @see #handleHide()
      */
     private void hideLocked() {
-        if (DEBUG) Log.d(TAG, "hideLocked");
+        /*if (DEBUG) Log.d(TAG, "hideLocked");
         Message msg = mHandler.obtainMessage(HIDE);
-        mHandler.sendMessage(msg);
+        mHandler.sendMessage(msg);*/
     }
 
     /** {@inheritDoc} */

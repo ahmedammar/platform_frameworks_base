@@ -61,6 +61,8 @@ public:
     /* revoke all allocations made by this heap */
     virtual void revoke();
 
+    /* get physical memory address */
+    virtual unsigned long getPhysAddr();
 private:
     /* use this to create your own IMemory for mapMemory */
     virtual sp<MemoryPmem> createMemory(size_t offset, size_t size);

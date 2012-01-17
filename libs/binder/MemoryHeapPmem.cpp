@@ -244,5 +244,18 @@ void MemoryHeapPmem::remove(const wp<MemoryPmem>& memory)
     mAllocations.remove(memory);
 }
 
+unsigned long MemoryHeapPmem::getPhysAddr()
+{
+    struct pmem_region region;
+    int our_fd = getHeapID();
+    if (ioctl (our_fd, PMEM_GET_PHYS, &region)){
+        LOGE ("PMEM_GET_PHYS failed. mFD=%d", our_fd);
+        return 0;
+    }
+
+    LOGI ("PMEM_GET_PHYS offset:0x%lx size:0x%lx", region.offset, region.len);
+    return region.offset;
+}
+
 // ---------------------------------------------------------------------------
 }; // namespace android

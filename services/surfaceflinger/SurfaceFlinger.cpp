@@ -441,6 +441,7 @@ bool SurfaceFlinger::threadLoop()
         logger.log(GraphicLog::SF_SWAP_BUFFERS, index);
         postFramebuffer();
 
+        debugShowFPS();
         logger.log(GraphicLog::SF_REPAINT_DONE, index);
     } else {
         // pretend we did the post
@@ -1096,19 +1097,40 @@ void SurfaceFlinger::drawWormhole() const
 
 void SurfaceFlinger::debugShowFPS() const
 {
-    static int mFrameCount;
-    static int mLastFrameCount = 0;
+    static unsigned int mFrameCount = 0;
+    static unsigned int mLastFrameCount = 0;
+    static unsigned int mSampleCount = 0;
     static nsecs_t mLastFpsTime = 0;
     static float mFps = 0;
+    static float mFpsSum = 0;
     mFrameCount++;
     nsecs_t now = systemTime();
     nsecs_t diff = now - mLastFpsTime;
-    if (diff > ms2ns(250)) {
+    char value[PROPERTY_VALUE_MAX];
+    property_get("debug.sf.resetFps", value, "0");
+    if(!strcmp(value, "1"))
+    {
+        property_set("debug.sf.resetFps", "0");
+        mSampleCount = 0;
+        mFpsSum = 0;
+    }
+    if (diff > ms2ns(500)) {
+        mSampleCount++;
+        if (mFrameCount < mLastFrameCount) {
+            mFrameCount += (sizeof(mLastFrameCount) * 8) - mLastFrameCount;
+            mLastFrameCount = 0;
+        }
         mFps =  ((mFrameCount - mLastFrameCount) * float(s2ns(1))) / diff;
         mLastFpsTime = now;
         mLastFrameCount = mFrameCount;
+        mFpsSum += mFps;
     }
     // XXX: mFPS has the value we want
+    char sFps[PROPERTY_VALUE_MAX];
+    sprintf(sFps, "%.2f", mFps);
+    property_set("debug.sf.fps", sFps);
+    sprintf(sFps, "%.2f", mFpsSum/mSampleCount);
+    property_set("debug.sf.avgFps", sFps);
  }
 
 status_t SurfaceFlinger::addLayer(const sp<LayerBase>& layer)
@@ -1804,6 +1826,8 @@ status_t SurfaceFlinger::renderScreenToTextureLocked(DisplayID dpy,
     glDisable(GL_TEXTURE_EXTERNAL_OES);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_SCISSOR_TEST);
+    glEnable(GL_DITHER);
+    glEnable(GL_MULTISAMPLE);
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_SCISSOR_TEST);
